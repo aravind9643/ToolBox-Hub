@@ -28,11 +28,73 @@ function getContrastRatio(hex1, hex2) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+function hexToHsl(hex) {
+  let { r, g, b } = hexToRgb(hex);
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s, l = (max + min) / 2;
+
+  if (max === min) {
+    h = s = 0;
+  } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+
+function hslToHex(h, s, l) {
+  l /= 100;
+  const a = (s * Math.min(l, 1 - l)) / 100;
+  const f = n => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function findCompliantColor(fgHex, bgHex, targetRatio = 4.5) {
+  let ratio = getContrastRatio(fgHex, bgHex);
+  if (ratio >= targetRatio) return fgHex;
+
+  const fgHsl = hexToHsl(fgHex);
+  const bgLuminance = getLuminance(bgHex);
+  const isBgDark = bgLuminance < 0.5;
+  
+  let bestHex = fgHex;
+  if (isBgDark) {
+    for (let l = fgHsl.l; l <= 100; l += 1) {
+      const testHex = hslToHex(fgHsl.h, fgHsl.s, l);
+      if (getContrastRatio(testHex, bgHex) >= targetRatio) {
+        bestHex = testHex;
+        break;
+      }
+    }
+  } else {
+    for (let l = fgHsl.l; l >= 0; l -= 1) {
+      const testHex = hslToHex(fgHsl.h, fgHsl.s, l);
+      if (getContrastRatio(testHex, bgHex) >= targetRatio) {
+        bestHex = testHex;
+        break;
+      }
+    }
+  }
+  return bestHex;
+}
+
 export default function ContrastChecker() {
   const [fgColor, setFgColor] = useState('#ffffff');
   const [bgColor, setBgColor] = useState('#1e293b');
 
   const contrastRatio = useMemo(() => getContrastRatio(fgColor, bgColor), [fgColor, bgColor]);
+  const suggestedFg = useMemo(() => findCompliantColor(fgColor, bgColor, 4.5), [fgColor, bgColor]);
   const wcagAA = contrastRatio >= 4.5;
   const wcagAALarge = contrastRatio >= 3;
   const wcagAAA = contrastRatio >= 7;
@@ -91,6 +153,17 @@ export default function ContrastChecker() {
                     onChange={e => { if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) setBgColor(e.target.value); }} />
                 </div>
               </div>
+
+              {suggestedFg !== fgColor && (
+                <div style={{ padding: '0.75rem 1rem', background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    💡 Compliant alternative: <strong style={{ color: suggestedFg }}>{suggestedFg}</strong> (Hue-aligned shift to satisfy WCAG AA ratio).
+                  </div>
+                  <button className="btn btn-secondary btn-sm" onClick={() => setFgColor(suggestedFg)} style={{ width: 'fit-content', padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}>
+                    Apply Suggestion
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Calculations & Results */}
@@ -98,13 +171,44 @@ export default function ContrastChecker() {
               <h2 style={{ fontSize: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>Contrast Projections</h2>
 
               {/* Sample Preview Box */}
-              <div style={{ padding: '1.5rem', background: bgColor, borderRadius: 'var(--radius-md)', border: '2px solid var(--border-color)' }}>
-                <p style={{ color: fgColor, fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>
-                  This is how normal text looks.
-                </p>
-                <p style={{ color: fgColor, fontSize: '0.85rem', margin: '0.5rem 0 0', opacity: 0.85 }}>
-                  This is how smaller secondary details look.
-                </p>
+              <div style={{ padding: '1.5rem', background: bgColor, borderRadius: 'var(--radius-md)', border: '2px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <p style={{ color: fgColor, fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>
+                    This is how normal text looks.
+                  </p>
+                  <p style={{ color: fgColor, fontSize: '0.85rem', margin: '0.5rem 0 0', opacity: 0.85 }}>
+                    This is how smaller secondary details look.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                  <button style={{
+                    padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700,
+                    background: fgColor, color: bgColor, border: 'none', cursor: 'pointer'
+                  }}>
+                    Solid Button
+                  </button>
+                  <button style={{
+                    padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700,
+                    background: 'none', color: fgColor, border: `2px solid ${fgColor}`, cursor: 'pointer'
+                  }}>
+                    Outline Button
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <label style={{ fontSize: '0.7rem', color: fgColor, opacity: 0.8, fontWeight: 600 }}>Interactive Input Preview</label>
+                  <input 
+                    type="text" 
+                    readOnly 
+                    value="Sample Input Text..." 
+                    style={{
+                      padding: '0.5rem 0.75rem', borderRadius: '6px', fontSize: '0.85rem',
+                      background: 'rgba(255,255,255,0.05)', color: fgColor, border: `1px solid ${fgColor}`,
+                      outline: 'none', width: '100%'
+                    }} 
+                  />
+                </div>
               </div>
 
               {/* Large Ratio value */}

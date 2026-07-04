@@ -9,6 +9,8 @@ export default function Base64Converter() {
   const [output, setOutput] = useState('');
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const [fileInfo, setFileInfo] = useState(null);
 
   const handleConvert = () => {
     setError('');
@@ -31,6 +33,8 @@ export default function Base64Converter() {
   };
 
   const handleFileEncode = (file) => {
+    if (!file) return;
+    setFileInfo({ name: file.name, size: file.size, type: file.type });
     const reader = new FileReader();
     reader.onload = () => {
       setOutput(reader.result);
@@ -55,9 +59,9 @@ export default function Base64Converter() {
         <div className="tool-main">
           <div className="glass-card">
             <div className="tabs">
-              <button className={`tab-btn ${mode === 'encode' ? 'active' : ''}`} onClick={() => { setMode('encode'); setInput(''); setOutput(''); setError(''); }}>Encode</button>
-              <button className={`tab-btn ${mode === 'decode' ? 'active' : ''}`} onClick={() => { setMode('decode'); setInput(''); setOutput(''); setError(''); }}>Decode</button>
-              <button className={`tab-btn ${mode === 'file' ? 'active' : ''}`} onClick={() => { setMode('file'); setInput(''); setOutput(''); setError(''); }}>File to Base64</button>
+              <button className={`tab-btn ${mode === 'encode' ? 'active' : ''}`} onClick={() => { setMode('encode'); setInput(''); setOutput(''); setError(''); setFileInfo(null); }}>Encode</button>
+              <button className={`tab-btn ${mode === 'decode' ? 'active' : ''}`} onClick={() => { setMode('decode'); setInput(''); setOutput(''); setError(''); setFileInfo(null); }}>Decode</button>
+              <button className={`tab-btn ${mode === 'file' ? 'active' : ''}`} onClick={() => { setMode('file'); setInput(''); setOutput(''); setError(''); setFileInfo(null); }}>File to Base64</button>
             </div>
 
             {mode !== 'file' ? (
@@ -82,11 +86,19 @@ export default function Base64Converter() {
               <div
                 className="drop-zone"
                 onClick={() => document.getElementById('b64-file-input').click()}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
+                onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); }}
+                onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); if (e.dataTransfer.files?.length > 0) handleFileEncode(e.dataTransfer.files[0]); }}
+                style={{
+                  border: isDragging ? '2px dashed var(--accent-cyan-light)' : '2px dashed var(--border-color)',
+                  background: isDragging ? 'var(--bg-glass-hover)' : 'none',
+                  transition: 'border-color 0.2s, background 0.2s'
+                }}
               >
                 <div className="drop-zone-icon">
-                  <i className="fa-solid fa-file-arrow-up" style={{ color: 'var(--accent-purple-light)' }}></i>
+                  <i className="fa-solid fa-file-arrow-up" style={{ color: isDragging ? 'var(--accent-cyan-light)' : 'var(--accent-purple-light)' }}></i>
                 </div>
-                <h3>Click to select a file</h3>
+                <h3>{isDragging ? 'Drop file here!' : 'Drag & drop or click to select a file'}</h3>
                 <p>The file will be converted to a Base64 data URI</p>
                 <input id="b64-file-input" type="file" style={{ display: 'none' }} onChange={e => handleFileEncode(e.target.files[0])} />
               </div>
@@ -100,6 +112,15 @@ export default function Base64Converter() {
 
             {output && (
               <div style={{ marginTop: '1rem' }}>
+                {fileInfo && (
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', background: 'var(--bg-input)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', marginBottom: '1rem', fontSize: '0.85rem' }}>
+                    <i className="fa-solid fa-file" style={{ color: 'var(--accent-purple-light)', fontSize: '1.25rem' }}></i>
+                    <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fileInfo.name}</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{fileInfo.type || 'unknown type'} — {(fileInfo.size / 1024).toFixed(1)} KB</div>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center justify-between mb-1">
                   <label className="form-label" style={{ marginBottom: 0 }}>Result</label>
                   <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy} style={{ gap: '6px' }}>

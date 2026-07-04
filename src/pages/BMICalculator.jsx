@@ -26,16 +26,43 @@ export default function BMICalculator() {
       const ft = parseFloat(height) || 0;
       const inches = parseFloat(heightIn) || 0;
       h = (ft * 12 + inches) * 0.0254; // to meters
-      // w is in lbs, convert to kg
     }
     if (!w || !h) return;
 
     const weightKg = unit === 'imperial' ? w * 0.453592 : w;
     const bmi = weightKg / (h * h);
-    setResult(bmi);
+
+    const minIdealKg = 18.5 * (h * h);
+    const maxIdealKg = 24.9 * (h * h);
+
+    let weightDiff = 0;
+    let weightDiffDir = 'normal';
+    if (weightKg < minIdealKg) {
+      weightDiff = minIdealKg - weightKg;
+      weightDiffDir = 'gain';
+    } else if (weightKg > maxIdealKg) {
+      weightDiff = weightKg - maxIdealKg;
+      weightDiffDir = 'lose';
+    }
+
+    if (unit === 'imperial') {
+      weightDiff = weightDiff / 0.453592;
+    }
+
+    const heightCm = h * 100;
+    const maintenanceCalories = Math.round((10 * weightKg + 6.25 * heightCm - 5 * 30 + 5) * 1.375);
+    const waterLiters = (weightKg * 35) / 1000;
+
+    setResult({
+      bmi: bmi.toFixed(1),
+      weightDiff: weightDiff.toFixed(1),
+      weightDiffDir,
+      maintenanceCalories,
+      waterLiters: waterLiters.toFixed(1)
+    });
   };
 
-  const bmi = result ? result.toFixed(1) : null;
+  const bmi = result ? result.bmi : null;
   const category = bmi ? getBMICategory(parseFloat(bmi)) : null;
   const gaugeRotation = bmi ? Math.min(Math.max((parseFloat(bmi) - 10) / 35, 0), 1) : 0;
 
@@ -134,6 +161,35 @@ export default function BMICalculator() {
                   {category.emoji} {category.label}
                 </div>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem' }}>{category.tip}</p>
+
+                {/* Premium health metrics cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem', width: '100%', marginTop: '1.25rem', marginBottom: '1.25rem' }}>
+                  <div className="result-box text-center" style={{ marginTop: 0, padding: '0.75rem 0.5rem' }}>
+                    <div className="result-label" style={{ fontSize: '0.72rem' }}>🎯 Ideal Weight Target</div>
+                    <div className="result-value result-value-sm" style={{ color: result.weightDiffDir === 'normal' ? 'var(--accent-green)' : 'var(--accent-cyan-light)', fontSize: '1.1rem' }}>
+                      {result.weightDiffDir === 'normal' ? 'Ideal Range' : `${result.weightDiff} ${unit === 'metric' ? 'kg' : 'lbs'}`}
+                    </div>
+                    <div className="result-sub" style={{ fontSize: '0.68rem' }}>
+                      {result.weightDiffDir === 'normal' ? 'No change needed' : (result.weightDiffDir === 'gain' ? 'Need to gain' : 'Need to lose')}
+                    </div>
+                  </div>
+                  
+                  <div className="result-box text-center" style={{ marginTop: 0, padding: '0.75rem 0.5rem' }}>
+                    <div className="result-label" style={{ fontSize: '0.72rem' }}>🔥 Daily Calories Target</div>
+                    <div className="result-value result-value-sm" style={{ color: 'var(--accent-amber)', fontSize: '1.1rem' }}>
+                      {result.maintenanceCalories} kcal
+                    </div>
+                    <div className="result-sub" style={{ fontSize: '0.68rem' }}>Active BMR estimate</div>
+                  </div>
+
+                  <div className="result-box text-center" style={{ marginTop: 0, padding: '0.75rem 0.5rem' }}>
+                    <div className="result-label" style={{ fontSize: '0.72rem' }}>💧 Daily Water Target</div>
+                    <div className="result-value result-value-sm" style={{ color: 'var(--accent-cyan-light)', fontSize: '1.1rem' }}>
+                      {result.waterLiters} L
+                    </div>
+                    <div className="result-sub" style={{ fontSize: '0.68rem' }}>Approx. {(result.waterLiters * 4).toFixed(0)} glasses</div>
+                  </div>
+                </div>
 
                 <div className="stats-grid mt-2">
                   <div className="stat-card"><div className="stat-card-label">Underweight</div><div className="stat-card-value" style={{ color: 'var(--accent-cyan)', fontSize: '1rem' }}>&lt; 18.5</div></div>

@@ -1,13 +1,66 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AdBanner from '../components/AdBanner';
 import SEOHead from '../components/SEOHead';
 import ShareButtons from '../components/ShareButtons';
 
+function getZodiacSign(dateString) {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  
+  if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return { name: 'Aries', symbol: '♈', trait: 'Energetic, brave & optimistic' };
+  if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return { name: 'Taurus', symbol: '♉', trait: 'Reliable, patient & practical' };
+  if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return { name: 'Gemini', symbol: '♊', trait: 'Curious, adaptable & expressive' };
+  if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return { name: 'Cancer', symbol: '♋', trait: 'Intuitive, protective & compassionate' };
+  if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return { name: 'Leo', symbol: '♌', trait: 'Generous, creative & passionate' };
+  if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return { name: 'Virgo', symbol: '♍', trait: 'Loyal, analytical & hardworking' };
+  if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return { name: 'Libra', symbol: '♎', trait: 'Diplomatic, social & artistic' };
+  if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return { name: 'Scorpio', symbol: '♏', trait: 'Brave, resourceful & passionate' };
+  if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return { name: 'Sagittarius', symbol: '♐', trait: 'Generous, idealistic & funny' };
+  if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return { name: 'Capricorn', symbol: '♑', trait: 'Responsible, disciplined & manager' };
+  if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return { name: 'Aquarius', symbol: '♒', trait: 'Progressive, original & independent' };
+  return { name: 'Pisces', symbol: '♓', trait: 'Compassionate, artistic & intuitive' };
+}
+
+function getChineseZodiac(year) {
+  const animals = [
+    { name: 'Monkey', emoji: '🐒', trait: 'Witty, intelligent & versatile' },
+    { name: 'Rooster', emoji: '🐓', trait: 'Observant, hardworking & courageous' },
+    { name: 'Dog', emoji: '🐕', trait: 'Lovely, honest & prudent' },
+    { name: 'Pig', emoji: '🐖', trait: 'Compassionate, generous & diligent' },
+    { name: 'Rat', emoji: '🐀', trait: 'Quick-witted, resourceful & versatile' },
+    { name: 'Ox', emoji: '🐂', trait: 'Diligent, dependable & strong' },
+    { name: 'Tiger', emoji: '🐅', trait: 'Brave, confident & competitive' },
+    { name: 'Rabbit', emoji: '🐇', trait: 'Quiet, elegant & responsible' },
+    { name: 'Dragon', emoji: '🐉', trait: 'Confident, intelligent & enthusiastic' },
+    { name: 'Snake', emoji: '🐍', trait: 'Enigmatic, intelligent & wise' },
+    { name: 'Horse', emoji: '🐎', trait: 'Animated, active & energetic' },
+    { name: 'Goat', emoji: '🐐', trait: 'Gentle, shy & sympathetic' }
+  ];
+  return animals[year % 12];
+}
+
 export default function AgeCalculator() {
   const [dob, setDob] = useState('');
   const [targetDate, setTargetDate] = useState(new Date().toISOString().split('T')[0]);
   const [result, setResult] = useState(null);
+  const [liveSeconds, setLiveSeconds] = useState(0);
+
+  useEffect(() => {
+    if (!dob) return;
+    const updateLiveAge = () => {
+      const birth = new Date(dob);
+      const now = new Date();
+      if (birth < now) {
+        setLiveSeconds(Math.floor((now - birth) / 1000));
+      }
+    };
+    updateLiveAge();
+    const interval = setInterval(updateLiveAge, 1000);
+    return () => clearInterval(interval);
+  }, [dob]);
 
   const calculate = () => {
     if (!dob) return;
@@ -44,8 +97,10 @@ export default function AgeCalculator() {
 
     // Day of birth
     const dayOfWeek = birth.toLocaleDateString('en-US', { weekday: 'long' });
+    const zodiac = getZodiacSign(dob);
+    const chineseZodiac = getChineseZodiac(birth.getFullYear());
 
-    setResult({ years, months, days, totalDays, totalWeeks, totalHours, totalMinutes, daysUntilBirthday, dayOfWeek, nextBirthdayAge: years + 1 });
+    setResult({ years, months, days, totalDays, totalWeeks, totalHours, totalMinutes, daysUntilBirthday, dayOfWeek, nextBirthdayAge: years + 1, zodiac, chineseZodiac });
   };
 
   return (
@@ -99,6 +154,15 @@ export default function AgeCalculator() {
                   </div>
                 </div>
 
+                {liveSeconds > 0 && (
+                  <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'var(--bg-glass-hover)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>⏱️ Live Age Tracker</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-cyan-light)', fontVariantNumeric: 'tabular-nums' }}>
+                      {liveSeconds.toLocaleString()} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>seconds elapsed</span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="stats-grid mt-2">
                   <div className="stat-card"><div className="stat-card-value">{result.totalDays.toLocaleString()}</div><div className="stat-card-label">Total Days</div></div>
                   <div className="stat-card"><div className="stat-card-value">{result.totalWeeks.toLocaleString()}</div><div className="stat-card-label">Total Weeks</div></div>
@@ -116,6 +180,23 @@ export default function AgeCalculator() {
                     <div className="result-label">📅 Born On</div>
                     <div className="result-value result-value-sm" style={{ color: 'var(--accent-cyan)' }}>{result.dayOfWeek}</div>
                     <div className="result-sub">Day of the week</div>
+                  </div>
+                </div>
+
+                <div className="grid-2 mt-2">
+                  <div className="result-box text-center" style={{ marginTop: 0 }}>
+                    <div className="result-label">✨ Western Zodiac</div>
+                    <div className="result-value result-value-sm" style={{ color: 'var(--accent-purple-light)', fontSize: '1.3rem' }}>
+                      {result.zodiac.symbol} {result.zodiac.name}
+                    </div>
+                    <div className="result-sub" style={{ fontSize: '0.75rem' }}>{result.zodiac.trait}</div>
+                  </div>
+                  <div className="result-box text-center" style={{ marginTop: 0 }}>
+                    <div className="result-label">🐉 Chinese Zodiac</div>
+                    <div className="result-value result-value-sm" style={{ color: 'var(--accent-amber)', fontSize: '1.3rem' }}>
+                      {result.chineseZodiac.emoji} {result.chineseZodiac.name}
+                    </div>
+                    <div className="result-sub" style={{ fontSize: '0.75rem' }}>{result.chineseZodiac.trait}</div>
                   </div>
                 </div>
               </>
