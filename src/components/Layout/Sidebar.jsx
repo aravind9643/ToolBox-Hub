@@ -72,6 +72,13 @@ const categories = [
       { path: '/countdown-timer', icon: 'fa-solid fa-hourglass-half', label: 'Countdown Timer' },
       { path: '/decision-maker', icon: 'fa-solid fa-dice', label: 'Decision Maker' }
     ]
+  },
+  {
+    title: 'Device Sensors',
+    items: [
+      { path: '/compass', icon: 'fa-solid fa-compass', label: 'Compass' },
+      { path: '/speedometer', icon: 'fa-solid fa-gauge', label: 'Speedometer' }
+    ]
   }
 ];
 

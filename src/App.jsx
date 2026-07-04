@@ -43,6 +43,8 @@ import JsonYamlConverter from './pages/JsonYamlConverter';
 import DecisionMaker from './pages/DecisionMaker';
 import UnitPriceCalculator from './pages/UnitPriceCalculator';
 import NumberBaseConverter from './pages/NumberBaseConverter';
+import Compass from './pages/Compass';
+import Speedometer from './pages/Speedometer';
 
 import ScrollToTop from './components/ScrollToTop';
 import NotFound from './pages/NotFound';
@@ -96,6 +98,8 @@ export default function App() {
           <Route path="/decision-maker" element={<DecisionMaker />} />
           <Route path="/unit-price-calculator" element={<UnitPriceCalculator />} />
           <Route path="/number-base-converter" element={<NumberBaseConverter />} />
+          <Route path="/compass" element={<Compass />} />
+          <Route path="/speedometer" element={<Speedometer />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

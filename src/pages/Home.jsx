@@ -213,6 +213,16 @@ const tools = [
     description: 'Roll dice, flip coins, or spin wheels for random choices.',
     color: '#ef4444'
   },
+  {
+    icon: 'fa-solid fa-compass', title: 'Compass', path: '/compass',
+    description: 'Real-time orientation compass dial using browser direction sensors.',
+    color: '#3b82f6'
+  },
+  {
+    icon: 'fa-solid fa-gauge', title: 'Speedometer', path: '/speedometer',
+    description: 'Track real-time travel speed and coordinates using browser GPS sensors.',
+    color: '#10b981'
+  },
 ];
 
 export default function Home() {
@@ -229,7 +239,7 @@ export default function Home() {
         <p>Fast, free, and private. All tools run in your browser — nothing is uploaded to any server.</p>
         <div className="hero-stats">
           <div className="hero-stat">
-            <div className="hero-stat-value">42+</div>
+            <div className="hero-stat-value">44+</div>
             <div className="hero-stat-label">Free Tools</div>
           </div>
           <div className="hero-stat">

@@ -51,6 +51,8 @@ const allTools = [
   { path: '/number-base-converter',    label: 'Number Base Converter',      tags: 'base binary octal decimal hex conversion integers division steps' },
   { path: '/diff-checker',             label: 'Diff Checker',               tags: 'compare text difference additions deletions side by side inline code split' },
   { path: '/json-yaml-converter',      label: 'JSON to YAML Converter',     tags: 'json yaml config serialize parsing bidirectional data format conversion' },
+  { path: '/compass',                  label: 'Compass',                    tags: 'compass navigation orientation angle heading cardinal N S E W direction sensors' },
+  { path: '/speedometer',              label: 'Speedometer',                tags: 'speedometer speed travel GPS coordinates tracker velocity velocity stats max avg' },
 ];
 
 export default function Navbar({ onMenuToggle }) {
