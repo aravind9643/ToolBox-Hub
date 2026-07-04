@@ -34,6 +34,15 @@ import ContrastChecker from './pages/ContrastChecker';
 import ColorPaletteGenerator from './pages/ColorPaletteGenerator';
 import TextCleaner from './pages/TextCleaner';
 import CountdownTimer from './pages/CountdownTimer';
+import ColorPaletteExtractor from './pages/ColorPaletteExtractor';
+import ExifMetadataViewer from './pages/ExifMetadataViewer';
+import SvgPngConverter from './pages/SvgPngConverter';
+import HashGenerator from './pages/HashGenerator';
+import DiffChecker from './pages/DiffChecker';
+import JsonYamlConverter from './pages/JsonYamlConverter';
+import DecisionMaker from './pages/DecisionMaker';
+import UnitPriceCalculator from './pages/UnitPriceCalculator';
+import NumberBaseConverter from './pages/NumberBaseConverter';
 
 import ScrollToTop from './components/ScrollToTop';
 import NotFound from './pages/NotFound';
@@ -78,6 +87,15 @@ export default function App() {
           <Route path="/color-palette-generator" element={<ColorPaletteGenerator />} />
           <Route path="/text-cleaner" element={<TextCleaner />} />
           <Route path="/countdown-timer" element={<CountdownTimer />} />
+          <Route path="/color-palette-extractor" element={<ColorPaletteExtractor />} />
+          <Route path="/exif-metadata-viewer" element={<ExifMetadataViewer />} />
+          <Route path="/svg-png-converter" element={<SvgPngConverter />} />
+          <Route path="/hash-generator" element={<HashGenerator />} />
+          <Route path="/diff-checker" element={<DiffChecker />} />
+          <Route path="/json-yaml-converter" element={<JsonYamlConverter />} />
+          <Route path="/decision-maker" element={<DecisionMaker />} />
+          <Route path="/unit-price-calculator" element={<UnitPriceCalculator />} />
+          <Route path="/number-base-converter" element={<NumberBaseConverter />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

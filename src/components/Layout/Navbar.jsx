@@ -41,6 +41,16 @@ const allTools = [
   // Productivity
   { path: '/pomodoro-timer',           label: 'Pomodoro Timer',             tags: 'focus productivity work break sessions clock' },
   { path: '/countdown-timer',          label: 'Countdown Timer',            tags: 'countdown clock timer event birthday deadline live time' },
+  { path: '/decision-maker',           label: 'Decision Maker',             tags: 'roll dice coin flip spin wheel winner choice random select decision' },
+  // Additional Standalone Tools
+  { path: '/hash-generator',           label: 'Hash Generator',             tags: 'md5 sha1 sha256 sha512 hash checksum encrypt security' },
+  { path: '/color-palette-extractor',  label: 'Color Palette Extractor',    tags: 'image color extract load palette canvas swatch pixel rbg' },
+  { path: '/exif-metadata-viewer',     label: 'EXIF Metadata Viewer',       tags: 'exif metadata image details GPS camera parameters privacy edit clear strip' },
+  { path: '/svg-png-converter',        label: 'SVG to PNG Converter',       tags: 'svg vector png raster image convert render high-dpi scale backdrop' },
+  { path: '/unit-price-calculator',    label: 'Unit Price Calculator',      tags: 'value comparison buy deal cheap price volume weight grams pieces' },
+  { path: '/number-base-converter',    label: 'Number Base Converter',      tags: 'base binary octal decimal hex conversion integers division steps' },
+  { path: '/diff-checker',             label: 'Diff Checker',               tags: 'compare text difference additions deletions side by side inline code split' },
+  { path: '/json-yaml-converter',      label: 'JSON to YAML Converter',     tags: 'json yaml config serialize parsing bidirectional data format conversion' },
 ];
 
 export default function Navbar({ onMenuToggle }) {

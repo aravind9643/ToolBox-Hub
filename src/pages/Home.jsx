@@ -168,6 +168,51 @@ const tools = [
     description: 'Set a custom live countdown timer for your upcoming events.',
     color: '#3b82f6'
   },
+  {
+    icon: 'fa-solid fa-hashtag', title: 'Hash Generator', path: '/hash-generator',
+    description: 'Generate SHA-256, SHA-512, MD5, and SHA-1 hashes locally.',
+    color: '#ef4444'
+  },
+  {
+    icon: 'fa-solid fa-palette', title: 'Palette Extractor', path: '/color-palette-extractor',
+    description: 'Extract dominant color palettes from any uploaded image.',
+    color: '#10b981'
+  },
+  {
+    icon: 'fa-solid fa-camera-retro', title: 'EXIF Viewer', path: '/exif-metadata-viewer',
+    description: 'View JPEG metadata EXIF tags and strip details for privacy.',
+    color: '#d946ef'
+  },
+  {
+    icon: 'fa-solid fa-file-export', title: 'SVG to PNG', path: '/svg-png-converter',
+    description: 'Convert SVG vector graphics to PNG raster images client-side.',
+    color: '#3b82f6'
+  },
+  {
+    icon: 'fa-solid fa-scale-balanced', title: 'Unit Price Calculator', path: '/unit-price-calculator',
+    description: 'Compare value for money of two products by volume or weight.',
+    color: '#f59e0b'
+  },
+  {
+    icon: 'fa-solid fa-calculator', title: 'Base Converter', path: '/number-base-converter',
+    description: 'Convert numbers between binary, octal, decimal, and hex.',
+    color: '#10b981'
+  },
+  {
+    icon: 'fa-solid fa-code-compare', title: 'Diff Checker', path: '/diff-checker',
+    description: 'Compare two text versions side-by-side or inline to spot changes.',
+    color: '#d946ef'
+  },
+  {
+    icon: 'fa-solid fa-code', title: 'JSON to YAML', path: '/json-yaml-converter',
+    description: 'Convert structured JSON data to human-friendly YAML and back.',
+    color: '#3b82f6'
+  },
+  {
+    icon: 'fa-solid fa-dice', title: 'Decision Maker', path: '/decision-maker',
+    description: 'Roll dice, flip coins, or spin wheels for random choices.',
+    color: '#ef4444'
+  },
 ];
 
 export default function Home() {
@@ -184,7 +229,7 @@ export default function Home() {
         <p>Fast, free, and private. All tools run in your browser — nothing is uploaded to any server.</p>
         <div className="hero-stats">
           <div className="hero-stat">
-            <div className="hero-stat-value">33+</div>
+            <div className="hero-stat-value">42+</div>
             <div className="hero-stat-label">Free Tools</div>
           </div>
           <div className="hero-stat">

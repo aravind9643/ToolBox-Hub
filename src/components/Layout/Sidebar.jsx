@@ -10,7 +10,8 @@ const categories = [
       { path: '/lorem-ipsum', icon: 'fa-solid fa-file-lines', label: 'Lorem Ipsum' },
       { path: '/gradient-generator', icon: 'fa-solid fa-palette', label: 'Gradient Generator' },
       { path: '/uuid-generator', icon: 'fa-solid fa-fingerprint', label: 'UUID Generator' },
-      { path: '/ascii-art-generator', icon: 'fa-solid fa-font', label: 'ASCII Art Generator' }
+      { path: '/ascii-art-generator', icon: 'fa-solid fa-font', label: 'ASCII Art Generator' },
+      { path: '/hash-generator', icon: 'fa-solid fa-hashtag', label: 'Hash Generator' }
     ]
   },
   {
@@ -21,7 +22,10 @@ const categories = [
       { path: '/timestamp-converter', icon: 'fa-solid fa-clock', label: 'Timestamp Converter' },
       { path: '/base64-converter', icon: 'fa-solid fa-right-left', label: 'Base64 Converter' },
       { path: '/currency-converter', icon: 'fa-solid fa-money-bill-transfer', label: 'Currency Converter' },
-      { path: '/morse-code-translator', icon: 'fa-solid fa-tower-broadcast', label: 'Morse Code Translator' }
+      { path: '/morse-code-translator', icon: 'fa-solid fa-tower-broadcast', label: 'Morse Code Translator' },
+      { path: '/color-palette-extractor', icon: 'fa-solid fa-palette', label: 'Palette Extractor' },
+      { path: '/exif-metadata-viewer', icon: 'fa-solid fa-camera-retro', label: 'EXIF Viewer' },
+      { path: '/svg-png-converter', icon: 'fa-solid fa-file-export', label: 'SVG to PNG' }
     ]
   },
   {
@@ -33,7 +37,9 @@ const categories = [
       { path: '/compound-interest-calculator', icon: 'fa-solid fa-chart-line', label: 'Compound Interest' },
       { path: '/tip-calculator', icon: 'fa-solid fa-coins', label: 'Tip Calculator' },
       { path: '/date-calculator', icon: 'fa-solid fa-calendar-days', label: 'Date Calculator' },
-      { path: '/tdee-calculator', icon: 'fa-solid fa-calculator', label: 'TDEE Calculator' }
+      { path: '/tdee-calculator', icon: 'fa-solid fa-calculator', label: 'TDEE Calculator' },
+      { path: '/unit-price-calculator', icon: 'fa-solid fa-scale-balanced', label: 'Unit Price' },
+      { path: '/number-base-converter', icon: 'fa-solid fa-calculator', label: 'Base Converter' }
     ]
   },
   {
@@ -44,7 +50,9 @@ const categories = [
       { path: '/json-formatter', icon: 'fa-solid fa-code', label: 'JSON Formatter' },
       { path: '/markdown-previewer', icon: 'fa-solid fa-file-code', label: 'Markdown Previewer' },
       { path: '/regex-tester', icon: 'fa-solid fa-magnifying-glass', label: 'Regex Tester' },
-      { path: '/image-compressor', icon: 'fa-solid fa-file-image', label: 'Image Compressor' }
+      { path: '/image-compressor', icon: 'fa-solid fa-file-image', label: 'Image Compressor' },
+      { path: '/diff-checker', icon: 'fa-solid fa-code-compare', label: 'Diff Checker' },
+      { path: '/json-yaml-converter', icon: 'fa-solid fa-code', label: 'JSON to YAML' }
     ]
   },
   {
@@ -61,7 +69,8 @@ const categories = [
     title: 'Productivity',
     items: [
       { path: '/pomodoro-timer', icon: 'fa-solid fa-clock', label: 'Pomodoro Timer' },
-      { path: '/countdown-timer', icon: 'fa-solid fa-hourglass-half', label: 'Countdown Timer' }
+      { path: '/countdown-timer', icon: 'fa-solid fa-hourglass-half', label: 'Countdown Timer' },
+      { path: '/decision-maker', icon: 'fa-solid fa-dice', label: 'Decision Maker' }
     ]
   }
 ];
