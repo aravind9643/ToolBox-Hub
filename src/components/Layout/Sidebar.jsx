@@ -7,7 +7,9 @@ const categories = [
       { path: '/qr-code-generator', icon: 'fa-solid fa-qrcode', label: 'QR Code Generator' },
       { path: '/password-generator', icon: 'fa-solid fa-shield-halved', label: 'Password Generator' },
       { path: '/lorem-ipsum', icon: 'fa-solid fa-file-lines', label: 'Lorem Ipsum' },
-      { path: '/gradient-generator', icon: 'fa-solid fa-palette', label: 'Gradient Generator' }
+      { path: '/gradient-generator', icon: 'fa-solid fa-palette', label: 'Gradient Generator' },
+      { path: '/uuid-generator', icon: 'fa-solid fa-fingerprint', label: 'UUID Generator' },
+      { path: '/ascii-art-generator', icon: 'fa-solid fa-font', label: 'ASCII Art Generator' }
     ]
   },
   {
@@ -16,7 +18,9 @@ const categories = [
       { path: '/unit-converter', icon: 'fa-solid fa-ruler-combined', label: 'Unit Converter' },
       { path: '/color-picker', icon: 'fa-solid fa-eye-dropper', label: 'Color Picker' },
       { path: '/timestamp-converter', icon: 'fa-solid fa-clock', label: 'Timestamp Converter' },
-      { path: '/base64-converter', icon: 'fa-solid fa-right-left', label: 'Base64 Converter' }
+      { path: '/base64-converter', icon: 'fa-solid fa-right-left', label: 'Base64 Converter' },
+      { path: '/currency-converter', icon: 'fa-solid fa-money-bill-transfer', label: 'Currency Converter' },
+      { path: '/morse-code-translator', icon: 'fa-solid fa-tower-broadcast', label: 'Morse Code Translator' }
     ]
   },
   {
@@ -39,6 +43,20 @@ const categories = [
       { path: '/markdown-previewer', icon: 'fa-solid fa-file-code', label: 'Markdown Previewer' },
       { path: '/regex-tester', icon: 'fa-solid fa-magnifying-glass', label: 'Regex Tester' },
       { path: '/image-compressor', icon: 'fa-solid fa-file-image', label: 'Image Compressor' }
+    ]
+  },
+  {
+    title: 'Design Tools',
+    items: [
+      { path: '/box-shadow-generator', icon: 'fa-solid fa-layer-group', label: 'Box Shadow Generator' },
+      { path: '/aspect-ratio-calculator', icon: 'fa-solid fa-expand', label: 'Aspect Ratio Calculator' },
+      { path: '/password-strength-tester', icon: 'fa-solid fa-shield-halved', label: 'Password Strength Tester' }
+    ]
+  },
+  {
+    title: 'Productivity',
+    items: [
+      { path: '/pomodoro-timer', icon: 'fa-solid fa-clock', label: 'Pomodoro Timer' }
     ]
   }
 ];

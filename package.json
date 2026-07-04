@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "browser-image-compression": "^2.0.2",
+    "figlet": "^1.11.0",
     "highlight.js": "^11.11.1",
     "json-formatter-js": "^2.5.23",
+    "jsqr": "^1.4.0",
     "marked": "^18.0.5",
     "qrcode": "^1.5.4",
     "react-router-dom": "^7.18.1"

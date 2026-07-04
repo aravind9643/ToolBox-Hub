@@ -21,6 +21,14 @@ import TimestampConverter from './pages/TimestampConverter';
 import MarkdownPreviewer from './pages/MarkdownPreviewer';
 import RegexTester from './pages/RegexTester';
 import GradientGenerator from './pages/GradientGenerator';
+import BoxShadowGenerator from './pages/BoxShadowGenerator';
+import PomodoroTimer from './pages/PomodoroTimer';
+import CurrencyConverter from './pages/CurrencyConverter';
+import UUIDGenerator from './pages/UUIDGenerator';
+import PasswordStrengthTester from './pages/PasswordStrengthTester';
+import MorseCodeTranslator from './pages/MorseCodeTranslator';
+import AspectRatioCalculator from './pages/AspectRatioCalculator';
+import AsciiArtGenerator from './pages/AsciiArtGenerator';
 
 import ScrollToTop from './components/ScrollToTop';
 import NotFound from './pages/NotFound';
@@ -52,6 +60,14 @@ export default function App() {
           <Route path="/markdown-previewer" element={<MarkdownPreviewer />} />
           <Route path="/regex-tester" element={<RegexTester />} />
           <Route path="/gradient-generator" element={<GradientGenerator />} />
+          <Route path="/box-shadow-generator" element={<BoxShadowGenerator />} />
+          <Route path="/pomodoro-timer" element={<PomodoroTimer />} />
+          <Route path="/currency-converter" element={<CurrencyConverter />} />
+          <Route path="/uuid-generator" element={<UUIDGenerator />} />
+          <Route path="/password-strength-tester" element={<PasswordStrengthTester />} />
+          <Route path="/morse-code-translator" element={<MorseCodeTranslator />} />
+          <Route path="/aspect-ratio-calculator" element={<AspectRatioCalculator />} />
+          <Route path="/ascii-art-generator" element={<AsciiArtGenerator />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

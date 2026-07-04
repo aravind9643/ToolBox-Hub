@@ -103,6 +103,46 @@ const tools = [
     description: 'Create linear or radial CSS gradients with visual previews.',
     color: '#0ea5e9'
   },
+  {
+    icon: 'fa-solid fa-layer-group', title: 'Box Shadow Generator', path: '/box-shadow-generator',
+    description: 'Build multi-layer CSS box shadows with a live visual preview.',
+    color: '#3b82f6'
+  },
+  {
+    icon: 'fa-solid fa-clock', title: 'Pomodoro Timer', path: '/pomodoro-timer',
+    description: 'Stay focused with timed work sessions and break reminders.',
+    color: '#ef4444'
+  },
+  {
+    icon: 'fa-solid fa-money-bill-transfer', title: 'Currency Converter', path: '/currency-converter',
+    description: 'Convert between 35+ world currencies. Works offline.',
+    color: '#10b981'
+  },
+  {
+    icon: 'fa-solid fa-fingerprint', title: 'UUID Generator', path: '/uuid-generator',
+    description: 'Generate bulk UUID v4 identifiers using native browser crypto.',
+    color: '#d946ef'
+  },
+  {
+    icon: 'fa-solid fa-shield-halved', title: 'Password Strength Tester', path: '/password-strength-tester',
+    description: 'Analyze password entropy, strength, and estimated crack time.',
+    color: '#f59e0b'
+  },
+  {
+    icon: 'fa-solid fa-tower-broadcast', title: 'Morse Code Translator', path: '/morse-code-translator',
+    description: 'Encode and decode Morse code with audio signal playback.',
+    color: '#3b82f6'
+  },
+  {
+    icon: 'fa-solid fa-expand', title: 'Aspect Ratio Calculator', path: '/aspect-ratio-calculator',
+    description: 'Find ratios, scale dimensions, and explore platform presets.',
+    color: '#10b981'
+  },
+  {
+    icon: 'fa-solid fa-font', title: 'ASCII Art Generator', path: '/ascii-art-generator',
+    description: 'Convert text to large ASCII art banners with multiple styles.',
+    color: '#d946ef'
+  },
 ];
 
 export default function Home() {
@@ -119,7 +159,7 @@ export default function Home() {
         <p>Fast, free, and private. All tools run in your browser — nothing is uploaded to any server.</p>
         <div className="hero-stats">
           <div className="hero-stat">
-            <div className="hero-stat-value">20+</div>
+            <div className="hero-stat-value">28+</div>
             <div className="hero-stat-label">Free Tools</div>
           </div>
           <div className="hero-stat">
