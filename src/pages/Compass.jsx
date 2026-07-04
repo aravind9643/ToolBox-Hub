@@ -135,15 +135,15 @@ export default function Compass() {
               {/* Rotating Compass Dial */}
               <div style={{
                 position: 'absolute', inset: 0, borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.95) 100%)',
-                boxShadow: 'inset 0 4px 12px rgba(0,0,0,0.6), 0 4px 8px rgba(0,0,0,0.3)',
+                background: 'radial-gradient(circle, var(--bg-secondary) 0%, var(--bg-input) 100%)',
+                boxShadow: 'inset 0 4px 12px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1)',
                 transform: `rotate(${-currentHeading}deg)`,
                 transition: isMobile ? 'transform 0.15s ease-out' : 'transform 0.3s ease-out',
                 overflow: 'hidden'
               }}>
                 {/* Center Crosshair Grid */}
-                <div style={{ position: 'absolute', top: '50%', left: '10px', right: '10px', height: '1px', background: 'rgba(255,255,255,0.05)' }} />
-                <div style={{ position: 'absolute', left: '50%', top: '10px', bottom: '10px', width: '1px', background: 'rgba(255,255,255,0.05)' }} />
+                <div style={{ position: 'absolute', top: '50%', left: '10px', right: '10px', height: '1px', background: 'var(--border-color)' }} />
+                <div style={{ position: 'absolute', left: '50%', top: '10px', bottom: '10px', width: '1px', background: 'var(--border-color)' }} />
 
                 {/* 24 Ticks (every 15 degrees) */}
                 {Array.from({ length: 24 }).map((_, i) => {

@@ -154,8 +154,8 @@ export default function Speedometer() {
                 {/* Dial face */}
                 <div style={{
                   position: 'absolute', inset: 0, borderRadius: '50%',
-                  background: 'radial-gradient(circle, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.98) 100%)',
-                  boxShadow: 'inset 0 4px 12px rgba(0,0,0,0.6)',
+                  background: 'radial-gradient(circle, var(--bg-secondary) 0%, var(--bg-input) 100%)',
+                  boxShadow: 'inset 0 4px 12px rgba(0,0,0,0.15)',
                   overflow: 'hidden'
                 }}>
                   {/* Gauge Tick Marks */}
