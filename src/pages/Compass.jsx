@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
 import AdBanner from '../components/AdBanner';
@@ -13,6 +13,8 @@ export default function Compass() {
   const [simulatedHeading, setSimulatedHeading] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
+  const gotAbsoluteRef = useRef(false);
+
   const getDirection = (degree) => {
     const sectors = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'];
     const index = Math.round(degree / 45) % 8;
@@ -20,6 +22,15 @@ export default function Compass() {
   };
 
   const handleOrientation = (event) => {
+    // If we've already received absolute events, ignore relative event updates to prevent conflicting overrides
+    if (event.type === 'deviceorientation' && gotAbsoluteRef.current) {
+      return;
+    }
+
+    if (event.type === 'deviceorientationabsolute') {
+      gotAbsoluteRef.current = true;
+    }
+
     let headingDeg = 0;
     if (event.webkitCompassHeading !== undefined) {
       headingDeg = event.webkitCompassHeading;

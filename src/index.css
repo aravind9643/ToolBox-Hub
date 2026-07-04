@@ -1845,3 +1845,62 @@ body.light-theme .markdown-preview :not(pre) > code {
   max-height: unset !important;
 }
 
+/* ========================================
+   Custom Premium Range Sliders
+   ======================================== */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--bg-glass-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  outline: none;
+  transition: background var(--transition-fast);
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+input[type="range"]:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.light-theme input[type="range"]:hover {
+  background: rgba(15, 23, 42, 0.08);
+}
+
+/* Chrome, Safari, Edge Webkit Thumb */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-purple-light);
+  box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  filter: brightness(1.1);
+}
+
+/* Firefox Moz Thumb */
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent-purple-light);
+  box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.25);
+  filter: brightness(1.1);
+}
+
