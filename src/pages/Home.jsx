@@ -39,6 +39,26 @@ const tools = [
     color: '#0ea5e9'
   },
   {
+    icon: 'fa-solid fa-chart-line', title: 'Compound Interest Calculator', path: '/compound-interest-calculator',
+    description: 'Calculate compounding interest growth with dynamic projections.',
+    color: '#3b82f6'
+  },
+  {
+    icon: 'fa-solid fa-coins', title: 'Tip Splitter & Calculator', path: '/tip-calculator',
+    description: 'Quickly split bills and calculate tips per person.',
+    color: '#ef4444'
+  },
+  {
+    icon: 'fa-solid fa-calendar-days', title: 'Date & Business Days Calculator', path: '/date-calculator',
+    description: 'Calculate durations, business days, or add/subtract time.',
+    color: '#10b981'
+  },
+  {
+    icon: 'fa-solid fa-calculator', title: 'TDEE & Calorie Calculator', path: '/tdee-calculator',
+    description: 'Estimate daily caloric expenditure and macro splits.',
+    color: '#d946ef'
+  },
+  {
     icon: 'fa-solid fa-paragraph', title: 'Word Counter', path: '/word-counter',
     description: 'Count words, characters, sentences, and reading time.',
     color: '#f59e0b'
@@ -99,7 +119,7 @@ export default function Home() {
         <p>Fast, free, and private. All tools run in your browser — nothing is uploaded to any server.</p>
         <div className="hero-stats">
           <div className="hero-stat">
-            <div className="hero-stat-value">16+</div>
+            <div className="hero-stat-value">20+</div>
             <div className="hero-stat-label">Free Tools</div>
           </div>
           <div className="hero-stat">

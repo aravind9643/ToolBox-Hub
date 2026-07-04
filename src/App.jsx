@@ -8,6 +8,10 @@ import ColorPicker from './pages/ColorPicker';
 import BMICalculator from './pages/BMICalculator';
 import AgeCalculator from './pages/AgeCalculator';
 import LoanCalculator from './pages/LoanCalculator';
+import TipCalculator from './pages/TipCalculator';
+import DateCalculator from './pages/DateCalculator';
+import TDEECalculator from './pages/TDEECalculator';
+import CompoundInterestCalculator from './pages/CompoundInterestCalculator';
 import WordCounter from './pages/WordCounter';
 import JSONFormatter from './pages/JSONFormatter';
 import ImageCompressor from './pages/ImageCompressor';
@@ -35,6 +39,10 @@ export default function App() {
           <Route path="/bmi-calculator" element={<BMICalculator />} />
           <Route path="/age-calculator" element={<AgeCalculator />} />
           <Route path="/loan-calculator" element={<LoanCalculator />} />
+          <Route path="/tip-calculator" element={<TipCalculator />} />
+          <Route path="/date-calculator" element={<DateCalculator />} />
+          <Route path="/tdee-calculator" element={<TDEECalculator />} />
+          <Route path="/compound-interest-calculator" element={<CompoundInterestCalculator />} />
           <Route path="/word-counter" element={<WordCounter />} />
           <Route path="/json-formatter" element={<JSONFormatter />} />
           <Route path="/image-compressor" element={<ImageCompressor />} />

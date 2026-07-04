@@ -24,7 +24,11 @@ const categories = [
     items: [
       { path: '/bmi-calculator', icon: 'fa-solid fa-weight-scale', label: 'BMI Calculator' },
       { path: '/age-calculator', icon: 'fa-solid fa-cake-candles', label: 'Age Calculator' },
-      { path: '/loan-calculator', icon: 'fa-solid fa-coins', label: 'Loan Calculator' }
+      { path: '/loan-calculator', icon: 'fa-solid fa-coins', label: 'Loan Calculator' },
+      { path: '/compound-interest-calculator', icon: 'fa-solid fa-chart-line', label: 'Compound Interest' },
+      { path: '/tip-calculator', icon: 'fa-solid fa-coins', label: 'Tip Calculator' },
+      { path: '/date-calculator', icon: 'fa-solid fa-calendar-days', label: 'Date Calculator' },
+      { path: '/tdee-calculator', icon: 'fa-solid fa-calculator', label: 'TDEE Calculator' }
     ]
   },
   {
