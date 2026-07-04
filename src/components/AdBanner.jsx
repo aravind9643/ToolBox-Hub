@@ -14,7 +14,7 @@ import { useEffect, useRef } from 'react';
  */
 
 // ⬇️ SET THIS TO true ONCE YOU HAVE YOUR ADSENSE APPROVED ⬇️
-const ADSENSE_ENABLED = true;
+const ADSENSE_ENABLED = false;
 
 // ⬇️ REPLACE THESE WITH YOUR ACTUAL AD SLOT IDs FROM ADSENSE DASHBOARD ⬇️
 const AD_SLOTS = {

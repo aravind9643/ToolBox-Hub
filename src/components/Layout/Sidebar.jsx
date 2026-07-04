@@ -44,16 +44,10 @@ export default function Sidebar({ isOpen, onClose }) {
     <>
       <div className={`sidebar-overlay ${isOpen ? 'visible' : ''}`} onClick={onClose} />
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
-        <div className="sidebar-header">
-          <div className="sidebar-logo">
-            <i className="fa-solid fa-screwdriver-wrench"></i>
-          </div>
-          <span className="sidebar-title">ToolBox Hub</span>
-          <button className="sidebar-close-btn" onClick={onClose}>
-            <i className="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-        <nav className="sidebar-nav">
+        <button className="sidebar-close-btn" onClick={onClose} style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', zIndex: 10 }}>
+          <i className="fa-solid fa-xmark"></i>
+        </button>
+        <nav className="sidebar-nav" style={{ paddingTop: '1.5rem' }}>
           <div className="sidebar-section-title">Home</div>
           <NavLink to="/" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} onClick={onClose} end>
             <span className="sidebar-link-icon">

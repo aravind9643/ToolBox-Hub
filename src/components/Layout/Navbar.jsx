@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const allTools = [
   { path: '/qr-code-generator', label: 'QR Code Generator' },
@@ -64,9 +64,12 @@ export default function Navbar({ onMenuToggle }) {
         <button className="mobile-menu-btn" onClick={onMenuToggle}>
           <i className="fa-solid fa-bars"></i>
         </button>
-        <span className="sidebar-logo" style={{ width: 30, height: 30, fontSize: '0.85rem' }}>
-          <i className="fa-solid fa-screwdriver-wrench"></i>
-        </span>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+          <div className="sidebar-logo" style={{ width: '32px', height: '32px', fontSize: '0.95rem' }}>
+            <i className="fa-solid fa-screwdriver-wrench"></i>
+          </div>
+          <span className="sidebar-title" style={{ fontSize: '1.2rem', marginBottom: 0 }}>ToolBox Hub</span>
+        </Link>
       </div>
 
       <div className="navbar-search" style={{ position: 'relative' }}>
@@ -109,9 +112,6 @@ export default function Navbar({ onMenuToggle }) {
         <button className="navbar-action-btn" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'} style={{ border: 'none', outline: 'none' }}>
           {theme === 'dark' ? <i className="fa-solid fa-sun"></i> : <i className="fa-solid fa-moon"></i>}
         </button>
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="navbar-action-btn" title="GitHub">
-          <i className="fa-brands fa-github"></i>
-        </a>
       </div>
     </nav>
   );
