@@ -62,7 +62,9 @@ export default function LoanCalculator() {
       <SEOHead title="Loan / EMI Calculator" description="Calculate EMI, total interest, and view amortization schedule for your loan. Free and instant." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Loan Calculator</span></div>
-        <h1>💰 Loan / EMI Calculator</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-coins" style={{ color: 'var(--accent-purple-light)' }}></i> Loan / EMI Calculator
+        </h1>
         <p>Calculate your monthly EMI, total interest, and amortization schedule.</p>
       </div>
 

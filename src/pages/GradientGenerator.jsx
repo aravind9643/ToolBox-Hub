@@ -26,7 +26,9 @@ export default function GradientGenerator() {
       <SEOHead title="CSS Gradient Generator" description="Generate beautiful linear and radial CSS gradients. Copy ready-to-use CSS code instantly." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Gradient Generator</span></div>
-        <h1>🎨 CSS Gradient Generator</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-palette" style={{ color: 'var(--accent-purple-light)' }}></i> CSS Gradient Generator
+        </h1>
         <p>Create modern, vibrant CSS gradients and export the CSS code.</p>
       </div>
 
@@ -82,8 +84,8 @@ export default function GradientGenerator() {
             <div className="form-group mt-2">
               <div className="flex items-center justify-between mb-1">
                 <label className="form-label" style={{ marginBottom: 0 }}>CSS Output</label>
-                <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy}>
-                  {copied ? '✓ Copied' : '📋 Copy CSS'}
+                <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy} style={{ gap: '6px' }}>
+                  <i className={copied ? "fa-solid fa-check" : "fa-solid fa-copy"}></i> {copied ? 'Copied' : 'Copy CSS'}
                 </button>
               </div>
               <div className="code-block" style={{ fontSize: '0.8rem' }}>

@@ -61,7 +61,9 @@ export default function ColorPicker() {
       <SEOHead title="Color Picker & Converter" description="Pick colors and convert between HEX, RGB, HSL formats. Generate color palettes." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Color Picker</span></div>
-        <h1>🎨 Color Picker & Converter</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-eye-dropper" style={{ color: 'var(--accent-purple-light)' }}></i> Color Picker & Converter
+        </h1>
         <p>Pick colors, convert formats, and generate harmonious palettes.</p>
       </div>
 

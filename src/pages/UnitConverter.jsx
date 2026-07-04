@@ -74,7 +74,9 @@ export default function UnitConverter() {
       <SEOHead title="Unit Converter" description="Convert between units of length, weight, temperature, speed, data storage, and time. Free and instant." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Unit Converter</span></div>
-        <h1>📏 Unit Converter</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-ruler-combined" style={{ color: 'var(--accent-purple-light)' }}></i> Unit Converter
+        </h1>
         <p>Convert between units of length, weight, temperature, speed, data, and time.</p>
       </div>
 
@@ -102,7 +104,9 @@ export default function UnitConverter() {
                 </div>
               </div>
 
-              <button className="converter-swap" onClick={handleSwap} title="Swap units">⇄</button>
+              <button className="converter-swap" onClick={handleSwap} title="Swap units">
+                <i className="fa-solid fa-arrow-right-arrow-left"></i>
+              </button>
 
               <div style={{ flex: 1 }}>
                 <div className="form-group">

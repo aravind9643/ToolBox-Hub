@@ -34,7 +34,9 @@ export default function QRCodeGenerator() {
       <SEOHead title="QR Code Generator" description="Generate QR codes for URLs, text, WiFi, and more. Free, instant, and customizable." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>QR Code Generator</span></div>
-        <h1>📱 QR Code Generator</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-qrcode" style={{ color: 'var(--accent-purple-light)' }}></i> QR Code Generator
+        </h1>
         <p>Generate customizable QR codes instantly. Download as PNG.</p>
       </div>
 
@@ -73,8 +75,12 @@ export default function QRCodeGenerator() {
             </div>
 
             <div className="btn-group mt-2" style={{ justifyContent: 'center' }}>
-              <button className="btn btn-primary" onClick={handleDownload}>⬇ Download PNG</button>
-              <button className="btn btn-secondary" onClick={() => { navigator.clipboard.writeText(text); }}>📋 Copy Text</button>
+              <button className="btn btn-primary" onClick={handleDownload} style={{ gap: '8px' }}>
+                <i className="fa-solid fa-download"></i> Download PNG
+              </button>
+              <button className="btn btn-secondary" onClick={() => { navigator.clipboard.writeText(text); }} style={{ gap: '8px' }}>
+                <i className="fa-solid fa-copy"></i> Copy Text
+              </button>
             </div>
           </div>
         </div>

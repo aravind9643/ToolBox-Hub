@@ -61,12 +61,18 @@ export default function Navbar({ onMenuToggle }) {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <button className="mobile-menu-btn" onClick={onMenuToggle}>☰</button>
-        <span className="sidebar-logo" style={{ width: 30, height: 30, fontSize: '0.85rem' }}>T</span>
+        <button className="mobile-menu-btn" onClick={onMenuToggle}>
+          <i className="fa-solid fa-bars"></i>
+        </button>
+        <span className="sidebar-logo" style={{ width: 30, height: 30, fontSize: '0.85rem' }}>
+          <i className="fa-solid fa-screwdriver-wrench"></i>
+        </span>
       </div>
 
       <div className="navbar-search" style={{ position: 'relative' }}>
-        <span className="search-icon">🔍</span>
+        <span className="search-icon">
+          <i className="fa-solid fa-magnifying-glass"></i>
+        </span>
         <input
           type="text"
           placeholder="Search tools..."
@@ -101,9 +107,11 @@ export default function Navbar({ onMenuToggle }) {
 
       <div className="navbar-actions">
         <button className="navbar-action-btn" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'} style={{ border: 'none', outline: 'none' }}>
-          {theme === 'dark' ? '☀️' : '🌙'}
+          {theme === 'dark' ? <i className="fa-solid fa-sun"></i> : <i className="fa-solid fa-moon"></i>}
         </button>
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="navbar-action-btn" title="GitHub">⭐</a>
+        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="navbar-action-btn" title="GitHub">
+          <i className="fa-brands fa-github"></i>
+        </a>
       </div>
     </nav>
   );

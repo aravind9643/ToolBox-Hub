@@ -44,7 +44,9 @@ export default function BMICalculator() {
       <SEOHead title="BMI Calculator" description="Calculate your Body Mass Index (BMI) and understand your health category. Supports metric and imperial units." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>BMI Calculator</span></div>
-        <h1>⚖️ BMI Calculator</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-weight-scale" style={{ color: 'var(--accent-purple-light)' }}></i> BMI Calculator
+        </h1>
         <p>Calculate your Body Mass Index and get health insights.</p>
       </div>
 

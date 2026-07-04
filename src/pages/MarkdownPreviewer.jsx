@@ -49,7 +49,9 @@ export default function MarkdownPreviewer() {
       <SEOHead title="Markdown Previewer" description="Write and preview Markdown formatting instantly. Free browser-based editor." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Markdown Previewer</span></div>
-        <h1>📝 Markdown Previewer</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-file-code" style={{ color: 'var(--accent-purple-light)' }}></i> Markdown Previewer
+        </h1>
         <p>Live Markdown editor and preview tool.</p>
       </div>
 

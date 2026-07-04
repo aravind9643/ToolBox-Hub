@@ -61,7 +61,9 @@ export default function ImageCompressor() {
       <SEOHead title="Image Compressor" description="Compress images in your browser. No upload to any server. Free and private." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Image Compressor</span></div>
-        <h1>🖼️ Image Compressor</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-file-image" style={{ color: 'var(--accent-purple-light)' }}></i> Image Compressor
+        </h1>
         <p>Compress images right in your browser. Nothing is uploaded to any server.</p>
       </div>
 
@@ -88,7 +90,9 @@ export default function ImageCompressor() {
               onDragLeave={() => setDragover(false)}
               onDrop={e => { e.preventDefault(); setDragover(false); handleFile(e.dataTransfer.files[0]); }}
             >
-              <div className="drop-zone-icon">🖼️</div>
+              <div className="drop-zone-icon">
+                <i className="fa-solid fa-cloud-arrow-up" style={{ color: 'var(--accent-purple-light)' }}></i>
+              </div>
               <h3>Drop your image here or click to browse</h3>
               <p>Supports JPEG, PNG, WebP, and more</p>
               <input id="img-input" type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleFile(e.target.files[0])} />
@@ -127,7 +131,9 @@ export default function ImageCompressor() {
                   </div>
                 </div>
 
-                <button className="btn btn-primary btn-lg w-full mt-2" onClick={handleDownload}>⬇ Download Compressed Image</button>
+                <button className="btn btn-primary btn-lg w-full mt-2" onClick={handleDownload} style={{ gap: '8px' }}>
+                  <i className="fa-solid fa-download"></i> Download Compressed Image
+                </button>
               </>
             )}
           </div>

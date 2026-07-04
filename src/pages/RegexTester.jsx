@@ -72,7 +72,9 @@ export default function RegexTester() {
       <SEOHead title="Regex Tester & Debugger" description="Test regular expressions in real-time. View matches and capture groups instantly." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Regex Tester</span></div>
-        <h1>🔍 Regex Tester & Debugger</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-magnifying-glass" style={{ color: 'var(--accent-purple-light)' }}></i> Regex Tester & Debugger
+        </h1>
         <p>Test and debug regular expressions with real-time match highlighting.</p>
       </div>
 

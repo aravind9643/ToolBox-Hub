@@ -53,7 +53,9 @@ export default function TimestampConverter() {
       <SEOHead title="Epoch & Unix Timestamp Converter" description="Convert Unix timestamps to human-readable dates and vice versa. Free online time tools." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Timestamp Converter</span></div>
-        <h1>⏰ Unix Timestamp Converter</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-clock" style={{ color: 'var(--accent-purple-light)' }}></i> Unix Timestamp Converter
+        </h1>
         <p>Convert Epoch/Unix timestamps to human-readable dates and vice versa.</p>
       </div>
 
@@ -63,7 +65,9 @@ export default function TimestampConverter() {
         <div className="tool-main">
           <div className="glass-card mb-2">
             <div className="result-box" style={{ marginTop: 0 }}>
-              <div className="result-label">⏱️ Current Unix Timestamp</div>
+              <div className="result-label">
+                <i className="fa-solid fa-stopwatch" style={{ marginRight: '6px' }}></i> Current Unix Timestamp
+              </div>
               <div className="result-value" style={{ color: 'var(--accent-cyan)' }}>{currentTimestamp}</div>
               <div className="result-sub">Seconds since Jan 1, 1970 (UTC)</div>
             </div>
@@ -76,7 +80,9 @@ export default function TimestampConverter() {
                 <label className="form-label">Unix Timestamp (seconds or ms)</label>
                 <input className="form-input" type="text" value={timestampInput} onChange={e => setTimestampInput(e.target.value)} />
               </div>
-              <button className="btn btn-primary w-full" onClick={handleConvertTimestamp}>Convert to Date</button>
+              <button className="btn btn-primary w-full" onClick={handleConvertTimestamp} style={{ gap: '6px' }}>
+                <i className="fa-solid fa-calendar-day"></i> Convert to Date
+              </button>
               
               {timestampResult && (
                 <div className="result-box mt-2">
@@ -92,7 +98,9 @@ export default function TimestampConverter() {
                 <label className="form-label">Date & Time</label>
                 <input className="form-input" type="datetime-local" value={dateInput} onChange={e => setDateInput(e.target.value)} />
               </div>
-              <button className="btn btn-primary w-full" onClick={handleConvertDate}>Convert to Timestamp</button>
+              <button className="btn btn-primary w-full" onClick={handleConvertDate} style={{ gap: '6px' }}>
+                <i className="fa-solid fa-hourglass-start"></i> Convert to Timestamp
+              </button>
 
               {dateResult && (
                 <div className="result-box mt-2">

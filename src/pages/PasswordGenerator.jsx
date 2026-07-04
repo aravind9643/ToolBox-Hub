@@ -56,7 +56,9 @@ export default function PasswordGenerator() {
       <SEOHead title="Password Generator" description="Generate strong, secure passwords. Customize length and character types. Free and instant." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Password Generator</span></div>
-        <h1>🔐 Password Generator</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-shield-halved" style={{ color: 'var(--accent-purple-light)' }}></i> Password Generator
+        </h1>
         <p>Generate cryptographically secure passwords with full customization.</p>
       </div>
 
@@ -69,7 +71,9 @@ export default function PasswordGenerator() {
               <div className="result-box" style={{ marginTop: 0, marginBottom: '1.5rem' }}>
                 <div className="flex items-center justify-between">
                   <code style={{ fontSize: '1.1rem', wordBreak: 'break-all', color: 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace', flex: 1 }}>{password}</code>
-                  <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy}>{copied ? '✓ Copied' : '📋 Copy'}</button>
+                  <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy} style={{ gap: '6px' }}>
+                    <i className={copied ? "fa-solid fa-check" : "fa-solid fa-copy"}></i> {copied ? 'Copied' : 'Copy'}
+                  </button>
                 </div>
                 {strength && (
                   <>
@@ -99,7 +103,9 @@ export default function PasswordGenerator() {
               ))}
             </div>
 
-            <button className="btn btn-primary btn-lg w-full mt-3" onClick={generate}>⚡ Generate Password</button>
+            <button className="btn btn-primary btn-lg w-full mt-3" onClick={generate} style={{ gap: '8px' }}>
+              <i className="fa-solid fa-bolt"></i> Generate Password
+            </button>
 
             {history.length > 0 && (
               <div style={{ marginTop: '1.5rem' }}>

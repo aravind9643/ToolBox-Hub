@@ -76,7 +76,9 @@ export default function LoremIpsumGenerator() {
       <SEOHead title="Lorem Ipsum Generator" description="Generate Lorem Ipsum placeholder text. Customize paragraphs, sentences, or words. Free and instant." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Lorem Ipsum</span></div>
-        <h1>📄 Lorem Ipsum Generator</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-file-lines" style={{ color: 'var(--accent-purple-light)' }}></i> Lorem Ipsum Generator
+        </h1>
         <p>Generate placeholder text for your designs and mockups.</p>
       </div>
 
@@ -114,7 +116,9 @@ export default function LoremIpsumGenerator() {
                 <span className="badge badge-purple">{wordCount} words</span>
                 <span className="badge badge-cyan">{charCount} characters</span>
               </div>
-              <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy} style={{ padding: '0.5rem 1rem' }}>{copied ? '✓ Copied!' : '📋 Copy to Clipboard'}</button>
+              <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy} style={{ padding: '0.5rem 1rem', gap: '6px' }}>
+                <i className={copied ? "fa-solid fa-check" : "fa-solid fa-copy"}></i> {copied ? 'Copied!' : 'Copy to Clipboard'}
+              </button>
             </div>
           </div>
         </div>

@@ -43,7 +43,9 @@ export default function Base64Converter() {
       <SEOHead title="Base64 Encoder / Decoder" description="Encode and decode text or files to/from Base64 format. Free and instant." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Base64 Converter</span></div>
-        <h1>🔄 Base64 Encoder / Decoder</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-right-left" style={{ color: 'var(--accent-purple-light)' }}></i> Base64 Encoder / Decoder
+        </h1>
         <p>Encode and decode text or files to/from Base64 format.</p>
       </div>
 
@@ -72,8 +74,8 @@ export default function Base64Converter() {
                   />
                 </div>
 
-                <button className="btn btn-primary w-full" onClick={handleConvert}>
-                  {mode === 'encode' ? '🔒 Encode to Base64' : '🔓 Decode from Base64'}
+                <button className="btn btn-primary w-full" onClick={handleConvert} style={{ gap: '8px' }}>
+                  {mode === 'encode' ? <><i className="fa-solid fa-lock"></i> Encode to Base64</> : <><i className="fa-solid fa-lock-open"></i> Decode from Base64</>}
                 </button>
               </>
             ) : (
@@ -81,7 +83,9 @@ export default function Base64Converter() {
                 className="drop-zone"
                 onClick={() => document.getElementById('b64-file-input').click()}
               >
-                <div className="drop-zone-icon">📁</div>
+                <div className="drop-zone-icon">
+                  <i className="fa-solid fa-file-arrow-up" style={{ color: 'var(--accent-purple-light)' }}></i>
+                </div>
                 <h3>Click to select a file</h3>
                 <p>The file will be converted to a Base64 data URI</p>
                 <input id="b64-file-input" type="file" style={{ display: 'none' }} onChange={e => handleFileEncode(e.target.files[0])} />
@@ -90,7 +94,7 @@ export default function Base64Converter() {
 
             {error && (
               <div style={{ padding: '0.75rem 1rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 'var(--radius-md)', marginTop: '1rem', color: 'var(--accent-red)', fontSize: '0.85rem' }}>
-                ❌ {error}
+                <i className="fa-solid fa-circle-exclamation"></i> {error}
               </div>
             )}
 
@@ -98,7 +102,9 @@ export default function Base64Converter() {
               <div style={{ marginTop: '1rem' }}>
                 <div className="flex items-center justify-between mb-1">
                   <label className="form-label" style={{ marginBottom: 0 }}>Result</label>
-                  <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy}>{copied ? '✓ Copied' : '📋 Copy'}</button>
+                  <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy} style={{ gap: '6px' }}>
+                    <i className={copied ? "fa-solid fa-check" : "fa-solid fa-copy"}></i> {copied ? 'Copied' : 'Copy'}
+                  </button>
                 </div>
                 <div className="code-block" style={{ maxHeight: 300 }}>{output}</div>
                 <div className="flex gap-1 mt-1">

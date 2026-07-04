@@ -28,45 +28,45 @@ export default function ShareButtons({ title, url }) {
         target="_blank"
         rel="noopener noreferrer"
         className="btn btn-sm"
-        style={{ background: '#25D366', color: 'white', fontSize: '0.8rem' }}
+        style={{ background: '#25D366', color: 'white', fontSize: '0.8rem', gap: '6px' }}
       >
-        💬 WhatsApp
+        <i className="fa-brands fa-whatsapp"></i> WhatsApp
       </a>
       <a
         href={`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`}
         target="_blank"
         rel="noopener noreferrer"
         className="btn btn-sm"
-        style={{ background: '#1DA1F2', color: 'white', fontSize: '0.8rem' }}
+        style={{ background: '#1DA1F2', color: 'white', fontSize: '0.8rem', gap: '6px' }}
       >
-        🐦 Twitter
+        <i className="fa-brands fa-twitter"></i> Twitter
       </a>
       <a
         href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`}
         target="_blank"
         rel="noopener noreferrer"
         className="btn btn-sm"
-        style={{ background: '#0A66C2', color: 'white', fontSize: '0.8rem' }}
+        style={{ background: '#0A66C2', color: 'white', fontSize: '0.8rem', gap: '6px' }}
       >
-        💼 LinkedIn
+        <i className="fa-brands fa-linkedin"></i> LinkedIn
       </a>
       <a
         href={`mailto:?subject=${encodedTitle}&body=Check%20out%20this%20tool:%20${encodedUrl}`}
         className="btn btn-sm btn-secondary"
-        style={{ fontSize: '0.8rem' }}
+        style={{ fontSize: '0.8rem', gap: '6px' }}
       >
-        ✉️ Email
+        <i className="fa-solid fa-envelope"></i> Email
       </a>
       <button
         className={`btn btn-sm ${copied ? '' : 'btn-secondary'}`}
-        style={copied ? { background: 'var(--accent-green)', color: 'white', fontSize: '0.8rem' } : { fontSize: '0.8rem' }}
+        style={copied ? { background: 'var(--accent-green)', color: 'white', fontSize: '0.8rem', gap: '6px' } : { fontSize: '0.8rem', gap: '6px' }}
         onClick={handleCopyLink}
       >
-        {copied ? '✓ Copied!' : '🔗 Copy Link'}
+        <i className={copied ? "fa-solid fa-check" : "fa-solid fa-link"}></i> {copied ? 'Copied!' : 'Copy Link'}
       </button>
       {navigator.share && (
-        <button className="btn btn-sm btn-secondary" onClick={handleNativeShare} style={{ fontSize: '0.8rem' }}>
-          📤 Share
+        <button className="btn btn-sm btn-secondary" onClick={handleNativeShare} style={{ fontSize: '0.8rem', gap: '6px' }}>
+          <i className="fa-solid fa-share-nodes"></i> Share
         </button>
       )}
     </div>

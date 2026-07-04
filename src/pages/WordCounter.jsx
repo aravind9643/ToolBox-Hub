@@ -30,7 +30,9 @@ export default function WordCounter() {
       <SEOHead title="Word Counter" description="Count words, characters, sentences, and estimate reading time. Free text analysis tool." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Word Counter</span></div>
-        <h1>📝 Word & Character Counter</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-paragraph" style={{ color: 'var(--accent-purple-light)' }}></i> Word & Character Counter
+        </h1>
         <p>Analyze your text with word count, character count, reading time, and more.</p>
       </div>
 
@@ -101,12 +103,12 @@ export default function WordCounter() {
               </div>
             )}
 
-            <div className="flex gap-1 mt-2">
+            <div className="flex gap-1 mt-2" style={{ flexWrap: 'wrap' }}>
               <button className="btn btn-secondary btn-sm" onClick={() => setText(text.toUpperCase())}>UPPERCASE</button>
               <button className="btn btn-secondary btn-sm" onClick={() => setText(text.toLowerCase())}>lowercase</button>
               <button className="btn btn-secondary btn-sm" onClick={() => setText(text.replace(/\b\w/g, c => c.toUpperCase()))}>Title Case</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => setText('')}>Clear</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => navigator.clipboard.writeText(text)}>📋 Copy</button>
+              <button className="btn btn-secondary btn-sm" onClick={() => setText('')} style={{ gap: '6px' }}><i className="fa-solid fa-trash-can"></i> Clear</button>
+              <button className="btn btn-secondary btn-sm" onClick={() => navigator.clipboard.writeText(text)} style={{ gap: '6px' }}><i className="fa-solid fa-copy"></i> Copy</button>
             </div>
           </div>
         </div>

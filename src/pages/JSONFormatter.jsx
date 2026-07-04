@@ -64,7 +64,9 @@ export default function JSONFormatter() {
       <SEOHead title="JSON Formatter & Validator" description="Format, validate, and beautify JSON data instantly. Free JSON pretty printer." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>JSON Formatter</span></div>
-        <h1>{'{ }'} JSON Formatter & Validator</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-code" style={{ color: 'var(--accent-purple-light)' }}></i> JSON Formatter & Validator
+        </h1>
         <p>Format, validate, minify, and beautify JSON data instantly.</p>
       </div>
 
@@ -74,11 +76,11 @@ export default function JSONFormatter() {
         <div className="tool-main">
           <div className="glass-card">
             <div className="flex items-center justify-between mb-2">
-              <div className="flex gap-1">
-                <button className="btn btn-primary btn-sm" onClick={format}>✨ Format</button>
-                <button className="btn btn-secondary btn-sm" onClick={minify}>📦 Minify</button>
-                <button className="btn btn-secondary btn-sm" onClick={validate}>✅ Validate</button>
-                <button className="btn btn-secondary btn-sm" onClick={loadSample}>📝 Sample</button>
+              <div className="flex gap-1" style={{ flexWrap: 'wrap' }}>
+                <button className="btn btn-primary btn-sm" onClick={format} style={{ gap: '6px' }}><i className="fa-solid fa-wand-magic-sparkles"></i> Format</button>
+                <button className="btn btn-secondary btn-sm" onClick={minify} style={{ gap: '6px' }}><i className="fa-solid fa-compress"></i> Minify</button>
+                <button className="btn btn-secondary btn-sm" onClick={validate} style={{ gap: '6px' }}><i className="fa-solid fa-square-check"></i> Validate</button>
+                <button className="btn btn-secondary btn-sm" onClick={loadSample} style={{ gap: '6px' }}><i className="fa-solid fa-file-lines"></i> Sample</button>
               </div>
               <div className="flex items-center gap-1">
                 <label className="text-xs text-muted">Indent:</label>
@@ -104,7 +106,7 @@ export default function JSONFormatter() {
 
             {error && (
               <div style={{ padding: '0.75rem 1rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 'var(--radius-md)', marginBottom: '1rem', color: 'var(--accent-red)', fontSize: '0.85rem' }}>
-                ❌ {error}
+                <i className="fa-solid fa-circle-exclamation"></i> {error}
               </div>
             )}
 
@@ -112,7 +114,9 @@ export default function JSONFormatter() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="form-label" style={{ marginBottom: 0 }}>Output</label>
-                  <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy}>{copied ? '✓ Copied' : '📋 Copy'}</button>
+                  <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy} style={{ gap: '6px' }}>
+                    <i className={copied ? "fa-solid fa-check" : "fa-solid fa-copy"}></i> {copied ? 'Copied' : 'Copy'}
+                  </button>
                 </div>
                 <div className="code-block">{output}</div>
               </div>

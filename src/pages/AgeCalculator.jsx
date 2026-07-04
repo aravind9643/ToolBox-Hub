@@ -52,7 +52,9 @@ export default function AgeCalculator() {
       <SEOHead title="Age Calculator" description="Calculate your exact age in years, months, and days. Find out your next birthday countdown." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Age Calculator</span></div>
-        <h1>🎂 Age Calculator</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <i className="fa-solid fa-cake-candles" style={{ color: 'var(--accent-purple-light)' }}></i> Age Calculator
+        </h1>
         <p>Calculate your exact age and countdown to your next birthday.</p>
       </div>
 
@@ -72,7 +74,9 @@ export default function AgeCalculator() {
               </div>
             </div>
 
-            <button className="btn btn-primary btn-lg w-full" onClick={calculate}>🎂 Calculate Age</button>
+            <button className="btn btn-primary btn-lg w-full" onClick={calculate} style={{ gap: '8px' }}>
+              <i className="fa-solid fa-cake-candles"></i> Calculate Age
+            </button>
 
             {result && (
               <>
