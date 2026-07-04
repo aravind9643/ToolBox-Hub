@@ -13,10 +13,18 @@ import JSONFormatter from './pages/JSONFormatter';
 import ImageCompressor from './pages/ImageCompressor';
 import Base64Converter from './pages/Base64Converter';
 import LoremIpsumGenerator from './pages/LoremIpsumGenerator';
+import TimestampConverter from './pages/TimestampConverter';
+import MarkdownPreviewer from './pages/MarkdownPreviewer';
+import RegexTester from './pages/RegexTester';
+import GradientGenerator from './pages/GradientGenerator';
+
+import ScrollToTop from './components/ScrollToTop';
+import NotFound from './pages/NotFound';
 
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
@@ -32,6 +40,11 @@ export default function App() {
           <Route path="/image-compressor" element={<ImageCompressor />} />
           <Route path="/base64-converter" element={<Base64Converter />} />
           <Route path="/lorem-ipsum" element={<LoremIpsumGenerator />} />
+          <Route path="/timestamp-converter" element={<TimestampConverter />} />
+          <Route path="/markdown-previewer" element={<MarkdownPreviewer />} />
+          <Route path="/regex-tester" element={<RegexTester />} />
+          <Route path="/gradient-generator" element={<GradientGenerator />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </Router>

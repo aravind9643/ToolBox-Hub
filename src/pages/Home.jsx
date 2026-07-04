@@ -63,6 +63,26 @@ const tools = [
     description: 'Generate placeholder text for your designs and mockups.',
     color: '#0ea5e9'
   },
+  {
+    icon: '⏰', title: 'Timestamp Converter', path: '/timestamp-converter',
+    description: 'Convert Unix timestamps to human-readable dates and vice-versa.',
+    color: '#10b981'
+  },
+  {
+    icon: '✍️', title: 'Markdown Previewer', path: '/markdown-previewer',
+    description: 'Write Markdown code and preview it rendered instantly.',
+    color: '#ec4899'
+  },
+  {
+    icon: '🔍', title: 'Regex Tester', path: '/regex-tester',
+    description: 'Test, match, and debug regular expressions in real-time.',
+    color: '#7c3aed'
+  },
+  {
+    icon: '🌈', title: 'Gradient Generator', path: '/gradient-generator',
+    description: 'Create linear or radial CSS gradients with visual previews.',
+    color: '#06b6d4'
+  },
 ];
 
 export default function Home() {
@@ -79,7 +99,7 @@ export default function Home() {
         <p>Fast, free, and private. All tools run in your browser — nothing is uploaded to any server.</p>
         <div className="hero-stats">
           <div className="hero-stat">
-            <div className="hero-stat-value">12+</div>
+            <div className="hero-stat-value">16+</div>
             <div className="hero-stat-label">Free Tools</div>
           </div>
           <div className="hero-stat">

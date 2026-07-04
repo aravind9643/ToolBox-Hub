@@ -14,12 +14,38 @@ const allTools = [
   { path: '/image-compressor', label: 'Image Compressor' },
   { path: '/base64-converter', label: 'Base64 Converter' },
   { path: '/lorem-ipsum', label: 'Lorem Ipsum Generator' },
+  { path: '/timestamp-converter', label: 'Timestamp Converter' },
+  { path: '/markdown-previewer', label: 'Markdown Previewer' },
+  { path: '/regex-tester', label: 'Regex Tester' },
+  { path: '/gradient-generator', label: 'Gradient Generator' },
 ];
 
 export default function Navbar({ onMenuToggle }) {
   const [query, setQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
+
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('theme') || 'dark';
+    if (saved === 'light') {
+      document.body.classList.add('light-theme');
+    } else {
+      document.body.classList.remove('light-theme');
+    }
+    return saved;
+  });
+
+  const toggleTheme = () => {
+    if (theme === 'dark') {
+      setTheme('light');
+      document.body.classList.add('light-theme');
+      localStorage.setItem('theme', 'light');
+    } else {
+      setTheme('dark');
+      document.body.classList.remove('light-theme');
+      localStorage.setItem('theme', 'dark');
+    }
+  };
 
   const results = useMemo(() => {
     if (!query.trim()) return [];
@@ -52,7 +78,7 @@ export default function Navbar({ onMenuToggle }) {
         {showResults && results.length > 0 && (
           <div style={{
             position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 8,
-            background: 'rgba(10, 14, 39, 0.98)', border: '1px solid var(--border-color)',
+            background: 'var(--bg-secondary)', border: '1px solid var(--border-color)',
             borderRadius: 'var(--radius-md)', overflow: 'hidden', zIndex: 999,
             boxShadow: 'var(--shadow-lg)'
           }}>
@@ -74,6 +100,9 @@ export default function Navbar({ onMenuToggle }) {
       </div>
 
       <div className="navbar-actions">
+        <button className="navbar-action-btn" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'} style={{ border: 'none', outline: 'none' }}>
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
         <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="navbar-action-btn" title="GitHub">⭐</a>
       </div>
     </nav>
