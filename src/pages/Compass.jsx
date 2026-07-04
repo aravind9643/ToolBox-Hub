@@ -86,8 +86,13 @@ export default function Compass() {
     }
   };
 
+  const [lockedHeading, setLockedHeading] = useState(null);
+
   const currentHeading = isMobile ? heading : simulatedHeading;
   const currentDirection = getDirection(currentHeading);
+
+  // Shortest angular distance between target and current heading
+  const delta = lockedHeading !== null ? ((currentHeading - lockedHeading + 180 + 360) % 360 - 180) : 0;
 
   return (
     <div className="tool-page">
@@ -156,6 +161,20 @@ export default function Compass() {
                 <div style={{ position: 'absolute', top: '50%', left: '10px', right: '10px', height: '1px', background: 'var(--border-color)' }} />
                 <div style={{ position: 'absolute', left: '50%', top: '10px', bottom: '10px', width: '1px', background: 'var(--border-color)' }} />
 
+                {/* Locked Target Course Indicator */}
+                {lockedHeading !== null && (
+                  <div style={{
+                    position: 'absolute', top: '50%', left: '50%',
+                    width: '12px', height: '12px', borderRadius: '50%',
+                    background: 'var(--accent-cyan-light)',
+                    border: '2px solid #fff',
+                    boxShadow: '0 0 8px var(--accent-cyan-light)',
+                    transform: `translate(-50%, -50%) rotate(${lockedHeading}deg) translateY(-112px)`,
+                    transformOrigin: 'center center',
+                    zIndex: 8
+                  }} />
+                )}
+
                 {/* 24 Ticks (every 15 degrees) */}
                 {Array.from({ length: 24 }).map((_, i) => {
                   const degree = i * 15;
@@ -217,6 +236,38 @@ export default function Compass() {
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Current Heading
               </div>
+            </div>
+
+            {/* Locked target navigation panel */}
+            {lockedHeading !== null && (
+              <div style={{ marginTop: '1.25rem', padding: '0.75rem 1.25rem', background: 'var(--bg-glass-hover)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', width: '100%', maxWidth: '300px' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                  <span>Locked Target:</span>
+                  <span style={{ fontWeight: 700, color: 'var(--accent-cyan-light)' }}>{lockedHeading}°</span>
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span>Deviation Delta:</span>
+                  <span style={{ fontWeight: 700, color: Math.abs(delta) <= 5 ? 'var(--accent-green)' : 'var(--accent-pink)' }}>
+                    {delta > 0 ? `+${delta}` : delta}°
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: Math.abs(delta) <= 5 ? 'var(--accent-green)' : 'var(--accent-amber)' }}>
+                  {Math.abs(delta) <= 5 ? '🎯 ON COURSE' : (delta > 0 ? '👈 TURN LEFT' : '👉 TURN RIGHT')}
+                </div>
+              </div>
+            )}
+
+            {/* Target lock controllers */}
+            <div style={{ marginTop: '1.25rem' }}>
+              {lockedHeading === null ? (
+                <button className="btn btn-secondary" onClick={() => setLockedHeading(currentHeading)} style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', gap: '6px' }}>
+                  <i className="fa-solid fa-lock"></i> Lock Target Course
+                </button>
+              ) : (
+                <button className="btn btn-secondary" onClick={() => setLockedHeading(null)} style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', gap: '6px', color: 'var(--accent-red)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+                  <i className="fa-solid fa-lock-open"></i> Clear Course Lock
+                </button>
+              )}
             </div>
 
             {/* Simulator slider for non-mobile/desktop fallback */}

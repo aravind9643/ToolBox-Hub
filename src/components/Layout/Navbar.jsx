@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const allTools = [
@@ -66,6 +66,7 @@ const allTools = [
 export default function Navbar({ onMenuToggle }) {
   const [query, setQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const navigate = useNavigate();
 
   const [theme, setTheme] = useState(() => {
@@ -98,6 +99,21 @@ export default function Navbar({ onMenuToggle }) {
     );
   }, [query]);
 
+  useEffect(() => {
+    setFocusedIndex(-1);
+  }, [query]);
+
+  const handleKeyDown = (e) => {
+    if (!showResults || results.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      setFocusedIndex(prev => (prev < results.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
+      setFocusedIndex(prev => (prev > 0 ? prev - 1 : results.length - 1));
+    } else if (e.key === 'Enter' && focusedIndex >= 0) {
+      handleSelect(results[focusedIndex].path);
+    }
+  };
+
   const handleSelect = (path) => {
     navigate(path);
     setQuery('');
@@ -129,6 +145,7 @@ export default function Navbar({ onMenuToggle }) {
           onChange={(e) => { setQuery(e.target.value); setShowResults(true); }}
           onFocus={() => setShowResults(true)}
           onBlur={() => setTimeout(() => setShowResults(false), 200)}
+          onKeyDown={handleKeyDown}
         />
         {showResults && results.length > 0 && (
           <div style={{
@@ -137,19 +154,18 @@ export default function Navbar({ onMenuToggle }) {
             borderRadius: 'var(--radius-md)', overflow: 'hidden', zIndex: 999,
             boxShadow: 'var(--shadow-lg)'
           }}>
-            {results.map(r => (
+            {results.map((r, idx) => (
               <button 
                 key={r.path} 
                 onTouchStart={(e) => { e.preventDefault(); handleSelect(r.path); }}
                 onMouseDown={(e) => { e.preventDefault(); handleSelect(r.path); }} 
                 style={{
                   display: 'block', width: '100%', padding: '0.7rem 1rem', textAlign: 'left',
-                  background: 'none', border: 'none', color: 'var(--text-primary)',
+                  background: idx === focusedIndex ? 'var(--bg-glass-hover)' : 'none', border: 'none', color: 'var(--text-primary)',
                   fontSize: '0.85rem', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
                   borderBottom: '1px solid var(--border-color)', transition: 'background 0.15s'
                 }}
-                onMouseEnter={e => e.target.style.background = 'var(--bg-glass-hover)'}
-                onMouseLeave={e => e.target.style.background = 'none'}
+                onMouseEnter={() => setFocusedIndex(idx)}
               >
                 {r.label}
               </button>

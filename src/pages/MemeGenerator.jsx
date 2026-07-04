@@ -41,6 +41,7 @@ export default function MemeGenerator() {
     }
 
     const img = new Image();
+    img.crossOrigin = 'anonymous';
     img.onload = () => {
       // Draw image
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -127,14 +128,29 @@ export default function MemeGenerator() {
                 <label className="form-label">Upload Image Template</label>
                 <input type="file" ref={fileInputRef} accept="image/*" onChange={handleImageUpload} className="form-input" style={{ padding: '0.5rem' }} />
               </div>
-              <div className="form-group" style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
-                <button className="btn btn-secondary w-full" onClick={() => {
-                  setImageSrc('https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=300&h=300&q=80');
-                  setTopTextPos({ x: 150, y: 40 });
-                  setBottomTextPos({ x: 150, y: 260 });
-                }}>
-                  Load Sample Portrait
-                </button>
+              <div className="form-group">
+                <label className="form-label">Or Choose Template Preset</label>
+                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                  {[
+                    { label: 'Drake', url: 'https://api.memegen.link/images/drake.png' },
+                    { label: 'Doge', url: 'https://api.memegen.link/images/doge.png' },
+                    { label: 'Disaster', url: 'https://api.memegen.link/images/disastergirl.png' },
+                    { label: 'Boyfriend', url: 'https://api.memegen.link/images/db.png' }
+                  ].map(tpl => (
+                    <button 
+                      key={tpl.label} 
+                      className="btn btn-secondary" 
+                      style={{ padding: '0.45rem 0.5rem', fontSize: '0.75rem', flex: '1 1 40%', minWidth: '80px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+                      onClick={() => {
+                        setImageSrc(tpl.url);
+                        setTopTextPos({ x: 150, y: 40 });
+                        setBottomTextPos({ x: 150, y: 260 });
+                      }}
+                    >
+                      {tpl.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 

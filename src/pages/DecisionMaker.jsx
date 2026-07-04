@@ -21,6 +21,7 @@ export default function DecisionMaker() {
   // Dice states
   const [diceCount, setDiceCount] = useState(1);
   const [diceResults, setDiceResults] = useState([6]);
+  const [diceRotation, setDiceRotation] = useState([0]);
   const [rolling, setRolling] = useState(false);
 
   const options = optionsText.split('\n').map(o => o.trim()).filter(Boolean);
@@ -179,6 +180,43 @@ export default function DecisionMaker() {
     }, 1200);
   };
 
+  const renderDiceDots = (val) => {
+    const dotPositions = {
+      1: [4],
+      2: [0, 8],
+      3: [0, 4, 8],
+      4: [0, 2, 6, 8],
+      5: [0, 2, 4, 6, 8],
+      6: [0, 2, 3, 5, 6, 8]
+    };
+
+    const activeDots = dotPositions[val] || [];
+    return (
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gridTemplateRows: 'repeat(3, 1fr)',
+        gap: '4px',
+        width: '32px',
+        height: '32px'
+      }}>
+        {Array.from({ length: 9 }).map((_, idx) => (
+          <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {activeDots.includes(idx) && (
+              <div style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: 'var(--accent-purple-light)',
+                boxShadow: '0 0 4px var(--accent-purple-light)'
+              }} />
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   // Roll Dice
   const rollDice = () => {
     if (rolling) return;
@@ -186,11 +224,13 @@ export default function DecisionMaker() {
 
     const interval = setInterval(() => {
       setDiceResults(Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1));
+      setDiceRotation(Array.from({ length: diceCount }, () => Math.floor(Math.random() * 360)));
     }, 80);
 
     setTimeout(() => {
       clearInterval(interval);
       setDiceResults(Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1));
+      setDiceRotation(Array.from({ length: diceCount }, () => Math.floor(Math.random() * 30) - 15));
       setRolling(false);
     }, 1000);
   };
@@ -304,12 +344,26 @@ export default function DecisionMaker() {
                   ))}
                 </div>
 
-                <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', height: '80px', alignItems: 'center', marginBottom: '1.5rem' }}>
-                  {diceResults.map((val, i) => (
-                    <div key={i} style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'var(--bg-input)', border: '2px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 800, color: 'var(--accent-purple-light)', boxShadow: 'var(--shadow-md)' }}>
-                      {val}
-                    </div>
-                  ))}
+                <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', height: '90px', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  {diceResults.map((val, i) => {
+                    const rot = diceRotation[i] || 0;
+                    return (
+                      <div 
+                        key={i} 
+                        style={{
+                          width: '64px', height: '64px', borderRadius: '14px',
+                          background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-input) 100%)',
+                          border: '2px solid var(--border-color)',
+                          boxShadow: '0 4px 10px rgba(0, 0, 0, 0.4)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transform: `rotate(${rot}deg) scale(${rolling ? 1.15 : 1})`,
+                          transition: rolling ? 'none' : 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                        }}
+                      >
+                        {renderDiceDots(val)}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <button className="btn btn-primary" onClick={rollDice} disabled={rolling} style={{ gap: '8px', margin: '0 auto' }}>

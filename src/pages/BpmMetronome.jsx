@@ -105,9 +105,30 @@ export default function BpmMetronome() {
     scheduler();
   };
 
+  const handleTapRef = useRef(null);
+  handleTapRef.current = handleTap;
+
+  const startMetronomeRef = useRef(null);
+  startMetronomeRef.current = startMetronome;
+
   useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+        return;
+      }
+      if (e.code === 'Space') {
+        e.preventDefault();
+        startMetronomeRef.current();
+      } else if (e.code === 'KeyT') {
+        e.preventDefault();
+        handleTapRef.current();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+
     return () => {
       clearTimeout(timerIdRef.current);
+      window.removeEventListener('keydown', handleGlobalKeyDown);
     };
   }, []);
 
@@ -124,39 +145,43 @@ export default function BpmMetronome() {
 
       <div className="tool-layout" style={{ gridTemplateColumns: '1fr' }}>
         <div className="tool-main">
-          <div className="markdown-workspace" style={{ height: 'auto', minHeight: 'unset', alignItems: 'stretch' }}>
+          <div className="grid-2">
             
             {/* BPM Tapper Panel */}
-            <div className="glass-card workspace-column" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-              <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>BPM Tempo Tapper</h2>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.5rem', textAlign: 'center' }}>
-                Tap the button in sync with any audio beat or song rhythm to measure the average BPM value.
-              </p>
+            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center' }}>
+              <h2 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>BPM Tapper</h2>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Tap the button or press <strong>[T]</strong> in beat to measure tempo</p>
 
               <button 
-                onClick={handleTap} 
+                className="btn btn-primary" 
+                onClick={handleTap}
                 style={{
-                  width: '120px', height: '120px', borderRadius: '50%',
-                  background: 'linear-gradient(135deg, var(--accent-purple-light) 0%, var(--accent-pink) 100%)',
-                  border: 'none', color: 'white', fontWeight: 800, fontSize: '1.1rem',
-                  boxShadow: 'var(--shadow-lg)', cursor: 'pointer', outline: 'none',
-                  transition: 'transform 0.1s'
+                  width: '120px', height: '120px', borderRadius: '50%', fontSize: '1.1rem', fontWeight: 700,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  background: 'linear-gradient(135deg, var(--accent-purple-light) 0%, var(--accent-purple) 100%)',
+                  boxShadow: '0 8px 24px rgba(96, 165, 250, 0.3)', cursor: 'pointer', border: 'none', color: '#fff',
+                  transition: 'transform var(--transition-fast)'
                 }}
                 onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
                 onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
               >
-                TAP BEAT
+                <span>TAP</span>
+                <span style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '4px' }}>OR PRESS T</span>
               </button>
 
-              <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: tappedBpm > 0 ? 'var(--accent-cyan-light)' : 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
-                  {tappedBpm || '—'}
-                </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginTop: '0.2rem' }}>Measured BPM</div>
+              <div style={{ marginTop: '1.5rem', minHeight: '60px' }}>
+                {tappedBpm > 0 ? (
+                  <div>
+                    <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--accent-cyan-light)', lineHeight: 1 }}>{tappedBpm}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '4px' }}>Calculated BPM</div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Tap at least twice to begin...</div>
+                )}
               </div>
 
-              {taps.length > 0 && (
-                <button className="copy-btn btn-sm mt-1" onClick={resetTaps} style={{ border: 'none', background: 'none', color: 'var(--accent-red)' }}>
+              {tappedBpm > 0 && (
+                <button className="btn btn-secondary" onClick={resetTaps} style={{ fontSize: '0.75rem', marginTop: '1rem', padding: '0.35rem 0.75rem' }}>
                   Reset Taps
                 </button>
               )}
@@ -187,13 +212,17 @@ export default function BpmMetronome() {
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }}>
                 <button className="btn btn-primary" onClick={startMetronome} style={{ gap: '8px' }}>
                   <i className={isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play'}></i>
-                  {isPlaying ? 'Pause Metronome' : 'Start Metronome'}
+                  {isPlaying ? 'Pause' : 'Start'}
                 </button>
                 {tappedBpm > 0 && (
                   <button className="btn btn-secondary" onClick={() => setBpm(tappedBpm)} style={{ fontSize: '0.8rem' }}>
-                    Sync Tapped BPM
+                    Sync Taps
                   </button>
                 )}
+              </div>
+
+              <div style={{ marginTop: '1.5rem', padding: '0.5rem 0.75rem', background: 'var(--bg-glass-hover)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Press <strong>[Space]</strong> to Toggle Play/Pause
               </div>
             </div>
 
