@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
 import AdBanner from '../components/AdBanner';
 
 // Exchange rates relative to USD (approximate, as of mid-2025)
-const RATES = {
+const FALLBACK_RATES = {
   USD: 1, EUR: 0.92, GBP: 0.79, JPY: 157.5, INR: 83.5, CAD: 1.37, AUD: 1.55,
   CHF: 0.90, CNY: 7.26, HKD: 7.82, SGD: 1.35, MXN: 17.1, BRL: 5.05, KRW: 1350,
   SEK: 10.5, NOK: 10.8, DKK: 6.88, NZD: 1.65, ZAR: 18.6, AED: 3.67, SAR: 3.75,
@@ -34,8 +34,6 @@ const NAMES = {
   EGP: 'Egyptian Pound', NGN: 'Nigerian Naira', PKR: 'Pakistani Rupee'
 };
 
-const CURRENCIES = Object.keys(RATES);
-
 export default function CurrencyConverter() {
   const [amount, setAmount] = useState('1');
   const [from, setFrom] = useState('USD');
@@ -43,22 +41,46 @@ export default function CurrencyConverter() {
   const [showAll, setShowAll] = useState(false);
   const [search, setSearch] = useState('');
   const [copied, setCopied] = useState('');
+  const [rates, setRates] = useState(FALLBACK_RATES);
+  const [rateInfo, setRateInfo] = useState({ status: 'loading', date: 'offline fallback' });
+  const currencies = useMemo(() => Object.keys(rates).filter(code => NAMES[code]), [rates]);
+
+  useEffect(() => {
+    const cached = localStorage.getItem('toolbox-currency-rates');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed.rates && parsed.date) { setRates({ USD: 1, ...parsed.rates }); setRateInfo({ status: 'cached', date: parsed.date }); }
+      } catch { /* ignore invalid cache */ }
+    }
+    const controller = new AbortController();
+    fetch('https://api.frankfurter.app/latest?from=USD', { signal: controller.signal })
+      .then(response => { if (!response.ok) throw new Error('Rate service unavailable'); return response.json(); })
+      .then(data => {
+        const current = { USD: 1, ...data.rates };
+        setRates(current);
+        setRateInfo({ status: 'live', date: data.date });
+        localStorage.setItem('toolbox-currency-rates', JSON.stringify({ rates: data.rates, date: data.date }));
+      })
+      .catch(() => setRateInfo(info => info.status === 'cached' ? info : { status: 'offline', date: 'built-in fallback' }));
+    return () => controller.abort();
+  }, []);
 
   const converted = useMemo(() => {
     const num = parseFloat(amount);
     if (isNaN(num)) return null;
-    const inUSD = num / RATES[from];
-    return inUSD * RATES[to];
-  }, [amount, from, to]);
+    const inUSD = num / rates[from];
+    return inUSD * rates[to];
+  }, [amount, from, to, rates]);
 
   const allConverted = useMemo(() => {
     const num = parseFloat(amount);
     if (isNaN(num)) return [];
-    const inUSD = num / RATES[from];
-    return CURRENCIES.filter(c => c !== from)
+    const inUSD = num / rates[from];
+    return currencies.filter(c => c !== from)
       .filter(c => !search || c.includes(search.toUpperCase()) || NAMES[c].toLowerCase().includes(search.toLowerCase()))
-      .map(c => ({ code: c, name: NAMES[c], symbol: SYMBOLS[c], val: inUSD * RATES[c] }));
-  }, [amount, from, search]);
+      .map(c => ({ code: c, name: NAMES[c], symbol: SYMBOLS[c], val: inUSD * rates[c] }));
+  }, [amount, from, search, rates, currencies]);
 
   const swap = () => { setFrom(to); setTo(from); };
 
@@ -76,7 +98,7 @@ export default function CurrencyConverter() {
 
   return (
     <div className="tool-page">
-      <SEOHead title="Currency Converter" description="Convert between 35+ world currencies offline. Approximate exchange rates included." />
+      <SEOHead title="Currency Converter" description="Convert world currencies using current rates with a cached offline fallback." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Currency Converter</span></div>
         <h1><i className="fa-solid fa-money-bill-transfer" style={{ color: 'var(--accent-purple-light)' }}></i> Currency Converter</h1>
@@ -90,7 +112,7 @@ export default function CurrencyConverter() {
           <div className="glass-card">
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', padding: '0.3rem 0.7rem', background: 'var(--bg-input)', borderRadius: '9999px', border: '1px solid var(--border-color)', marginBottom: '1.25rem' }}>
               <i className="fa-solid fa-circle-info" style={{ color: 'var(--accent-amber)' }}></i>
-              Approximate rates — not for financial transactions. Updated mid-2025.
+              {rateInfo.status === 'loading' ? 'Updating exchange rates…' : rateInfo.status === 'live' ? `Current reference rates · ${rateInfo.date}` : `Offline rates · ${rateInfo.date}`} — informational use only.
             </div>
 
             {/* Main Converter */}
@@ -99,25 +121,25 @@ export default function CurrencyConverter() {
                 <label className="form-label">Amount</label>
                 <input className="form-input" type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="1.00" style={{ fontSize: '1.2rem', fontWeight: 600 }} />
                 <select className="form-select" style={{ marginTop: '0.5rem' }} value={from} onChange={e => setFrom(e.target.value)}>
-                  {CURRENCIES.map(c => <option key={c} value={c}>{c} — {NAMES[c]}</option>)}
+                  {currencies.map(c => <option key={c} value={c}>{c} — {NAMES[c]}</option>)}
                 </select>
               </div>
 
-              <button className="converter-swap" onClick={swap} title="Swap currencies">
+              <button type="button" className="converter-swap" onClick={swap} title="Swap currencies" aria-label="Swap currencies">
                 <i className="fa-solid fa-arrow-right-arrow-left"></i>
               </button>
 
               <div style={{ flex: 1 }}>
                 <label className="form-label">Converted To</label>
-                <div className="result-box" style={{ marginTop: 0, cursor: 'pointer' }} onClick={() => converted && copy(`${formatVal(converted, to)} ${to}`, 'main')}>
+                <button type="button" className="result-box w-full" style={{ marginTop: 0, cursor: 'pointer', textAlign: 'left' }} onClick={() => converted && copy(`${formatVal(converted, to)} ${to}`, 'main')} aria-label="Copy converted amount">
                   <div className="result-label">{SYMBOLS[to]} {NAMES[to]}</div>
                   <div className="result-value result-value-sm" style={{ color: 'var(--accent-purple-light)' }}>
                     {converted !== null ? `${SYMBOLS[to]} ${formatVal(converted, to)}` : '—'}
                   </div>
                   <div className="result-sub">{copied === 'main' ? '✓ Copied!' : 'Click to copy'}</div>
-                </div>
+                </button>
                 <select className="form-select" style={{ marginTop: '0.5rem' }} value={to} onChange={e => setTo(e.target.value)}>
-                  {CURRENCIES.map(c => <option key={c} value={c}>{c} — {NAMES[c]}</option>)}
+                  {currencies.map(c => <option key={c} value={c}>{c} — {NAMES[c]}</option>)}
                 </select>
               </div>
             </div>
@@ -126,9 +148,9 @@ export default function CurrencyConverter() {
             {converted !== null && (
               <div className="result-box mt-2 text-center" style={{ fontSize: '0.9rem', padding: '0.75rem' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>
-                  1 {from} = <strong style={{ color: 'var(--text-primary)' }}>{formatVal(RATES[to] / RATES[from], to)} {to}</strong>
+                  1 {from} = <strong style={{ color: 'var(--text-primary)' }}>{formatVal(rates[to] / rates[from], to)} {to}</strong>
                   &nbsp;·&nbsp;
-                  1 {to} = <strong style={{ color: 'var(--text-primary)' }}>{formatVal(RATES[from] / RATES[to], from)} {from}</strong>
+                  1 {to} = <strong style={{ color: 'var(--text-primary)' }}>{formatVal(rates[from] / rates[to], from)} {from}</strong>
                 </span>
               </div>
             )}

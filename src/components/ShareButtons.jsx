@@ -7,10 +7,12 @@ export default function ShareButtons({ title, url }) {
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedTitle = encodeURIComponent(shareTitle);
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { setCopied(false); }
   };
 
   const handleNativeShare = async () => {
@@ -22,7 +24,7 @@ export default function ShareButtons({ title, url }) {
   };
 
   return (
-    <div className="flex gap-1" style={{ flexWrap: 'wrap', marginTop: '1rem' }}>
+    <div className="flex gap-1" aria-label="Share this tool" style={{ flexWrap: 'wrap', marginTop: '1rem' }}>
       <a
         href={`https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`}
         target="_blank"
@@ -58,6 +60,7 @@ export default function ShareButtons({ title, url }) {
         <i className="fa-solid fa-envelope"></i> Email
       </a>
       <button
+        type="button"
         className={`btn btn-sm ${copied ? '' : 'btn-secondary'}`}
         style={copied ? { background: 'var(--accent-green)', color: 'white', fontSize: '0.8rem', gap: '6px' } : { fontSize: '0.8rem', gap: '6px' }}
         onClick={handleCopyLink}
@@ -65,7 +68,7 @@ export default function ShareButtons({ title, url }) {
         <i className={copied ? "fa-solid fa-check" : "fa-solid fa-link"}></i> {copied ? 'Copied!' : 'Copy Link'}
       </button>
       {navigator.share && (
-        <button className="btn btn-sm btn-secondary" onClick={handleNativeShare} style={{ fontSize: '0.8rem', gap: '6px' }}>
+        <button type="button" className="btn btn-sm btn-secondary" onClick={handleNativeShare} style={{ fontSize: '0.8rem', gap: '6px' }}>
           <i className="fa-solid fa-share-nodes"></i> Share
         </button>
       )}
