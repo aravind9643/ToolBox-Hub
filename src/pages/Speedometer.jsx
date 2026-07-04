@@ -11,6 +11,7 @@ export default function Speedometer() {
   const [coords, setCoords] = useState(null);
   const [gpsError, setGpsError] = useState('');
   const [tracking, setTracking] = useState(false);
+  const [mode, setMode] = useState('digital'); // 'digital' | 'analog'
 
   const speedHistoryRef = useRef([]);
   const watchIdRef = useRef(null);
@@ -26,7 +27,7 @@ export default function Speedometer() {
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
-        const speed = position.coords.speed; // speed in m/s (can be null if device stationary or low accuracy)
+        const speed = position.coords.speed;
         const currentSpeed = speed !== null && speed >= 0 ? speed : 0;
 
         setSpeedMs(currentSpeed);
@@ -91,9 +92,16 @@ export default function Speedometer() {
     ? speedHistoryRef.current.reduce((a, b) => a + b, 0) / speedHistoryRef.current.length
     : 0;
 
+  const currentSpeedConverted = convertSpeed(speedMs);
+  const maxGaugeVal = speedUnit === 'kmh' ? 220 : speedUnit === 'mph' ? 140 : 60;
+  const step = maxGaugeVal / 10;
+
+  // Rotation angle calculations: -120deg to 120deg (240deg total span)
+  const needleAngle = -120 + Math.min(1, currentSpeedConverted / maxGaugeVal) * 240;
+
   return (
     <div className="tool-page">
-      <SEOHead title="GPS Speedometer Tool" description="Real-time GPS Speedometer tracking tool. Check current, max, and average speeds in km/h, mph, and m/s." />
+      <SEOHead title="GPS Speedometer Tool" description="Real-time GPS Speedometer tracking tool with digital and analog modes." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Speedometer</span></div>
         <h1><i className="fa-solid fa-gauge" style={{ color: 'var(--accent-purple-light)' }}></i> GPS Speedometer</h1>
@@ -104,7 +112,7 @@ export default function Speedometer() {
 
       <div className="tool-layout" style={{ gridTemplateColumns: '1fr' }}>
         <div className="tool-main">
-          <div className="glass-card" style={{ textAlign: 'center' }}>
+          <div className="glass-card" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {gpsError && (
               <div style={{ padding: '0.85rem 1rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: 'var(--radius-md)', color: 'var(--accent-red)', fontSize: '0.85rem', marginBottom: '1.5rem', width: '100%' }}>
                 <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '6px' }}></i>
@@ -112,15 +120,106 @@ export default function Speedometer() {
               </div>
             )}
 
-            {/* Main Speed Gauge display */}
-            <div style={{ padding: '2rem 0' }}>
-              <div style={{ fontSize: '4.5rem', fontWeight: 800, color: 'var(--accent-cyan-light)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
-                {convertSpeed(speedMs).toFixed(1)}
-              </div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-secondary)', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {unitLabel}
-              </div>
+            {/* In-meter Segmented Mode Switcher */}
+            <div style={{ display: 'inline-flex', background: 'var(--bg-input)', padding: '4px', borderRadius: '20px', border: '1px solid var(--border-color)', marginBottom: '1rem' }}>
+              <button onClick={() => setMode('digital')} style={{ background: mode === 'digital' ? 'var(--accent-purple-light)' : 'transparent', color: mode === 'digital' ? 'white' : 'var(--text-secondary)', border: 'none', padding: '5px 16px', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', outline: 'none' }}>
+                Digital
+              </button>
+              <button onClick={() => setMode('analog')} style={{ background: mode === 'analog' ? 'var(--accent-purple-light)' : 'transparent', color: mode === 'analog' ? 'white' : 'var(--text-secondary)', border: 'none', padding: '5px 16px', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', outline: 'none' }}>
+                Analog
+              </button>
             </div>
+
+            {/* Display according to selected mode (both fixed at 250px height) */}
+            {mode === 'digital' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '250px', height: '250px', margin: '2rem 0' }}>
+                <div style={{ fontSize: '5.2rem', fontWeight: 800, color: 'var(--accent-cyan-light)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
+                  {currentSpeedConverted.toFixed(1)}
+                </div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-secondary)', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {unitLabel}
+                </div>
+              </div>
+            ) : (
+              /* Analog Dial Gauge representation */
+              <div style={{ position: 'relative', width: '250px', height: '250px', margin: '2rem 0' }}>
+                {/* Bezel Ring */}
+                <div style={{
+                  position: 'absolute', inset: -6, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, var(--bg-glass-hover) 0%, var(--bg-input) 100%)',
+                  border: '2px solid var(--border-color)',
+                  boxShadow: 'var(--shadow-lg)'
+                }} />
+
+                {/* Dial face */}
+                <div style={{
+                  position: 'absolute', inset: 0, borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.98) 100%)',
+                  boxShadow: 'inset 0 4px 12px rgba(0,0,0,0.6)',
+                  overflow: 'hidden'
+                }}>
+                  {/* Gauge Tick Marks */}
+                  {Array.from({ length: 11 }).map((_, i) => {
+                    const angle = -120 + (i * 24);
+                    const val = Math.round(i * step);
+                    return (
+                      <div key={i}>
+                        {/* Major Tick line */}
+                        <div style={{
+                          position: 'absolute', top: '50%', left: '50%',
+                          width: '2px', height: '10px', background: 'var(--text-secondary)',
+                          transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-112px)`,
+                          transformOrigin: 'center center'
+                        }} />
+                        {/* Value Text */}
+                        <div style={{
+                          position: 'absolute', top: '50%', left: '50%',
+                          fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)',
+                          transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-96px) rotate(${-angle}deg)`
+                        }}>
+                          {val}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Glowing Analog Needle */}
+                  <div style={{
+                    position: 'absolute', bottom: '50%', left: '50%',
+                    width: '3px', height: '94px',
+                    background: 'linear-gradient(to top, var(--accent-pink) 30%, #f472b6 100%)',
+                    borderRadius: '3px',
+                    transformOrigin: 'bottom center',
+                    transform: `translate(-50%, 0) rotate(${needleAngle}deg)`,
+                    transition: tracking ? 'transform 0.2s ease-out' : 'transform 0.4s ease-out',
+                    boxShadow: '0 0 6px rgba(244,114,182,0.6)',
+                    zIndex: 2
+                  }} />
+
+                  {/* Center Pivot Point Cover */}
+                  <div style={{
+                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                    width: '16px', height: '16px', borderRadius: '50%',
+                    background: 'var(--bg-glass-hover)', border: '2px solid var(--border-color)',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                    zIndex: 3
+                  }} />
+
+                  {/* Readout label inside gauge */}
+                  <div style={{
+                    position: 'absolute', bottom: '55px', left: '0', right: '0',
+                    textAlign: 'center', zIndex: 1
+                  }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                      {currentSpeedConverted.toFixed(0)}
+                    </div>
+                    <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+                      {unitLabel}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Tracking Toggle Controls */}
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', marginBottom: '2rem', flexWrap: 'wrap' }}>
@@ -144,14 +243,14 @@ export default function Speedometer() {
             </div>
 
             {/* Stats section */}
-            <div className="stats-grid">
-              <div className="stat-card">
+            <div className="stats-grid" style={{ width: '100%' }}>
+              <div className="stat-card" style={{ textAlign: 'center' }}>
                 <div className="stat-card-value" style={{ color: 'var(--accent-purple-light)' }}>
                   {convertSpeed(maxSpeedMs).toFixed(1)}
                 </div>
                 <div className="stat-card-label">Max Speed ({unitLabel})</div>
               </div>
-              <div className="stat-card">
+              <div className="stat-card" style={{ textAlign: 'center' }}>
                 <div className="stat-card-value" style={{ color: 'var(--accent-green)' }}>
                   {convertSpeed(averageSpeedMs).toFixed(1)}
                 </div>
@@ -161,7 +260,7 @@ export default function Speedometer() {
 
             {/* Coordinates / Metadata */}
             {coords && (
-              <div style={{ marginTop: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem', textAlign: 'left' }}>
+              <div style={{ marginTop: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem', textAlign: 'left', width: '100%' }}>
                 {[
                   { label: 'Latitude', val: coords.lat },
                   { label: 'Longitude', val: coords.lng },
@@ -176,7 +275,7 @@ export default function Speedometer() {
               </div>
             )}
 
-            <div style={{ marginTop: '1.5rem', padding: '0.75rem', background: 'var(--bg-glass-hover)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'left' }}>
+            <div style={{ marginTop: '1.5rem', padding: '0.75rem', background: 'var(--bg-glass-hover)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'left', width: '100%' }}>
               <i className="fa-solid fa-circle-info" style={{ color: 'var(--accent-cyan-light)', marginRight: '6px' }}></i>
               Speedometer tracks values using your device's built-in GPS. Ensure GPS or Location Services are enabled and active. Accuracy is higher outdoors.
             </div>

@@ -33,7 +33,7 @@ export default function DecisionMaker() {
     const w = canvas.width;
     const h = canvas.height;
     const center = w / 2;
-    const radius = center - 10;
+    const radius = center - 22; // leave room for bezel and studs
 
     ctx.clearRect(0, 0, w, h);
 
@@ -47,13 +47,14 @@ export default function DecisionMaker() {
       ctx.fillStyle = 'var(--text-muted)';
       ctx.font = '14px Inter, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('Enter options to draw wheel', center, center);
+      ctx.fillText('Enter choices to draw wheel', center, center);
       return;
     }
 
     const arcSize = (2 * Math.PI) / options.length;
     const colors = ['#3b82f6', '#d946ef', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6'];
 
+    // Draw wheel segments
     options.forEach((opt, i) => {
       const angle = angleRef.current + i * arcSize;
       ctx.beginPath();
@@ -64,7 +65,7 @@ export default function DecisionMaker() {
       ctx.strokeStyle = 'rgba(255,255,255,0.15)';
       ctx.stroke();
 
-      // Draw Text
+      // Draw Text segment labels
       ctx.save();
       ctx.translate(center, center);
       ctx.rotate(angle + arcSize / 2);
@@ -75,14 +76,63 @@ export default function DecisionMaker() {
       ctx.restore();
     });
 
-    // Arrow pointer
+    // Draw outer metallic bezel casing
     ctx.beginPath();
-    ctx.moveTo(w - 5, center);
-    ctx.lineTo(w - 20, center - 10);
-    ctx.lineTo(w - 20, center + 10);
-    ctx.closePath();
+    ctx.arc(center, center, radius + 6, 0, 2 * Math.PI);
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = '#475569'; // steel color casing
+    ctx.stroke();
+
+    // Draw chrome inner bezel border ring
+    ctx.beginPath();
+    ctx.arc(center, center, radius + 1, 0, 2 * Math.PI);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#94a3b8';
+    ctx.stroke();
+
+    // Draw metal studs/pins at each segment edge
+    options.forEach((_, i) => {
+      const angle = angleRef.current + i * arcSize;
+      const studX = center + (radius + 6) * Math.cos(angle);
+      const studY = center + (radius + 6) * Math.sin(angle);
+      ctx.beginPath();
+      ctx.arc(studX, studY, 3.5, 0, 2 * Math.PI);
+      ctx.fillStyle = '#cbd5e1'; // light chrome stud
+      ctx.fill();
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    // Draw center metallic hubcap
+    ctx.beginPath();
+    ctx.arc(center, center, 24, 0, 2 * Math.PI);
+    ctx.fillStyle = '#1e293b';
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(center, center, 8, 0, 2 * Math.PI);
     ctx.fillStyle = 'var(--accent-pink)';
     ctx.fill();
+
+    // High fidelity pointer arrow at 3 o'clock (East direction) pointing left
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 5;
+    ctx.beginPath();
+    ctx.moveTo(w - 2, center);
+    ctx.lineTo(w - 24, center - 12);
+    ctx.lineTo(w - 24, center + 12);
+    ctx.closePath();
+    ctx.fillStyle = '#ef4444'; // neon red
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
   };
 
   useEffect(() => {
@@ -94,17 +144,13 @@ export default function DecisionMaker() {
     setSpinning(true);
     setWinner('');
 
-    let speed = Math.random() * 0.4 + 0.3; // initial rotation speed
-    const friction = 0.985; // deceleration speed
+    let speed = Math.random() * 0.35 + 0.35; // initial rotation speed
+    const friction = 0.982; // deceleration rate
 
     const animate = () => {
       if (speed < 0.002) {
         setSpinning(false);
-        // Calculate winner
         const arcSize = (2 * Math.PI) / options.length;
-        // The pointer is at angle 0 (3 o'clock / East). 
-        // Need to find which segment covers the 0-angle.
-        // segment index = Math.floor((2*Math.PI - (rotationAngle % 2*Math.PI)) / arcSize)
         const normalizedAngle = (2 * Math.PI - (angleRef.current % (2 * Math.PI))) % (2 * Math.PI);
         const winIdx = Math.floor(normalizedAngle / arcSize);
         setWinner(options[winIdx]);
@@ -152,6 +198,19 @@ export default function DecisionMaker() {
   return (
     <div className="tool-page">
       <SEOHead title="Random Decision Maker (Wheel Spinner & Dice)" description="Spin a decision wheel, flip a coin, or roll dice client-side. Make selections and choices randomly." />
+      
+      {/* 3D Coin flip custom CSS inject */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes flip-3d-coin {
+          0% { transform: rotateY(0) scale(1); }
+          50% { transform: rotateY(900deg) scale(1.3); }
+          100% { transform: rotateY(1800deg) scale(1); }
+        }
+        .flipping-coin {
+          animation: flip-3d-coin 1.2s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+        }
+      `}} />
+
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Decision Maker</span></div>
         <h1><i className="fa-solid fa-dice" style={{ color: 'var(--accent-purple-light)' }}></i> Random Decision Maker</h1>
@@ -186,8 +245,8 @@ export default function DecisionMaker() {
 
                 {/* Display Wheel */}
                 <div className="workspace-column" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ position: 'relative', width: '220px', height: '220px' }}>
-                    <canvas ref={canvasRef} width="220" height="220" style={{ borderRadius: '50%', border: '2px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }} />
+                  <div style={{ position: 'relative', width: '240px', height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <canvas ref={canvasRef} width="240" height="240" style={{ borderRadius: '50%' }} />
                   </div>
                   <button className="btn btn-primary mt-2" onClick={spinWheel} disabled={spinning || options.length === 0} style={{ gap: '8px' }}>
                     <i className="fa-solid fa-rotate"></i> Spin Wheel
@@ -204,11 +263,43 @@ export default function DecisionMaker() {
             )}
 
             {activeTab === 'coin' && (
-              <div style={{ padding: '2rem 0' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '130px', height: '130px', borderRadius: '50%', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', border: '6px double #fff3', color: 'white', fontSize: '1.4rem', fontWeight: 800, boxShadow: 'var(--shadow-lg)', animation: flipping ? 'spin 0.15s linear infinite' : 'none', textShadow: '0 2px 4px rgba(0,0,0,0.3)', cursor: 'pointer' }} onClick={flipCoin}>
-                  {coinResult || (flipping ? '?' : 'FLIP')}
+              <div style={{ padding: '2.5rem 0' }}>
+                <div 
+                  className={flipping ? 'flipping-coin' : ''}
+                  style={{
+                    display: 'inline-flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    width: '140px', height: '140px', borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #ffe066 0%, #f59e0b 50%, #d97706 100%)',
+                    border: '5px double rgba(255,255,255,0.45)',
+                    color: '#451a03',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.5)',
+                    perspective: '1000px', transformStyle: 'preserve-3d', cursor: 'pointer',
+                    userSelect: 'none'
+                  }}
+                  onClick={flipCoin}
+                >
+                  {/* Emboss / Inset Details */}
+                  <div style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    width: '116px', height: '116px', borderRadius: '50%',
+                    border: '2px dashed rgba(69, 26, 3, 0.25)',
+                  }}>
+                    {flipping ? (
+                      <span style={{ fontSize: '2.2rem', fontWeight: 900, color: '#451a03' }}>?</span>
+                    ) : (
+                      <>
+                        <span style={{ fontSize: '2.2rem', lineHeight: 1, marginBottom: '2px' }}>
+                          {coinResult === 'Heads' ? '👑' : coinResult === 'Tails' ? '🛡️' : '🪙'}
+                        </span>
+                        <span style={{ fontSize: '0.95rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          {coinResult || 'FLIP'}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div style={{ marginTop: '2rem' }}>
+
+                <div style={{ marginTop: '2.5rem' }}>
                   <button className="btn btn-primary" onClick={flipCoin} disabled={flipping} style={{ gap: '8px', margin: '0 auto' }}>
                     <i className="fa-solid fa-coins"></i> Flip Coin
                   </button>
