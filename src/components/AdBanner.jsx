@@ -18,14 +18,14 @@ const ADSENSE_ENABLED = false;
 
 // ⬇️ REPLACE THESE WITH YOUR ACTUAL AD SLOT IDs FROM ADSENSE DASHBOARD ⬇️
 const AD_SLOTS = {
-  header: 'XXXXXXXXXX',   // Leaderboard (728x90)
-  sidebar: 'XXXXXXXXXX',  // Medium Rectangle (300x250)
-  inline: 'XXXXXXXXXX',   // In-feed
-  footer: 'XXXXXXXXXX',   // Leaderboard (728x90)
+  header: '6876828711',   // Leaderboard (728x90)
+  sidebar: '3192734578',  // Medium Rectangle (300x250)
+  inline: '1846074877',   // In-feed
+  footer: '7625015165',   // Leaderboard (728x90)
 };
 
 // ⬇️ REPLACE WITH YOUR PUBLISHER ID ⬇️
-const PUBLISHER_ID = 'ca-pub-XXXXXXXXXXXXXXXX';
+const PUBLISHER_ID = 'ca-pub-9316330718026325';
 
 export default function AdBanner({ type = 'header' }) {
   const adRef = useRef(null);
