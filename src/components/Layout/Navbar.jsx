@@ -53,6 +53,14 @@ const allTools = [
   { path: '/json-yaml-converter',      label: 'JSON to YAML Converter',     tags: 'json yaml config serialize parsing bidirectional data format conversion' },
   { path: '/compass',                  label: 'Compass',                    tags: 'compass navigation orientation angle heading cardinal N S E W direction sensors' },
   { path: '/speedometer',              label: 'Speedometer',                tags: 'speedometer speed travel GPS coordinates tracker velocity velocity stats max avg' },
+  { path: '/voice-recorder',           label: 'Voice Recorder',             tags: 'voice recorder sound recording visualizer mic microphone webm audio waveform' },
+  { path: '/bpm-metronome',            label: 'BPM & Metronome',            tags: 'bpm metronome tap beat click rhythm audio tempo count measure timing' },
+  { path: '/meme-generator',           label: 'Meme Generator',             tags: 'meme generator caption custom text template image text impact layout' },
+  { path: '/glassmorphism-generator',  label: 'Glassmorphism Generator',    tags: 'glassmorphism css style code design backdrop blur opacity transperancy shadow' },
+  { path: '/text-to-speech',           label: 'Text to Speech Reader',      tags: 'text to speech speech reader speech synthesis voice audio speaker listen speech read aloud' },
+  { path: '/csv-json-converter',       label: 'CSV ↔ JSON Converter',       tags: 'csv json converter spreadsheet array table columns records spreadsheet parsing' },
+  { path: '/sketchpad',                label: 'Sketchpad Whiteboard',       tags: 'sketchpad paint drawing whiteboard draw erase sketch sign image transparent png' },
+  { path: '/stopwatch',                label: 'Precision Stopwatch',        tags: 'stopwatch timer split lap centisecond clock precise duration delta' },
 ];
 
 export default function Navbar({ onMenuToggle }) {

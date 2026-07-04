@@ -223,6 +223,46 @@ const tools = [
     description: 'Track real-time travel speed and coordinates using browser GPS sensors.',
     color: '#10b981'
   },
+  {
+    icon: 'fa-solid fa-microphone', title: 'Voice Recorder', path: '/voice-recorder',
+    description: 'Record sound clips locally and display live waveform canvas frequencies.',
+    color: '#ef4444'
+  },
+  {
+    icon: 'fa-solid fa-drum', title: 'BPM & Metronome', path: '/bpm-metronome',
+    description: 'Tap rhythms to measure beat BPM, or run an audio click metronome track.',
+    color: '#d946ef'
+  },
+  {
+    icon: 'fa-solid fa-face-laugh-squint', title: 'Meme Generator', path: '/meme-generator',
+    description: 'Upload templates and add custom top/bottom text captions on images.',
+    color: '#f59e0b'
+  },
+  {
+    icon: 'fa-solid fa-shapes', title: 'Glassmorphism Generator', path: '/glassmorphism-generator',
+    description: 'Design modern CSS glass styling with interactive sliders and codes.',
+    color: '#0ea5e9'
+  },
+  {
+    icon: 'fa-solid fa-volume-high', title: 'Text to Speech Reader', path: '/text-to-speech',
+    description: 'Convert typed or pasted text to spoken speech audio in real-time.',
+    color: '#3b82f6'
+  },
+  {
+    icon: 'fa-solid fa-file-csv', title: 'CSV ↔ JSON Converter', path: '/csv-json-converter',
+    description: 'Convert spreadsheet CSV columns to structured JSON object lists and back.',
+    color: '#10b981'
+  },
+  {
+    icon: 'fa-solid fa-paintbrush', title: 'Sketchpad Board', path: '/sketchpad',
+    description: 'Whiteboard drawing canvas with brushes, sizes, and transparent PNG saves.',
+    color: '#d946ef'
+  },
+  {
+    icon: 'fa-solid fa-stopwatch', title: 'Stopwatch Timer', path: '/stopwatch',
+    description: 'High-precision lap and split timing records down to centiseconds.',
+    color: '#ef4444'
+  },
 ];
 
 export default function Home() {
@@ -239,7 +279,7 @@ export default function Home() {
         <p>Fast, free, and private. All tools run in your browser — nothing is uploaded to any server.</p>
         <div className="hero-stats">
           <div className="hero-stat">
-            <div className="hero-stat-value">44+</div>
+            <div className="hero-stat-value">52+</div>
             <div className="hero-stat-label">Free Tools</div>
           </div>
           <div className="hero-stat">

@@ -45,6 +45,14 @@ import UnitPriceCalculator from './pages/UnitPriceCalculator';
 import NumberBaseConverter from './pages/NumberBaseConverter';
 import Compass from './pages/Compass';
 import Speedometer from './pages/Speedometer';
+import VoiceRecorder from './pages/VoiceRecorder';
+import BpmMetronome from './pages/BpmMetronome';
+import MemeGenerator from './pages/MemeGenerator';
+import GlassmorphismGenerator from './pages/GlassmorphismGenerator';
+import TextToSpeech from './pages/TextToSpeech';
+import CsvJsonConverter from './pages/CsvJsonConverter';
+import Sketchpad from './pages/Sketchpad';
+import Stopwatch from './pages/Stopwatch';
 
 import ScrollToTop from './components/ScrollToTop';
 import NotFound from './pages/NotFound';
@@ -100,6 +108,14 @@ export default function App() {
           <Route path="/number-base-converter" element={<NumberBaseConverter />} />
           <Route path="/compass" element={<Compass />} />
           <Route path="/speedometer" element={<Speedometer />} />
+          <Route path="/voice-recorder" element={<VoiceRecorder />} />
+          <Route path="/bpm-metronome" element={<BpmMetronome />} />
+          <Route path="/meme-generator" element={<MemeGenerator />} />
+          <Route path="/glassmorphism-generator" element={<GlassmorphismGenerator />} />
+          <Route path="/text-to-speech" element={<TextToSpeech />} />
+          <Route path="/csv-json-converter" element={<CsvJsonConverter />} />
+          <Route path="/sketchpad" element={<Sketchpad />} />
+          <Route path="/stopwatch" element={<Stopwatch />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

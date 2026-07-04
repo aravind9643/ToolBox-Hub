@@ -11,7 +11,8 @@ const categories = [
       { path: '/gradient-generator', icon: 'fa-solid fa-palette', label: 'Gradient Generator' },
       { path: '/uuid-generator', icon: 'fa-solid fa-fingerprint', label: 'UUID Generator' },
       { path: '/ascii-art-generator', icon: 'fa-solid fa-font', label: 'ASCII Art Generator' },
-      { path: '/hash-generator', icon: 'fa-solid fa-hashtag', label: 'Hash Generator' }
+      { path: '/hash-generator', icon: 'fa-solid fa-hashtag', label: 'Hash Generator' },
+      { path: '/meme-generator', icon: 'fa-solid fa-face-laugh-squint', label: 'Meme Generator' }
     ]
   },
   {
@@ -25,7 +26,9 @@ const categories = [
       { path: '/morse-code-translator', icon: 'fa-solid fa-tower-broadcast', label: 'Morse Code Translator' },
       { path: '/color-palette-extractor', icon: 'fa-solid fa-palette', label: 'Palette Extractor' },
       { path: '/exif-metadata-viewer', icon: 'fa-solid fa-camera-retro', label: 'EXIF Viewer' },
-      { path: '/svg-png-converter', icon: 'fa-solid fa-file-export', label: 'SVG to PNG' }
+      { path: '/svg-png-converter', icon: 'fa-solid fa-file-export', label: 'SVG to PNG' },
+      { path: '/csv-json-converter', icon: 'fa-solid fa-file-csv', label: 'CSV ↔ JSON' },
+      { path: '/voice-recorder', icon: 'fa-solid fa-microphone', label: 'Voice Recorder' }
     ]
   },
   {
@@ -52,7 +55,8 @@ const categories = [
       { path: '/regex-tester', icon: 'fa-solid fa-magnifying-glass', label: 'Regex Tester' },
       { path: '/image-compressor', icon: 'fa-solid fa-file-image', label: 'Image Compressor' },
       { path: '/diff-checker', icon: 'fa-solid fa-code-compare', label: 'Diff Checker' },
-      { path: '/json-yaml-converter', icon: 'fa-solid fa-code', label: 'JSON to YAML' }
+      { path: '/json-yaml-converter', icon: 'fa-solid fa-code', label: 'JSON to YAML' },
+      { path: '/text-to-speech', icon: 'fa-solid fa-volume-high', label: 'Text to Speech' }
     ]
   },
   {
@@ -62,7 +66,9 @@ const categories = [
       { path: '/aspect-ratio-calculator', icon: 'fa-solid fa-expand', label: 'Aspect Ratio Calculator' },
       { path: '/contrast-checker', icon: 'fa-solid fa-circle-half-stroke', label: 'Contrast Checker' },
       { path: '/color-palette-generator', icon: 'fa-solid fa-palette', label: 'Palette Generator' },
-      { path: '/password-strength-tester', icon: 'fa-solid fa-shield-halved', label: 'Password Strength Tester' }
+      { path: '/password-strength-tester', icon: 'fa-solid fa-shield-halved', label: 'Password Strength Tester' },
+      { path: '/glassmorphism-generator', icon: 'fa-solid fa-shapes', label: 'Glassmorphism' },
+      { path: '/sketchpad', icon: 'fa-solid fa-paintbrush', label: 'Sketchpad' }
     ]
   },
   {
@@ -70,7 +76,9 @@ const categories = [
     items: [
       { path: '/pomodoro-timer', icon: 'fa-solid fa-clock', label: 'Pomodoro Timer' },
       { path: '/countdown-timer', icon: 'fa-solid fa-hourglass-half', label: 'Countdown Timer' },
-      { path: '/decision-maker', icon: 'fa-solid fa-dice', label: 'Decision Maker' }
+      { path: '/decision-maker', icon: 'fa-solid fa-dice', label: 'Decision Maker' },
+      { path: '/bpm-metronome', icon: 'fa-solid fa-drum', label: 'BPM & Metronome' },
+      { path: '/stopwatch', icon: 'fa-solid fa-stopwatch', label: 'Stopwatch' }
     ]
   },
   {
