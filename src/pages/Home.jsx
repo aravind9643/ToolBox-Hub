@@ -6,17 +6,17 @@ const tools = [
   {
     icon: 'fa-solid fa-qrcode', title: 'QR Code Generator', path: '/qr-code-generator',
     description: 'Generate QR codes for URLs, text, WiFi credentials, and more.',
-    color: '#7c3aed'
+    color: '#3b82f6'
   },
   {
     icon: 'fa-solid fa-shield-halved', title: 'Password Generator', path: '/password-generator',
     description: 'Create strong, secure passwords with customizable options.',
-    color: '#ec4899'
+    color: '#d946ef'
   },
   {
     icon: 'fa-solid fa-ruler-combined', title: 'Unit Converter', path: '/unit-converter',
     description: 'Convert between units of length, weight, temperature, and more.',
-    color: '#06b6d4'
+    color: '#0ea5e9'
   },
   {
     icon: 'fa-solid fa-eye-dropper', title: 'Color Picker', path: '/color-picker',
@@ -31,32 +31,32 @@ const tools = [
   {
     icon: 'fa-solid fa-cake-candles', title: 'Age Calculator', path: '/age-calculator',
     description: 'Calculate your exact age in years, months, and days.',
-    color: '#8b5cf6'
+    color: '#3b82f6'
   },
   {
     icon: 'fa-solid fa-coins', title: 'Loan Calculator', path: '/loan-calculator',
     description: 'Calculate EMI, total interest, and amortization schedules.',
-    color: '#14b8a6'
+    color: '#0ea5e9'
   },
   {
     icon: 'fa-solid fa-paragraph', title: 'Word Counter', path: '/word-counter',
     description: 'Count words, characters, sentences, and reading time.',
-    color: '#f97316'
+    color: '#f59e0b'
   },
   {
     icon: 'fa-solid fa-code', title: 'JSON Formatter', path: '/json-formatter',
     description: 'Format, validate, and beautify JSON data instantly.',
-    color: '#22d3ee'
+    color: '#d946ef'
   },
   {
     icon: 'fa-solid fa-file-image', title: 'Image Compressor', path: '/image-compressor',
     description: 'Compress images in your browser. No upload to any server.',
-    color: '#a855f7'
+    color: '#10b981'
   },
   {
     icon: 'fa-solid fa-right-left', title: 'Base64 Converter', path: '/base64-converter',
     description: 'Encode and decode text or files to/from Base64 format.',
-    color: '#e11d48'
+    color: '#ef4444'
   },
   {
     icon: 'fa-solid fa-file-lines', title: 'Lorem Ipsum Generator', path: '/lorem-ipsum',
@@ -66,22 +66,22 @@ const tools = [
   {
     icon: 'fa-solid fa-clock', title: 'Timestamp Converter', path: '/timestamp-converter',
     description: 'Convert Unix timestamps to human-readable dates and vice-versa.',
-    color: '#10b981'
+    color: '#3b82f6'
   },
   {
     icon: 'fa-solid fa-file-code', title: 'Markdown Previewer', path: '/markdown-previewer',
     description: 'Write Markdown code and preview it rendered instantly.',
-    color: '#ec4899'
+    color: '#d946ef'
   },
   {
     icon: 'fa-solid fa-magnifying-glass', title: 'Regex Tester', path: '/regex-tester',
     description: 'Test, match, and debug regular expressions in real-time.',
-    color: '#7c3aed'
+    color: '#ef4444'
   },
   {
     icon: 'fa-solid fa-palette', title: 'Gradient Generator', path: '/gradient-generator',
     description: 'Create linear or radial CSS gradients with visual previews.',
-    color: '#06b6d4'
+    color: '#0ea5e9'
   },
 ];
 

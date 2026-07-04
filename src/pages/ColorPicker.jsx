@@ -36,7 +36,7 @@ function generatePalette(hex) {
 }
 
 export default function ColorPicker() {
-  const [hex, setHex] = useState('#7c3aed');
+  const [hex, setHex] = useState('#3b82f6');
   const [copied, setCopied] = useState('');
 
   const rgb = hexToRgb(hex);

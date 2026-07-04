@@ -6,7 +6,7 @@ import SEOHead from '../components/SEOHead';
 
 export default function QRCodeGenerator() {
   const [text, setText] = useState('https://example.com');
-  const [fgColor, setFgColor] = useState('#7c3aed');
+  const [fgColor, setFgColor] = useState('#3b82f6');
   const [bgColor, setBgColor] = useState('#ffffff');
   const [size, setSize] = useState(256);
   const canvasRef = useRef(null);

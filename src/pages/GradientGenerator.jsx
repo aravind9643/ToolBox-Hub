@@ -5,8 +5,8 @@ import SEOHead from '../components/SEOHead';
 import ShareButtons from '../components/ShareButtons';
 
 export default function GradientGenerator() {
-  const [color1, setColor1] = useState('#7c3aed');
-  const [color2, setColor2] = useState('#06b6d4');
+  const [color1, setColor1] = useState('#3b82f6');
+  const [color2, setColor2] = useState('#0ea5e9');
   const [type, setType] = useState('linear');
   const [angle, setAngle] = useState(135);
   const [copied, setCopied] = useState(false);

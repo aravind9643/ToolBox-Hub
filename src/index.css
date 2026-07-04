@@ -914,12 +914,12 @@ h1, h2, h3, h4, h5, h6 {
 .btn-primary {
   background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.35);
 }
 
 .btn-secondary {
@@ -1007,8 +1007,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ---- Result Display ---- */
 .result-box {
-  background: rgba(124, 58, 237, 0.05);
-  border: 1px solid rgba(124, 58, 237, 0.15);
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.15);
   border-radius: var(--radius-md);
   padding: 1.25rem;
   margin-top: 1.25rem;
@@ -1382,7 +1382,7 @@ h1, h2, h3, h4, h5, h6 {
 .drop-zone:hover,
 .drop-zone.dragover {
   border-color: var(--accent-purple);
-  background: rgba(124, 58, 237, 0.05);
+  background: rgba(59, 130, 246, 0.05);
 }
 
 .drop-zone-icon {
@@ -1498,7 +1498,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .converter-swap:hover {
-  background: rgba(124, 58, 237, 0.15);
+  background: rgba(59, 130, 246, 0.15);
   transform: rotate(180deg);
 }
 
