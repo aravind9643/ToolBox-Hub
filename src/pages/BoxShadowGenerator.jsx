@@ -104,8 +104,7 @@ export default function BoxShadowGenerator() {
                     <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
                     <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{layer[field]}{unit}</span>
                   </div>
-                  <input type="range" min={min} max={max} value={layer[field]} onChange={e => updateLayer(field, Number(e.target.value))}
-                    style={{ width: '100%', accentColor: 'var(--accent-purple-light)' }} />
+                  <input type="range" min={min} max={max} value={layer[field]} onChange={e => updateLayer(field, Number(e.target.value))} />
                 </div>
               ))}
 
@@ -121,7 +120,7 @@ export default function BoxShadowGenerator() {
 
               {/* Inset toggle */}
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input type="checkbox" checked={layer.inset} onChange={e => updateLayer('inset', e.target.checked)} style={{ accentColor: 'var(--accent-purple-light)', width: '16px', height: '16px' }} />
+                <input type="checkbox" checked={layer.inset} onChange={e => updateLayer('inset', e.target.checked)} style={{ width: '16px', height: '16px' }} />
                 <span style={{ fontSize: '0.85rem' }}>Inset Shadow</span>
               </label>
 

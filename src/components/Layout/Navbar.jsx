@@ -138,14 +138,18 @@ export default function Navbar({ onMenuToggle }) {
             boxShadow: 'var(--shadow-lg)'
           }}>
             {results.map(r => (
-              <button key={r.path} onClick={() => handleSelect(r.path)} style={{
-                display: 'block', width: '100%', padding: '0.7rem 1rem', textAlign: 'left',
-                background: 'none', border: 'none', color: 'var(--text-primary)',
-                fontSize: '0.85rem', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-                borderBottom: '1px solid var(--border-color)', transition: 'background 0.15s'
-              }}
-              onMouseEnter={e => e.target.style.background = 'var(--bg-glass-hover)'}
-              onMouseLeave={e => e.target.style.background = 'none'}
+              <button 
+                key={r.path} 
+                onTouchStart={(e) => { e.preventDefault(); handleSelect(r.path); }}
+                onMouseDown={(e) => { e.preventDefault(); handleSelect(r.path); }} 
+                style={{
+                  display: 'block', width: '100%', padding: '0.7rem 1rem', textAlign: 'left',
+                  background: 'none', border: 'none', color: 'var(--text-primary)',
+                  fontSize: '0.85rem', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+                  borderBottom: '1px solid var(--border-color)', transition: 'background 0.15s'
+                }}
+                onMouseEnter={e => e.target.style.background = 'var(--bg-glass-hover)'}
+                onMouseLeave={e => e.target.style.background = 'none'}
               >
                 {r.label}
               </button>

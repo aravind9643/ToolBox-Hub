@@ -61,27 +61,27 @@ export default function GlassmorphismGenerator() {
               
               <div className="form-group">
                 <label className="form-label">Blur Radius ({blur}px)</label>
-                <input type="range" min="0" max="24" value={blur} onChange={e => setBlur(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--accent-purple-light)' }} />
+                <input type="range" min="0" max="24" value={blur} onChange={e => setBlur(Number(e.target.value))} />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Background Opacity ({opacity * 100}%)</label>
-                <input type="range" min="0" max="1" step="0.05" value={opacity} onChange={e => setOpacity(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--accent-purple-light)' }} />
+                <input type="range" min="0" max="1" step="0.05" value={opacity} onChange={e => setOpacity(Number(e.target.value))} />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Border Opacity ({borderOpacity * 100}%)</label>
-                <input type="range" min="0" max="1" step="0.05" value={borderOpacity} onChange={e => setBorderOpacity(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--accent-purple-light)' }} />
+                <input type="range" min="0" max="1" step="0.05" value={borderOpacity} onChange={e => setBorderOpacity(Number(e.target.value))} />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Border Radius ({borderRadius}px)</label>
-                <input type="range" min="0" max="40" value={borderRadius} onChange={e => setBorderRadius(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--accent-purple-light)' }} />
+                <input type="range" min="0" max="40" value={borderRadius} onChange={e => setBorderRadius(Number(e.target.value))} />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Shadow Strength ({shadow}%)</label>
-                <input type="range" min="0" max="50" value={shadow} onChange={e => setShadow(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--accent-purple-light)' }} />
+                <input type="range" min="0" max="50" value={shadow} onChange={e => setShadow(Number(e.target.value))} />
               </div>
 
               <div className="form-group">

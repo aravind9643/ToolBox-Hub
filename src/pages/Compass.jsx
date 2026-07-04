@@ -223,8 +223,7 @@ export default function Compass() {
             {!isMobile && (
               <div style={{ width: '100%', maxWidth: '300px', marginTop: '1.5rem', padding: '1rem', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                 <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.5rem' }}>Drag to Simulate Orientation</label>
-                <input type="range" min="0" max="359" value={simulatedHeading} onChange={e => setSimulatedHeading(Number(e.target.value))}
-                  style={{ width: '100%', accentColor: 'var(--accent-purple-light)' }} />
+                <input type="range" min="0" max="359" value={simulatedHeading} onChange={e => setSimulatedHeading(Number(e.target.value))} />
               </div>
             )}
 

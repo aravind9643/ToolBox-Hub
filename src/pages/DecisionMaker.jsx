@@ -265,25 +265,11 @@ export default function DecisionMaker() {
             {activeTab === 'coin' && (
               <div style={{ padding: '2.5rem 0' }}>
                 <div 
-                  className={flipping ? 'flipping-coin' : ''}
-                  style={{
-                    display: 'inline-flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    width: '140px', height: '140px', borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #ffe066 0%, #f59e0b 50%, #d97706 100%)',
-                    border: '5px double rgba(255,255,255,0.45)',
-                    color: '#451a03',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.5)',
-                    perspective: '1000px', transformStyle: 'preserve-3d', cursor: 'pointer',
-                    userSelect: 'none'
-                  }}
+                  className={`coin-widget ${flipping ? 'flipping-coin' : ''}`}
                   onClick={flipCoin}
                 >
                   {/* Emboss / Inset Details */}
-                  <div style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    width: '116px', height: '116px', borderRadius: '50%',
-                    border: '2px dashed rgba(69, 26, 3, 0.25)',
-                  }}>
+                  <div className="coin-inner">
                     {flipping ? (
                       <span style={{ fontSize: '2.2rem', fontWeight: 900, color: '#451a03' }}>?</span>
                     ) : (

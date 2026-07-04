@@ -87,8 +87,8 @@ export default function TextCleaner() {
               <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>Select Cleaning Operations</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.5rem', marginBottom: '1.25rem' }}>
                 {cleanOperations.map(({ id, label }) => (
-                  <label key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem 0.75rem', background: cleanOps[id] ? 'rgba(96,165,250,0.1)' : 'var(--bg-input)', borderRadius: 'var(--radius-sm)', border: `1px solid ${cleanOps[id] ? 'var(--accent-purple-light)' : 'var(--border-color)'}`, transition: 'all 0.2s' }}>
-                    <input type="checkbox" checked={cleanOps[id]} onChange={() => toggleOp(id)} style={{ accentColor: 'var(--accent-purple-light)' }} />
+                  <label key={id} className={`option-card ${cleanOps[id] ? 'active' : ''}`}>
+                    <input type="checkbox" checked={cleanOps[id]} onChange={() => toggleOp(id)} />
                     <span style={{ fontSize: '0.85rem' }}>{label}</span>
                   </label>
                 ))}

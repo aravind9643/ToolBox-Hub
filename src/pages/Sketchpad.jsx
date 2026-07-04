@@ -106,7 +106,7 @@ export default function Sketchpad() {
 
               <div className="form-group" style={{ margin: 0, width: '130px' }}>
                 <label className="form-label" style={{ marginBottom: '0.2rem', fontSize: '0.75rem' }}>Brush Size ({brushSize}px)</label>
-                <input type="range" min="1" max="50" value={brushSize} onChange={e => setBrushSize(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--accent-purple-light)' }} />
+                <input type="range" min="1" max="50" value={brushSize} onChange={e => setBrushSize(Number(e.target.value))} />
               </div>
 
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>

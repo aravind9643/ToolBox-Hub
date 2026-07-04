@@ -123,7 +123,7 @@ export default function TipCalculator() {
                       max="100"
                       value={customTip}
                       onChange={(e) => setCustomTip(e.target.value)}
-                      style={{ flex: 1, accentColor: 'var(--accent-purple-light)' }}
+                      style={{ flex: 1 }}
                     />
                     <input
                       type="number"

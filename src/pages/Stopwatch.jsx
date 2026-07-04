@@ -114,12 +114,7 @@ export default function Stopwatch() {
                   {laps.map((l) => (
                     <div 
                       key={l.id} 
-                      style={{
-                        display: 'flex', justifyContent: 'space-between',
-                        padding: '0.5rem 0.75rem', background: 'var(--bg-input)',
-                        borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)',
-                        fontSize: '0.85rem'
-                      }}
+                      className="lap-item"
                     >
                       <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Lap {l.id}</span>
                       <span style={{ fontFamily: 'monospace', color: 'var(--text-primary)' }}>{formatTime(l.time)}</span>

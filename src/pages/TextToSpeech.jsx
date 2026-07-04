@@ -121,19 +121,18 @@ export default function TextToSpeech() {
               </div>
             </div>
 
-            {/* Parameter sliders */}
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1.25rem', flexWrap: 'wrap' }}>
               <div className="form-group" style={{ flex: 1, minWidth: '130px' }}>
                 <label className="form-label">Speed Rate ({rate}x)</label>
-                <input type="range" min="0.5" max="2" step="0.1" value={rate} onChange={e => setRate(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--accent-purple-light)' }} />
+                <input type="range" min="0.5" max="2" step="0.1" value={rate} onChange={e => setRate(Number(e.target.value))} />
               </div>
               <div className="form-group" style={{ flex: 1, minWidth: '130px' }}>
                 <label className="form-label">Pitch Scale ({pitch})</label>
-                <input type="range" min="0.5" max="1.5" step="0.1" value={pitch} onChange={e => setPitch(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--accent-purple-light)' }} />
+                <input type="range" min="0.5" max="1.5" step="0.1" value={pitch} onChange={e => setPitch(Number(e.target.value))} />
               </div>
               <div className="form-group" style={{ flex: 1, minWidth: '130px' }}>
                 <label className="form-label">Volume ({Math.round(volume * 100)}%)</label>
-                <input type="range" min="0" max="1" step="0.1" value={volume} onChange={e => setVolume(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--accent-purple-light)' }} />
+                <input type="range" min="0" max="1" step="0.1" value={volume} onChange={e => setVolume(Number(e.target.value))} />
               </div>
             </div>
 

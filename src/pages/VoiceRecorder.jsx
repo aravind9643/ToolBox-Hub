@@ -151,7 +151,7 @@ export default function VoiceRecorder() {
               </div>
             )}
 
-            <div style={{ position: 'relative', width: '100%', height: '140px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden', marginBottom: '1.5rem' }}>
+            <div className="waves-visualizer">
               <canvas ref={canvasRef} width="400" height="140" style={{ width: '100%', height: '100%', display: 'block' }} />
               {!recording && !audioUrl && (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>

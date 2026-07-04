@@ -171,14 +171,7 @@ export default function BpmMetronome() {
                 {[0, 1, 2, 3].map(b => (
                   <div 
                     key={b} 
-                    style={{
-                      width: '24px', height: '24px', borderRadius: '50%',
-                      background: isPlaying && beat === b
-                        ? (b === 0 ? 'var(--accent-pink)' : 'var(--accent-cyan-light)')
-                        : 'var(--bg-input)',
-                      border: '1px solid var(--border-color)',
-                      transition: 'background 0.1s'
-                    }} 
+                    className={`metronome-dot ${isPlaying && beat === b ? (b === 0 ? 'first-beat' : 'active') : ''}`}
                   />
                 ))}
               </div>
@@ -188,7 +181,6 @@ export default function BpmMetronome() {
                 <input 
                   type="range" min="40" max="240" value={bpm} 
                   onChange={e => setBpm(Number(e.target.value))} 
-                  style={{ width: '100%', accentColor: 'var(--accent-purple-light)' }} 
                 />
               </div>
 

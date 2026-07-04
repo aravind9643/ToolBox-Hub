@@ -1846,6 +1846,14 @@ body.light-theme .markdown-preview :not(pre) > code {
 }
 
 /* ========================================
+   Global Theme Accents for Checkboxes & Radios
+   ======================================== */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--accent-purple-light);
+}
+
+/* ========================================
    Custom Premium Range Sliders
    ======================================== */
 input[type="range"] {
@@ -1857,17 +1865,14 @@ input[type="range"] {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   outline: none;
-  transition: background var(--transition-fast);
+  transition: opacity var(--transition-fast);
   cursor: pointer;
   margin: 10px 0;
+  opacity: 0.85;
 }
 
 input[type="range"]:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-body.light-theme input[type="range"]:hover {
-  background: rgba(15, 23, 42, 0.08);
+  opacity: 1;
 }
 
 /* Chrome, Safari, Edge Webkit Thumb */
@@ -1878,7 +1883,7 @@ input[type="range"]::-webkit-slider-thumb {
   height: 16px;
   border-radius: 50%;
   background: var(--accent-purple-light);
-  box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
+  box-shadow: 0 0 8px var(--border-glow);
   transition: transform var(--transition-fast), filter var(--transition-fast);
 }
 
@@ -1894,7 +1899,7 @@ input[type="range"]::-moz-range-thumb {
   border: none;
   border-radius: 50%;
   background: var(--accent-purple-light);
-  box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
+  box-shadow: 0 0 8px var(--border-glow);
   transition: transform var(--transition-fast), filter var(--transition-fast);
   cursor: pointer;
 }
@@ -1902,5 +1907,151 @@ input[type="range"]::-moz-range-thumb {
 input[type="range"]::-moz-range-thumb:hover {
   transform: scale(1.25);
   filter: brightness(1.1);
+}
+
+/* ========================================
+   Reusable Layout Components & Utilities
+   ======================================== */
+.option-card {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+}
+.option-card:hover {
+  background: var(--bg-glass-hover);
+}
+.option-card.active {
+  background: rgba(96, 165, 250, 0.1);
+  border-color: var(--accent-purple-light);
+}
+
+.metronome-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  transition: background var(--transition-fast);
+}
+.metronome-dot.active {
+  background: var(--accent-cyan-light);
+}
+.metronome-dot.first-beat {
+  background: var(--accent-pink);
+}
+
+.lap-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  font-size: 0.85rem;
+}
+
+.waves-visualizer {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.coin-widget {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffe066 0%, #f59e0b 50%, #d97706 100%);
+  border: 5px double rgba(255, 255, 255, 0.45);
+  color: #451a03;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.5);
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  user-select: none;
+}
+
+.coin-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  border: 2px dashed rgba(69, 26, 3, 0.25);
+}
+
+/* Sidebar Search Layout Classes */
+.sidebar-search-container {
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.sidebar-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.sidebar-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.sidebar-search-input {
+  width: 100%;
+  padding: 0.45rem 1.75rem 0.45rem 2.1rem;
+  font-size: 0.8rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.sidebar-search-input:focus {
+  border-color: var(--accent-purple-light);
+}
+
+.sidebar-search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .sidebar-search-container {
+    padding-top: 3.5rem;
+  }
 }
 
