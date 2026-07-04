@@ -5,6 +5,7 @@ const categories = [
     title: 'Generators',
     items: [
       { path: '/qr-code-generator', icon: 'fa-solid fa-qrcode', label: 'QR Code Generator' },
+      { path: '/qr-code-scanner', icon: 'fa-solid fa-camera', label: 'QR Code Scanner' },
       { path: '/password-generator', icon: 'fa-solid fa-shield-halved', label: 'Password Generator' },
       { path: '/lorem-ipsum', icon: 'fa-solid fa-file-lines', label: 'Lorem Ipsum' },
       { path: '/gradient-generator', icon: 'fa-solid fa-palette', label: 'Gradient Generator' },
@@ -39,6 +40,7 @@ const categories = [
     title: 'Text & Development',
     items: [
       { path: '/word-counter', icon: 'fa-solid fa-paragraph', label: 'Word Counter' },
+      { path: '/text-cleaner', icon: 'fa-solid fa-wand-magic-sparkles', label: 'Text Cleaner' },
       { path: '/json-formatter', icon: 'fa-solid fa-code', label: 'JSON Formatter' },
       { path: '/markdown-previewer', icon: 'fa-solid fa-file-code', label: 'Markdown Previewer' },
       { path: '/regex-tester', icon: 'fa-solid fa-magnifying-glass', label: 'Regex Tester' },
@@ -50,13 +52,16 @@ const categories = [
     items: [
       { path: '/box-shadow-generator', icon: 'fa-solid fa-layer-group', label: 'Box Shadow Generator' },
       { path: '/aspect-ratio-calculator', icon: 'fa-solid fa-expand', label: 'Aspect Ratio Calculator' },
+      { path: '/contrast-checker', icon: 'fa-solid fa-circle-half-stroke', label: 'Contrast Checker' },
+      { path: '/color-palette-generator', icon: 'fa-solid fa-palette', label: 'Palette Generator' },
       { path: '/password-strength-tester', icon: 'fa-solid fa-shield-halved', label: 'Password Strength Tester' }
     ]
   },
   {
     title: 'Productivity',
     items: [
-      { path: '/pomodoro-timer', icon: 'fa-solid fa-clock', label: 'Pomodoro Timer' }
+      { path: '/pomodoro-timer', icon: 'fa-solid fa-clock', label: 'Pomodoro Timer' },
+      { path: '/countdown-timer', icon: 'fa-solid fa-hourglass-half', label: 'Countdown Timer' }
     ]
   }
 ];

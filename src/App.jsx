@@ -29,6 +29,11 @@ import PasswordStrengthTester from './pages/PasswordStrengthTester';
 import MorseCodeTranslator from './pages/MorseCodeTranslator';
 import AspectRatioCalculator from './pages/AspectRatioCalculator';
 import AsciiArtGenerator from './pages/AsciiArtGenerator';
+import QRCodeScanner from './pages/QRCodeScanner';
+import ContrastChecker from './pages/ContrastChecker';
+import ColorPaletteGenerator from './pages/ColorPaletteGenerator';
+import TextCleaner from './pages/TextCleaner';
+import CountdownTimer from './pages/CountdownTimer';
 
 import ScrollToTop from './components/ScrollToTop';
 import NotFound from './pages/NotFound';
@@ -68,6 +73,11 @@ export default function App() {
           <Route path="/morse-code-translator" element={<MorseCodeTranslator />} />
           <Route path="/aspect-ratio-calculator" element={<AspectRatioCalculator />} />
           <Route path="/ascii-art-generator" element={<AsciiArtGenerator />} />
+          <Route path="/qr-code-scanner" element={<QRCodeScanner />} />
+          <Route path="/contrast-checker" element={<ContrastChecker />} />
+          <Route path="/color-palette-generator" element={<ColorPaletteGenerator />} />
+          <Route path="/text-cleaner" element={<TextCleaner />} />
+          <Route path="/countdown-timer" element={<CountdownTimer />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

@@ -143,6 +143,31 @@ const tools = [
     description: 'Convert text to large ASCII art banners with multiple styles.',
     color: '#d946ef'
   },
+  {
+    icon: 'fa-solid fa-camera', title: 'QR Code Scanner', path: '/qr-code-scanner',
+    description: 'Scan QR codes using your device webcam or camera.',
+    color: '#3b82f6'
+  },
+  {
+    icon: 'fa-solid fa-circle-half-stroke', title: 'Contrast Checker', path: '/contrast-checker',
+    description: 'Check contrast ratios between foreground and background colors.',
+    color: '#f59e0b'
+  },
+  {
+    icon: 'fa-solid fa-palette', title: 'Color Palette Generator', path: '/color-palette-generator',
+    description: 'Generate harmonious color schemes using color theory rules.',
+    color: '#10b981'
+  },
+  {
+    icon: 'fa-solid fa-wand-magic-sparkles', title: 'Text Cleaner', path: '/text-cleaner',
+    description: 'Clean formatting, remove duplicate lines, sort, or encode text.',
+    color: '#d946ef'
+  },
+  {
+    icon: 'fa-solid fa-hourglass-half', title: 'Countdown Timer', path: '/countdown-timer',
+    description: 'Set a custom live countdown timer for your upcoming events.',
+    color: '#3b82f6'
+  },
 ];
 
 export default function Home() {
@@ -159,7 +184,7 @@ export default function Home() {
         <p>Fast, free, and private. All tools run in your browser — nothing is uploaded to any server.</p>
         <div className="hero-stats">
           <div className="hero-stat">
-            <div className="hero-stat-value">28+</div>
+            <div className="hero-stat-value">33+</div>
             <div className="hero-stat-label">Free Tools</div>
           </div>
           <div className="hero-stat">
