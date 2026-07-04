@@ -82,7 +82,7 @@ export default function AgeCalculator() {
               <>
                 <div className="result-box mt-2 text-center">
                   <div className="result-label">Your Age</div>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(1rem, 5vw, 2rem)', flexWrap: 'wrap', marginTop: '0.75rem' }}>
                     <div>
                       <div className="result-value">{result.years}</div>
                       <div className="result-sub">Years</div>
