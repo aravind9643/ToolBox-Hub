@@ -12,8 +12,11 @@ export default function PomodoroTimer() {
   const [running, setRunning] = useState(false);
   const [sessions, setSessions] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
+  const [ambientSound, setAmbientSound] = useState('none'); // 'none' | 'rain'
+
   const intervalRef = useRef(null);
   const audioCtxRef = useRef(null);
+  const rainSourceRef = useRef(null);
 
   const totalSeconds = durations[mode] * 60;
   const progress = secondsLeft / totalSeconds;
@@ -41,6 +44,58 @@ export default function PomodoroTimer() {
       });
     } catch { /* AudioContext not supported */ }
   }, []);
+
+  const stopRain = () => {
+    if (rainSourceRef.current) {
+      try {
+        rainSourceRef.current.stop();
+      } catch (err) {}
+      rainSourceRef.current = null;
+    }
+  };
+
+  const playRain = () => {
+    try {
+      if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = audioCtxRef.current;
+      if (ctx.state === 'suspended') ctx.resume();
+
+      const bufferSize = ctx.sampleRate * 2;
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+
+      const whiteNoise = ctx.createBufferSource();
+      whiteNoise.buffer = noiseBuffer;
+      whiteNoise.loop = true;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 450; // soft rain rumble
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+
+      whiteNoise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      whiteNoise.start();
+      rainSourceRef.current = whiteNoise;
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleAmbientChange = (type) => {
+    stopRain();
+    setAmbientSound(type);
+    if (type === 'rain') {
+      playRain();
+    }
+  };
 
   const stop = useCallback(() => {
     clearInterval(intervalRef.current);
@@ -84,6 +139,14 @@ export default function PomodoroTimer() {
     return () => { document.title = 'ToolBox Hub'; };
   }, [secondsLeft, running, mode]);
 
+  // Clean up audio on page exit
+  useEffect(() => {
+    return () => {
+      stop();
+      stopRain();
+    };
+  }, [stop]);
+
   const requestNotifications = () => {
     if ('Notification' in window) Notification.requestPermission();
   };
@@ -92,11 +155,11 @@ export default function PomodoroTimer() {
 
   return (
     <div className="tool-page">
-      <SEOHead title="Pomodoro Focus Timer" description="Stay productive with the Pomodoro technique. Animated timer with audio alerts and session tracking." />
+      <SEOHead title="Pomodoro Focus Timer" description="Stay productive with the Pomodoro technique. Custom synthesized rain sound backdrops and session tracking." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Pomodoro Timer</span></div>
         <h1><i className="fa-solid fa-clock" style={{ color: 'var(--accent-purple-light)' }}></i> Pomodoro Focus Timer</h1>
-        <p>Boost productivity with timed work and break cycles.</p>
+        <p>Stay focused with Pomodoro study loops and relaxing synthesized rain sounds.</p>
       </div>
 
       <AdBanner type="header" />
@@ -104,6 +167,26 @@ export default function PomodoroTimer() {
       <div className="tool-layout" style={{ gridTemplateColumns: '1fr' }}>
         <div className="tool-main">
           <div className="glass-card" style={{ textAlign: 'center' }}>
+            
+            {/* Ambient Sound Settings */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Ambient sound:</span>
+              <button 
+                className={`btn btn-sm ${ambientSound === 'none' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => handleAmbientChange('none')}
+                style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem' }}
+              >
+                None
+              </button>
+              <button 
+                className={`btn btn-sm ${ambientSound === 'rain' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => handleAmbientChange('rain')}
+                style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem', gap: '4px' }}
+              >
+                <i className="fa-solid fa-cloud-showers-water"></i> Rain Noise
+              </button>
+            </div>
+
             {/* Mode Tabs */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
               {Object.entries(MODES).map(([key, label]) => (

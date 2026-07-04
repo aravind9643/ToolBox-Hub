@@ -161,6 +161,67 @@ export default function MarkdownPreviewer() {
     document.body.removeChild(link);
   };
 
+  const handleDownloadHTML = () => {
+    const pageHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Rendered Markdown Document</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #333; }
+    pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow: auto; }
+    code { font-family: monospace; }
+    blockquote { border-left: 4px solid #dfe2e5; padding-left: 16px; color: #6a737d; margin: 0; }
+  </style>
+</head>
+<body>
+  ${html}
+</body>
+</html>`;
+    const blob = new Blob([pageHtml], { type: 'text/html;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'document.html');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handlePrintPDF = () => {
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+    
+    const doc = iframe.contentWindow.document;
+    doc.write(`
+      <html>
+        <head>
+          <title>Export PDF</title>
+          <style>
+            body { font-family: sans-serif; padding: 20px; line-height: 1.6; color: #000; }
+            pre { background: #f5f5f5; padding: 12px; border-radius: 4px; overflow: auto; }
+            code { font-family: monospace; }
+            blockquote { border-left: 4px solid #ccc; padding-left: 10px; color: #555; }
+          </style>
+        </head>
+        <body>${html}</body>
+      </html>
+    `);
+    doc.close();
+    
+    setTimeout(() => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      document.body.removeChild(iframe);
+    }, 500);
+  };
+
   return (
     <div className="tool-page">
       <SEOHead title="Markdown Previewer" description="Write and preview Markdown formatting instantly. Free browser-based editor." />
@@ -291,14 +352,20 @@ export default function MarkdownPreviewer() {
                 
                 {/* Action buttons */}
                 <div className="flex gap-1 flex-wrap">
-                  <button className={`copy-btn btn-sm ${copiedMd ? 'copied' : ''}`} onClick={handleCopyMarkdown}>
-                    <i className={copiedMd ? "fa-solid fa-check" : "fa-solid fa-copy"}></i> {copiedMd ? 'Copied' : 'MD'}
+                  <button className={`copy-btn btn-sm ${copiedMd ? 'copied' : ''}`} onClick={handleCopyMarkdown} title="Copy Markdown">
+                    <i className={copiedMd ? "fa-solid fa-check" : "fa-solid fa-copy"}></i> MD
                   </button>
-                  <button className={`copy-btn btn-sm ${copiedHtml ? 'copied' : ''}`} onClick={handleCopyHTML}>
-                    <i className={copiedHtml ? "fa-solid fa-check" : "fa-solid fa-code"}></i> {copiedHtml ? 'Copied' : 'HTML'}
+                  <button className={`copy-btn btn-sm ${copiedHtml ? 'copied' : ''}`} onClick={handleCopyHTML} title="Copy HTML">
+                    <i className={copiedHtml ? "fa-solid fa-check" : "fa-solid fa-code"}></i> HTML
                   </button>
-                  <button className="copy-btn btn-sm" onClick={handleDownload} title="Download File">
-                    <i className="fa-solid fa-download"></i> Download
+                  <button className="copy-btn btn-sm" onClick={handleDownload} title="Download Markdown (.md)">
+                    <i className="fa-solid fa-file-arrow-down"></i> .MD
+                  </button>
+                  <button className="copy-btn btn-sm" onClick={handleDownloadHTML} title="Download HTML Page (.html)">
+                    <i className="fa-solid fa-file-code"></i> .HTML
+                  </button>
+                  <button className="copy-btn btn-sm" onClick={handlePrintPDF} title="Print / Export PDF">
+                    <i className="fa-solid fa-print"></i> PDF
                   </button>
                   <button 
                     className={`copy-btn btn-sm ${isFullscreenPreview ? 'active' : ''}`} 

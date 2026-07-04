@@ -15,7 +15,7 @@ function calcEntropy(password) {
 }
 
 function estimateCrackTime(entropy) {
-  const guessesPerSecond = 1e10; // 10 billion guesses/sec (modern GPU)
+  const guessesPerSecond = 1e10; // 10 billion guesses/sec
   const combinations = Math.pow(2, entropy);
   const seconds = combinations / 2 / guessesPerSecond;
   if (seconds < 1) return 'Instantly';
@@ -31,6 +31,29 @@ function estimateCrackTime(entropy) {
 export default function PasswordStrengthTester() {
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
+  const [showGenerator, setShowGenerator] = useState(false);
+
+  // Generator states
+  const [genLength, setGenLength] = useState(16);
+  const [includeUpper, setIncludeUpper] = useState(true);
+  const [includeLower, setIncludeLower] = useState(true);
+  const [includeNumbers, setIncludeNumbers] = useState(true);
+  const [includeSymbols, setIncludeSymbols] = useState(true);
+
+  const generatePassword = () => {
+    let chars = '';
+    if (includeLower) chars += 'abcdefghijklmnopqrstuvwxyz';
+    if (includeUpper) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    if (includeNumbers) chars += '0123456789';
+    if (includeSymbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+    if (!chars) return;
+    let generated = '';
+    for (let i = 0; i < genLength; i++) {
+      generated += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setPassword(generated);
+  };
 
   const analysis = useMemo(() => {
     if (!password) return null;
@@ -39,14 +62,14 @@ export default function PasswordStrengthTester() {
     const isCommon = COMMON_PASSWORDS.includes(password.toLowerCase());
 
     const checks = [
-      { label: 'At least 8 characters', pass: password.length >= 8 },
-      { label: 'At least 12 characters', pass: password.length >= 12 },
+      { label: 'Length: At least 8 characters', pass: password.length >= 8 },
+      { label: 'Length: At least 12 characters', pass: password.length >= 12 },
       { label: 'Lowercase letters (a–z)', pass: /[a-z]/.test(password) },
       { label: 'Uppercase letters (A–Z)', pass: /[A-Z]/.test(password) },
       { label: 'Numbers (0–9)', pass: /[0-9]/.test(password) },
       { label: 'Special symbols (!@#$...)', pass: /[^a-zA-Z0-9]/.test(password) },
-      { label: 'Not a common password', pass: !isCommon },
-      { label: 'No repeated characters (aaa...)', pass: !/(.)\1{2,}/.test(password) },
+      { label: 'Unique from common dictionary list', pass: !isCommon },
+      { label: 'No long repetitions (aaa...)', pass: !/(.)\1{2,}/.test(password) },
     ];
 
     const passedCount = checks.filter(c => c.pass).length;
@@ -54,19 +77,21 @@ export default function PasswordStrengthTester() {
     if (isCommon || entropy < 28) { strength = 'Very Weak'; color = '#ef4444'; level = 1; }
     else if (entropy < 40) { strength = 'Weak'; color = '#f97316'; level = 2; }
     else if (entropy < 55) { strength = 'Fair'; color = '#f59e0b'; level = 3; }
-    else if (entropy < 70) { strength = 'Strong'; color = '#22c55e'; level = 4; }
+    else if (entropy < 70) { strength = 'Strong'; color = '#10b981'; level = 4; }
     else { strength = 'Excellent'; color = '#3b82f6'; level = 5; }
 
-    return { entropy: entropy.toFixed(1), crackTime, strength, color, level, checks, passedCount };
+    const failedChecks = checks.filter(c => !c.pass);
+
+    return { entropy: entropy.toFixed(1), crackTime, strength, color, level, checks, passedCount, failedChecks };
   }, [password]);
 
   return (
     <div className="tool-page">
-      <SEOHead title="Password Strength Tester" description="Analyze password strength, entropy, and estimated crack time. 100% private, offline." />
+      <SEOHead title="Password Strength Tester" description="Analyze password strength, entropy, and estimated crack time. Generate strong custom passwords offline." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Password Strength Tester</span></div>
         <h1><i className="fa-solid fa-shield-halved" style={{ color: 'var(--accent-purple-light)' }}></i> Password Strength Tester</h1>
-        <p>Analyze how strong your password is. Nothing is stored or sent anywhere.</p>
+        <p>Analyze how strong your password is. Test and generate keys safely completely offline.</p>
       </div>
 
       <AdBanner type="header" />
@@ -74,8 +99,20 @@ export default function PasswordStrengthTester() {
       <div className="tool-layout" style={{ gridTemplateColumns: '1fr' }}>
         <div className="tool-main">
           <div className="glass-card">
+            
+            {/* Input and Toggle */}
             <div className="form-group">
-              <label className="form-label">Enter Password to Test</label>
+              <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                Enter Password to Test
+                <span 
+                  onClick={() => setShowGenerator(!showGenerator)} 
+                  style={{ fontSize: '0.75rem', color: 'var(--accent-cyan-light)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                  <i className={`fa-solid ${showGenerator ? 'fa-angle-up' : 'fa-wand-magic-sparkles'}`}></i>
+                  {showGenerator ? 'Hide Generator' : 'Generate Strong Password'}
+                </span>
+              </label>
+              
               <div style={{ position: 'relative' }}>
                 <input
                   type={show ? 'text' : 'password'}
@@ -92,6 +129,37 @@ export default function PasswordStrengthTester() {
                 </button>
               </div>
             </div>
+
+            {/* Generator Panel */}
+            {showGenerator && (
+              <div style={{ padding: '1rem', background: 'var(--bg-glass-hover)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Configure Password Generator</span>
+                  <button className="btn btn-primary btn-sm" onClick={generatePassword} style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}>
+                    Generate & Autofill
+                  </button>
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.72rem', marginBottom: '0.2rem' }}>Length ({genLength} characters)</label>
+                  <input type="range" min="6" max="32" value={genLength} onChange={e => setGenLength(Number(e.target.value))} style={{ width: '100%', height: '4px' }} />
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  {[
+                    { state: includeLower, set: setIncludeLower, label: 'a-z' },
+                    { state: includeUpper, set: setIncludeUpper, label: 'A-Z' },
+                    { state: includeNumbers, set: setIncludeNumbers, label: '0-9' },
+                    { state: includeSymbols, set: setIncludeSymbols, label: '!@#$' }
+                  ].map(item => (
+                    <label key={item.label} style={{ fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                      <input type="checkbox" checked={item.state} onChange={() => item.set(!item.state)} style={{ cursor: 'pointer' }} />
+                      {item.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Strength Meter */}
             {analysis && (
@@ -144,6 +212,18 @@ export default function PasswordStrengthTester() {
                   ))}
                 </div>
 
+                {/* Fixing Tips */}
+                {analysis.failedChecks.length > 0 && (
+                  <div style={{ marginTop: '1.25rem', padding: '0.85rem 1rem', background: 'rgba(239, 68, 68, 0.04)', border: '1px solid rgba(239, 68, 68, 0.15)', borderRadius: 'var(--radius-md)' }}>
+                    <h4 style={{ fontSize: '0.82rem', color: 'var(--accent-red)', margin: '0 0 0.5rem 0', fontWeight: 600 }}>💡 How to Improve Your Password:</h4>
+                    <ul style={{ margin: 0, paddingLeft: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.78rem', color: 'var(--text-secondary)', textAlign: 'left' }}>
+                      {analysis.failedChecks.map(c => (
+                        <li key={c.label}>To increase safety, satisfy: <strong>{c.label}</strong></li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 <div style={{ marginTop: '1.25rem', padding: '0.75rem', background: 'var(--bg-glass-hover)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                   <i className="fa-solid fa-lock" style={{ color: 'var(--accent-green)', marginRight: '6px' }}></i>
                   Your password is analyzed entirely in your browser. It is never sent to any server.
@@ -154,7 +234,7 @@ export default function PasswordStrengthTester() {
             {!analysis && (
               <div style={{ textAlign: 'center', padding: '2rem 0', color: 'var(--text-muted)' }}>
                 <i className="fa-solid fa-shield" style={{ fontSize: '2rem', marginBottom: '0.75rem', display: 'block' }}></i>
-                Start typing to analyze your password's strength instantly.
+                Start typing or use the generator to analyze your password's strength instantly.
               </div>
             )}
           </div>

@@ -120,15 +120,61 @@ export default function LoanCalculator() {
                   </div>
                 </div>
 
-                {/* Visual bar */}
+                {/* Visual bar and SVG Balance Decline Chart */}
                 <div style={{ marginTop: '1.5rem' }}>
                   <div className="flex justify-between mb-1">
                     <span className="text-xs" style={{ color: 'var(--accent-purple-light)' }}>● Principal ({(100 - parseFloat(result.interestPercent)).toFixed(1)}%)</span>
                     <span className="text-xs" style={{ color: 'var(--accent-amber)' }}>● Interest ({result.interestPercent}%)</span>
                   </div>
-                  <div style={{ height: 12, borderRadius: 6, overflow: 'hidden', display: 'flex' }}>
+                  <div style={{ height: 12, borderRadius: 6, overflow: 'hidden', display: 'flex', marginBottom: '1.25rem' }}>
                     <div style={{ width: `${100 - parseFloat(result.interestPercent)}%`, background: 'var(--accent-purple)', transition: 'width 0.5s ease' }} />
                     <div style={{ flex: 1, background: 'var(--accent-amber)' }} />
+                  </div>
+
+                  {/* SVG Chart */}
+                  <div style={{ border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1rem', background: 'var(--bg-glass-hover)' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Remaining Loan Balance Curve</div>
+                    <div style={{ width: '100%', overflowX: 'auto', display: 'flex', justifyContent: 'center' }}>
+                      <svg viewBox="0 0 400 160" style={{ width: '100%', maxWidth: '400px', height: 'auto' }}>
+                        <defs>
+                          <linearGradient id="balanceGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="var(--accent-purple)" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="var(--accent-purple)" stopOpacity="0.0" />
+                          </linearGradient>
+                        </defs>
+                        {/* Horizontal guidelines */}
+                        <line x1="40" y1="15" x2="390" y2="15" stroke="var(--border-color)" strokeWidth="0.5" strokeDasharray="3" />
+                        <line x1="40" y1="140" x2="390" y2="140" stroke="var(--border-color)" strokeWidth="1" />
+                        
+                        {/* Area under curve */}
+                        <path
+                          d={`M 40,140 L 40,15 L ${result.schedule.map((row, idx) => {
+                            const x = 40 + ((idx + 1) / result.schedule.length) * 350;
+                            const y = 15 + 125 - (row.balance / parseFloat(principal)) * 125;
+                            return `${x},${y}`;
+                          }).join(' L ')} L 390,140 Z`}
+                          fill="url(#balanceGrad)"
+                        />
+
+                        {/* Line path */}
+                        <path
+                          d={`M 40,15 L ${result.schedule.map((row, idx) => {
+                            const x = 40 + ((idx + 1) / result.schedule.length) * 350;
+                            const y = 15 + 125 - (row.balance / parseFloat(principal)) * 125;
+                            return `${x},${y}`;
+                          }).join(' L ')}`}
+                          fill="none"
+                          stroke="var(--accent-purple-light)"
+                          strokeWidth="2"
+                        />
+
+                        {/* Labels */}
+                        <text x="35" y="20" fill="var(--text-muted)" fontSize="8" textAnchor="end">₹{fmt(parseFloat(principal))}</text>
+                        <text x="35" y="140" fill="var(--text-muted)" fontSize="8" textAnchor="end">₹0</text>
+                        <text x="40" y="152" fill="var(--text-muted)" fontSize="8" textAnchor="middle">Start</text>
+                        <text x="390" y="152" fill="var(--text-muted)" fontSize="8" textAnchor="middle">End</text>
+                      </svg>
+                    </div>
                   </div>
                 </div>
 

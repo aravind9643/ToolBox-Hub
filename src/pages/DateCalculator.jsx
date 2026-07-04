@@ -17,6 +17,8 @@ export default function DateCalculator() {
   const [amount, setAmount] = useState('1');
   const [unit, setUnit] = useState('days'); // 'days', 'weeks', 'months', 'years'
 
+  const [excludeHolidays, setExcludeHolidays] = useState(false);
+
   // Difference Calculations
   const diffResults = useMemo(() => {
     if (!startDate || !endDate) return null;
@@ -35,7 +37,22 @@ export default function DateCalculator() {
     
     while (tempDate <= end) {
       const day = tempDate.getDay();
-      if (day !== 0 && day !== 6) { // 0 = Sunday, 6 = Saturday
+      const m = tempDate.getMonth();
+      const d = tempDate.getDate();
+      
+      let isHoliday = false;
+      if (excludeHolidays) {
+        // New Year's Day (Jan 1)
+        if (m === 0 && d === 1) isHoliday = true;
+        // Independence Day (Jul 4)
+        if (m === 6 && d === 4) isHoliday = true;
+        // Veteran's Day (Nov 11)
+        if (m === 10 && d === 11) isHoliday = true;
+        // Christmas Day (Dec 25)
+        if (m === 11 && d === 25) isHoliday = true;
+      }
+
+      if (day !== 0 && day !== 6 && !isHoliday) { // 0 = Sunday, 6 = Saturday
         businessDays++;
       }
       tempDate.setDate(tempDate.getDate() + 1);
@@ -54,7 +71,7 @@ export default function DateCalculator() {
       months,
       years
     };
-  }, [startDate, endDate]);
+  }, [startDate, endDate, excludeHolidays]);
 
   // Date Math Calculations
   const mathResult = useMemo(() => {
@@ -161,10 +178,17 @@ export default function DateCalculator() {
                     />
                   </div>
 
-                  <div className="flex gap-1">
-                    <button className="copy-btn btn-sm" onClick={() => setEndDate(new Date().toISOString().split('T')[0])}>
-                      Set End to Today
-                    </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.25rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', cursor: 'pointer' }}>
+                      <input type="checkbox" checked={excludeHolidays} onChange={e => setExcludeHolidays(e.target.checked)} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                      Exclude US Public Holidays
+                    </label>
+                    
+                    <div className="flex gap-1">
+                      <button className="copy-btn btn-sm" onClick={() => setEndDate(new Date().toISOString().split('T')[0])}>
+                        Set End to Today
+                      </button>
+                    </div>
                   </div>
                 </div>
 

@@ -8,9 +8,9 @@ const defaultLayer = { x: 4, y: 4, blur: 10, spread: 0, color: '#000000', opacit
 function shadowCSS(layers) {
   return layers.map(l => {
     const hex = l.color;
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
+    const r = parseInt(hex.slice(1, 3), 16) || 0;
+    const g = parseInt(hex.slice(3, 5), 16) || 0;
+    const b = parseInt(hex.slice(5, 7), 16) || 0;
     return `${l.inset ? 'inset ' : ''}${l.x}px ${l.y}px ${l.blur}px ${l.spread}px rgba(${r},${g},${b},${(l.opacity / 100).toFixed(2)})`;
   }).join(',\n  ');
 }
@@ -21,6 +21,9 @@ export default function BoxShadowGenerator() {
   const [bgColor, setBgColor] = useState('#1e293b');
   const [boxColor, setBoxColor] = useState('#3b82f6');
   const [copied, setCopied] = useState(false);
+
+  // Preview modes: 'single' | 'stack'
+  const [previewMode, setPreviewMode] = useState('single');
 
   const cssValue = useMemo(() => shadowCSS(layers), [layers]);
   const fullCSS = `box-shadow: ${cssValue};`;
@@ -46,6 +49,34 @@ export default function BoxShadowGenerator() {
     setTimeout(() => setCopied(false), 1500);
   };
 
+  // Josh W. Comeau style ambient smooth shadow presets
+  const applySmoothShadow = (diffusion) => {
+    const newLayers = [];
+    // Calculate exponential coordinates for natural light diffusion
+    for (let i = 1; i <= diffusion; i++) {
+      const weight = i / diffusion;
+      newLayers.push({
+        x: Math.round(weight * 8),
+        y: Math.round(weight * 16),
+        blur: Math.round(weight * 32),
+        spread: 0,
+        color: '#000000',
+        opacity: Math.round((1 - weight) * 20 + 2),
+        inset: false
+      });
+    }
+    setLayers(newLayers);
+    setActiveLayer(0);
+  };
+
+  const applyGlassShadow = () => {
+    setLayers([
+      { x: 0, y: 8, blur: 32, spread: 0, color: '#000000', opacity: 15, inset: false },
+      { x: 0, y: 1, blur: 0, spread: 0, color: '#ffffff', opacity: 15, inset: true }
+    ]);
+    setActiveLayer(0);
+  };
+
   const layer = layers[activeLayer];
 
   const sliders = [
@@ -58,11 +89,11 @@ export default function BoxShadowGenerator() {
 
   return (
     <div className="tool-page">
-      <SEOHead title="CSS Box Shadow Generator" description="Visually create multi-layer CSS box shadows with live preview. Copy-ready CSS output." />
+      <SEOHead title="CSS Box Shadow Generator" description="Visually design smooth layered CSS box shadows, stack mockups, and Josh Comeau style soft shadow presets." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Box Shadow Generator</span></div>
         <h1><i className="fa-solid fa-layer-group" style={{ color: 'var(--accent-purple-light)' }}></i> CSS Box Shadow Generator</h1>
-        <p>Build multi-layer box shadows visually and copy the CSS instantly.</p>
+        <p>Design smooth multi-layered box shadows with custom ambient presets and stack card mockups.</p>
       </div>
 
       <AdBanner type="header" />
@@ -70,6 +101,7 @@ export default function BoxShadowGenerator() {
       <div className="tool-layout" style={{ gridTemplateColumns: '1fr' }}>
         <div className="tool-main">
           <div className="markdown-workspace" style={{ height: 'auto', minHeight: 'unset', alignItems: 'stretch' }}>
+            
             {/* Controls */}
             <div className="glass-card workspace-column" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -97,6 +129,16 @@ export default function BoxShadowGenerator() {
                 ))}
               </div>
 
+              {/* Smooth Shadow Presets */}
+              <div style={{ padding: '0.75rem', background: 'var(--bg-glass-hover)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>⚡ Smooth Shadow Synthesizers:</span>
+                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                  <button className="btn btn-secondary btn-sm" onClick={() => applySmoothShadow(3)} style={{ padding: '0.3rem 0.5rem', fontSize: '0.7rem' }}>Soft Ambient (3 layers)</button>
+                  <button className="btn className btn-secondary btn-sm" onClick={() => applySmoothShadow(5)} style={{ padding: '0.3rem 0.5rem', fontSize: '0.7rem' }}>Smooth Depth (5 layers)</button>
+                  <button className="btn btn-secondary btn-sm" onClick={applyGlassShadow} style={{ padding: '0.3rem 0.5rem', fontSize: '0.7rem' }}>Glossy Glassmorphic</button>
+                </div>
+              </div>
+
               {/* Sliders */}
               {sliders.map(({ label, field, min, max, unit }) => (
                 <div key={field}>
@@ -104,7 +146,7 @@ export default function BoxShadowGenerator() {
                     <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
                     <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{layer[field]}{unit}</span>
                   </div>
-                  <input type="range" min={min} max={max} value={layer[field]} onChange={e => updateLayer(field, Number(e.target.value))} />
+                  <input type="range" min={min} max={max} value={layer[field]} onChange={e => updateLayer(field, Number(e.target.value))} style={{ width: '100%', height: '4px' }} />
                 </div>
               ))}
 
@@ -140,9 +182,25 @@ export default function BoxShadowGenerator() {
 
             {/* Preview + Output */}
             <div className="glass-card workspace-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ fontSize: '1.1rem', margin: 0 }}>Visual Preview</h2>
+                <div className="tabs" style={{ background: 'var(--bg-input)', padding: '2px', borderRadius: '8px', border: '1px solid var(--border-color)', margin: 0 }}>
+                  <button className={`tab-btn ${previewMode === 'single' ? 'active' : ''}`} onClick={() => setPreviewMode('single')} style={{ fontSize: '0.7rem', padding: '0.25rem 0.5rem' }}>Single Card</button>
+                  <button className={`tab-btn ${previewMode === 'stack' ? 'active' : ''}`} onClick={() => setPreviewMode('stack')} style={{ fontSize: '0.7rem', padding: '0.25rem 0.5rem' }}>3D Stack</button>
+                </div>
+              </div>
+
               {/* Preview box */}
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', background: bgColor, borderRadius: 'var(--radius-md)', minHeight: '200px', transition: 'background 0.3s' }}>
-                <div style={{ width: '140px', height: '140px', background: boxColor, borderRadius: '16px', boxShadow: cssValue, transition: 'box-shadow 0.2s' }}></div>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2.5rem 1.5rem', background: bgColor, borderRadius: 'var(--radius-md)', minHeight: '220px', transition: 'background 0.3s' }}>
+                {previewMode === 'single' ? (
+                  <div style={{ width: '130px', height: '130px', background: boxColor, borderRadius: '16px', boxShadow: cssValue, transition: 'box-shadow 0.2s' }}></div>
+                ) : (
+                  <div style={{ position: 'relative', width: '190px', height: '190px' }}>
+                    <div style={{ position: 'absolute', top: '0', left: '0', width: '100px', height: '100px', background: boxColor, borderRadius: '12px', boxShadow: cssValue, zIndex: 1 }} />
+                    <div style={{ position: 'absolute', top: '35px', left: '35px', width: '100px', height: '100px', background: boxColor, borderRadius: '12px', boxShadow: cssValue, zIndex: 2 }} />
+                    <div style={{ position: 'absolute', top: '70px', left: '70px', width: '100px', height: '100px', background: boxColor, borderRadius: '12px', boxShadow: cssValue, zIndex: 3 }} />
+                  </div>
+                )}
               </div>
 
               {/* CSS Output */}
@@ -158,6 +216,7 @@ export default function BoxShadowGenerator() {
                 {copied ? 'Copied!' : 'Copy CSS'}
               </button>
             </div>
+
           </div>
         </div>
       </div>

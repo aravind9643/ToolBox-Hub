@@ -135,13 +135,20 @@ export default function ColorPaletteGenerator() {
               ))}
             </div>
 
-            <div style={{ padding: '1rem', background: 'var(--bg-glass-hover)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Copy as CSS variables</div>
-              <code style={{ fontSize: '0.8rem', color: 'var(--accent-cyan-light)', cursor: 'pointer', wordBreak: 'break-all' }}
-                onClick={() => copy(harmonyColors.map((c, i) => `--color-${i + 1}: ${c};`).join('\n'), 'css')}>
-                {harmonyColors.map((c, i) => `--color-${i + 1}: ${c};`).join(' ')}
-                {copied === 'css' && <span style={{ color: 'var(--accent-green)', marginLeft: '0.5rem' }}>✓</span>}
-              </code>
+            <div style={{ marginTop: '1.5rem' }}>
+              <div className="tabs" style={{ background: 'var(--bg-input)', padding: '2px', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '0.75rem' }}>
+                <button className={`tab-btn ${copied === 'css' || copied === '' ? 'active' : ''}`} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }} onClick={() => copy(harmonyColors.map((c, i) => `--color-${i + 1}: ${c};`).join('\n'), 'css')}>Copy CSS Variables</button>
+                <button className={`tab-btn ${copied === 'tw' ? 'active' : ''}`} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }} onClick={() => copy(`colors: {\n  ${harmonyColors.map((c, i) => `color${i + 1}: '${c}',`).join('\n  ')}\n}`, 'tw')}>Copy Tailwind Config</button>
+              </div>
+
+              <div style={{ position: 'relative' }}>
+                <pre style={{ padding: '0.85rem', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--accent-cyan-light)', whiteSpace: 'pre-wrap', textAlign: 'left' }}>
+                  {copied === 'tw' ? `colors: {\n  ${harmonyColors.map((c, i) => `color${i + 1}: '${c}',`).join('\n  ')}\n}` : harmonyColors.map((c, i) => `--color-${i + 1}: ${c};`).join('\n')}
+                </pre>
+                <div style={{ position: 'absolute', right: '0.5rem', top: '0.5rem', fontSize: '0.7rem', color: copied ? 'var(--accent-green)' : 'var(--text-muted)' }}>
+                  {copied ? '✓ Copied!' : 'Click tab above to copy code'}
+                </div>
+              </div>
             </div>
           </div>
 
