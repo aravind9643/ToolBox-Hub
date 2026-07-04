@@ -37,7 +37,7 @@ export default function BMICalculator() {
 
   const bmi = result ? result.toFixed(1) : null;
   const category = bmi ? getBMICategory(parseFloat(bmi)) : null;
-  const gaugeRotation = bmi ? Math.min(Math.max((parseFloat(bmi) - 10) / 35, 0), 1) * 180 : 0;
+  const gaugeRotation = bmi ? Math.min(Math.max((parseFloat(bmi) - 10) / 35, 0), 1) : 0;
 
   return (
     <div className="tool-page">
@@ -86,15 +86,47 @@ export default function BMICalculator() {
             {bmi && category && (
               <div className="result-box mt-2 text-center">
                 <div className="gauge-container">
-                  <div className="gauge">
-                    <div className="gauge-bg" />
-                    <div className="gauge-fill" style={{
-                      background: `conic-gradient(from 180deg, var(--accent-cyan) 0deg, var(--accent-green) 60deg, var(--accent-amber) 120deg, var(--accent-red) 180deg)`,
-                      transform: `rotate(${gaugeRotation * 180}deg)`,
-                      clipPath: 'inset(0 0 50% 0)'
-                    }} />
-                    <div className="gauge-cover">
-                      <span className="gauge-value" style={{ color: category.color }}>{bmi}</span>
+                  <div style={{ position: 'relative', width: '200px', height: '110px', margin: '0 auto' }}>
+                    <svg width="200" height="110" viewBox="0 0 200 110" style={{ display: 'block' }}>
+                      <defs>
+                        <linearGradient id="bmiGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="var(--accent-cyan)" />
+                          <stop offset="33%" stopColor="var(--accent-green)" />
+                          <stop offset="66%" stopColor="var(--accent-amber)" />
+                          <stop offset="100%" stopColor="var(--accent-red)" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M 20 100 A 80 80 0 0 1 180 100"
+                        fill="none"
+                        stroke="var(--border-color)"
+                        strokeWidth="12"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M 20 100 A 80 80 0 0 1 180 100"
+                        fill="none"
+                        stroke="url(#bmiGradient)"
+                        strokeWidth="12"
+                        strokeLinecap="round"
+                        strokeDasharray="251.3"
+                        strokeDashoffset={251.3 - (251.3 * gaugeRotation)}
+                        style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                      />
+                    </svg>
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '10px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      textAlign: 'center'
+                    }}>
+                      <span style={{
+                        fontFamily: 'Outfit, sans-serif',
+                        fontSize: '2rem',
+                        fontWeight: 700,
+                        color: category.color
+                      }}>{bmi}</span>
                     </div>
                   </div>
                 </div>
