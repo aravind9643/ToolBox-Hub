@@ -66,6 +66,10 @@ export default function Stopwatch() {
     return () => cancelAnimationFrame(animationFrameRef.current);
   }, []);
 
+  const fastestLapDuration = laps.length > 0 
+    ? Math.min(...laps.map(l => l.duration)) 
+    : null;
+
   return (
     <div className="tool-page">
       <SEOHead title="Online Stopwatch & Lap Timer" description="High-precision stopwatch timer with millisecond resolution and split lap times tracking." />
@@ -111,16 +115,23 @@ export default function Stopwatch() {
               <div style={{ width: '100%', maxWidth: '440px', margin: '0 auto', textAlign: 'left' }}>
                 <h3 style={{ fontSize: '1rem', marginBottom: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Laps Split Logs</h3>
                 <div style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {laps.map((l) => (
-                    <div 
-                      key={l.id} 
-                      className="lap-item"
-                    >
-                      <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Lap {l.id}</span>
-                      <span style={{ fontFamily: 'monospace', color: 'var(--text-primary)' }}>{formatTime(l.time)}</span>
-                      <span style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>+{formatTime(l.duration)}</span>
-                    </div>
-                  ))}
+                   {laps.map((l) => {
+                     const isFastest = l.duration === fastestLapDuration;
+                     const deltaMs = l.duration - fastestLapDuration;
+                     return (
+                       <div 
+                         key={l.id} 
+                         className="lap-item"
+                         style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0.75rem', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', border: isFastest ? '1px solid var(--accent-green)' : '1px solid var(--border-color)' }}
+                       >
+                         <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Lap {l.id}</span>
+                         <span style={{ fontFamily: 'monospace', color: 'var(--text-primary)' }}>Split: {formatTime(l.time)}</span>
+                         <span style={{ fontFamily: 'monospace', color: isFastest ? 'var(--accent-green)' : 'var(--text-muted)' }}>
+                           {isFastest ? '🏆 Fastest' : `+${formatTime(deltaMs)}`}
+                         </span>
+                       </div>
+                     );
+                   })}
                 </div>
               </div>
             )}
