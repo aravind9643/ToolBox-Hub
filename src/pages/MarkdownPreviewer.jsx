@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
@@ -40,7 +40,7 @@ npm run dev
 
   meeting: `# Meeting Notes — Team Sync
 
-**Date:** \${new Date().toLocaleDateString()}
+**Date:** ${new Date().toLocaleDateString()}
 **Attendees:** Alice, Bob, Charlie
 
 ## Discussion
@@ -66,36 +66,61 @@ npm run dev
 };
 
 export default function MarkdownPreviewer() {
-  const [markdown, setMarkdown] = useState(`# Markdown Previewer\n\nWrite some markdown here to preview it instantly.\n\n## Sub Heading\n- **Bold text**\n- *Italic text*\n- \`Inline code\`\n- > Quote section\n\n\`\`\`javascript\nconst hello = "world";\nconsole.log(hello);\n\`\`\``);
+  const [markdown, setMarkdown] = useState(`# Markdown Previewer
+
+Write some markdown here to preview it instantly.
+
+## Sub Heading
+- **Bold text**
+- *Italic text*
+- \`Inline code\`
+- > Quote section
+
+\`\`\`javascript
+const hello = "world";
+console.log(hello);
+\`\`\``);
+
   const [copiedMd, setCopiedMd] = useState(false);
   const [copiedHtml, setCopiedHtml] = useState(false);
-  const [activeTab, setActiveTab] = useState('write');
-  const [isFullscreenEditor, setIsFullscreenEditor] = useState(false);
-  const [isFullscreenPreview, setIsFullscreenPreview] = useState(false);
+  const [layoutMode, setLayoutMode] = useState('split'); // 'split' | 'write' | 'preview'
+  const [syncScroll, setSyncScroll] = useState(true);
+  
+  const textareaRef = useRef(null);
+  const previewRef = useRef(null);
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setIsFullscreenEditor(false);
-        setIsFullscreenPreview(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
+  const isScrollingEditor = useRef(false);
+  const isScrollingPreview = useRef(false);
 
-  useEffect(() => {
-    if (isFullscreenEditor || isFullscreenPreview) {
-      document.body.style.overflow = 'hidden';
+  // Sync scroll implementation
+  const handleScroll = (source) => {
+    if (!syncScroll) return;
+    const txt = textareaRef.current;
+    const pre = previewRef.current;
+    if (!txt || !pre) return;
+
+    if (source === 'editor') {
+      if (isScrollingPreview.current) return;
+      isScrollingEditor.current = true;
+      
+      const percentage = txt.scrollTop / (txt.scrollHeight - txt.clientHeight);
+      pre.scrollTop = percentage * (pre.scrollHeight - pre.clientHeight);
+      
+      setTimeout(() => {
+        isScrollingEditor.current = false;
+      }, 50);
     } else {
-      document.body.style.overflow = '';
+      if (isScrollingEditor.current) return;
+      isScrollingPreview.current = true;
+      
+      const percentage = pre.scrollTop / (pre.scrollHeight - pre.clientHeight);
+      txt.scrollTop = percentage * (txt.scrollHeight - txt.clientHeight);
+      
+      setTimeout(() => {
+        isScrollingPreview.current = false;
+      }, 50);
     }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isFullscreenEditor, isFullscreenPreview]);
+  };
 
   const html = useMemo(() => {
     try {
@@ -107,11 +132,13 @@ export default function MarkdownPreviewer() {
   }, [markdown]);
 
   useEffect(() => {
-    const codeBlocks = document.querySelectorAll('.markdown-preview pre code');
-    codeBlocks.forEach((block) => {
-      block.removeAttribute('data-highlighted');
-      hljs.highlightElement(block);
-    });
+    const codeBlocks = previewRef.current?.querySelectorAll('pre code');
+    if (codeBlocks) {
+      codeBlocks.forEach((block) => {
+        block.removeAttribute('data-highlighted');
+        hljs.highlightElement(block);
+      });
+    }
   }, [html]);
 
   const stats = useMemo(() => {
@@ -122,8 +149,57 @@ export default function MarkdownPreviewer() {
     return { chars, words, readingTime };
   }, [markdown]);
 
+  // Heading outline parser
+  const headingOutline = useMemo(() => {
+    const raw = markdown || '';
+    const lines = raw.split('\n');
+    const outline = [];
+    lines.forEach((line, idx) => {
+      const match = line.match(/^(#{1,6})\s+(.*)$/);
+      if (match) {
+        outline.push({
+          level: match[1].length,
+          text: match[2].replace(/[*_`]/g, ''),
+          lineIndex: idx
+        });
+      }
+    });
+    return outline;
+  }, [markdown]);
+
+  const scrollToHeading = (lineIndex) => {
+    const txt = textareaRef.current;
+    const pre = previewRef.current;
+    if (!txt || !pre) return;
+    const lines = (markdown || '').split('\n');
+    const totalLines = lines.length;
+    if (totalLines <= 1) return;
+    
+    const percentage = lineIndex / totalLines;
+    const targetScrollTop = percentage * (txt.scrollHeight - txt.clientHeight);
+    const targetPreviewScrollTop = percentage * (pre.scrollHeight - pre.clientHeight);
+    
+    // Temporarily disable scroll listener triggers to prevent conflict
+    isScrollingEditor.current = true;
+    isScrollingPreview.current = true;
+    
+    txt.scrollTo({
+      top: targetScrollTop,
+      behavior: 'smooth'
+    });
+    pre.scrollTo({
+      top: targetPreviewScrollTop,
+      behavior: 'smooth'
+    });
+    
+    setTimeout(() => {
+      isScrollingEditor.current = false;
+      isScrollingPreview.current = false;
+    }, 800);
+  };
+
   const insertText = (before, after = '') => {
-    const textarea = document.getElementById('md-textarea');
+    const textarea = textareaRef.current;
     if (!textarea) return;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
@@ -224,183 +300,233 @@ export default function MarkdownPreviewer() {
 
   return (
     <div className="tool-page">
-      <SEOHead title="Markdown Previewer" description="Write and preview Markdown formatting instantly. Free browser-based editor." />
+      <SEOHead title="Markdown Previewer & Editor" description="Interactive split-pane Markdown editor with live outlines, template helpers, and HTML/PDF exporting features." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Markdown Previewer</span></div>
         <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <i className="fa-solid fa-file-code" style={{ color: 'var(--accent-purple-light)' }}></i> Markdown Previewer
+          <i className="fa-solid fa-file-code" style={{ color: 'var(--accent-purple-light)' }}></i> Professional Markdown Editor
         </h1>
-        <p>Live Markdown editor and preview tool.</p>
+        <p>A feature-rich offline Markdown workspace with synchronized scrolling and document outlines.</p>
       </div>
 
       <AdBanner type="header" />
 
       <div className="tool-layout" style={{ gridTemplateColumns: '1fr' }}>
         <div className="tool-main">
-          {/* Tabs selector on mobile/tablet viewports */}
-          <div className="workspace-tabs tabs" style={{ marginBottom: '1.25rem' }}>
-            <button className={`tab-btn ${activeTab === 'write' ? 'active' : ''}`} onClick={() => setActiveTab('write')}>
-              <i className="fa-solid fa-pen-to-square" style={{ marginRight: '6px' }}></i> Write
-            </button>
-            <button className={`tab-btn ${activeTab === 'preview' ? 'active' : ''}`} onClick={() => setActiveTab('preview')}>
-              <i className="fa-solid fa-eye" style={{ marginRight: '6px' }}></i> Preview
-            </button>
+          
+          {/* Workspace Options Toolbar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+            {/* Layout Mode Toggles */}
+            <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-glass-hover)', padding: '4px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+              <button 
+                className={layoutMode === 'split' ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'} 
+                onClick={() => setLayoutMode('split')}
+                style={{ fontSize: '0.75rem', padding: '4px 10px', height: 'auto' }}
+              >
+                Split view
+              </button>
+              <button 
+                className={layoutMode === 'write' ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'} 
+                onClick={() => setLayoutMode('write')}
+                style={{ fontSize: '0.75rem', padding: '4px 10px', height: 'auto' }}
+              >
+                Editor only
+              </button>
+              <button 
+                className={layoutMode === 'preview' ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'} 
+                onClick={() => setLayoutMode('preview')}
+                style={{ fontSize: '0.75rem', padding: '4px 10px', height: 'auto' }}
+              >
+                Preview only
+              </button>
+            </div>
+
+            {/* General Settings */}
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', cursor: 'pointer', marginRight: '0.5rem' }}>
+                <input 
+                  type="checkbox" 
+                  checked={syncScroll} 
+                  onChange={e => setSyncScroll(e.target.checked)} 
+                  style={{ accentColor: 'var(--accent-purple-light)' }}
+                />
+                <span>Sync Scroll</span>
+              </label>
+
+              <select 
+                className="form-select text-xs" 
+                onChange={e => e.target.value && setMarkdown(templates[e.target.value])}
+                style={{ padding: '0.25rem 1.5rem 0.25rem 0.5rem', width: 'auto', minWidth: '120px', height: '30px', fontSize: '0.75rem' }}
+                defaultValue=""
+              >
+                <option value="" disabled>Presets...</option>
+                <option value="readme">README.md Template</option>
+                <option value="meeting">Meeting notes Template</option>
+                <option value="todo">Task list Template</option>
+              </select>
+            </div>
           </div>
 
-          {/* Main Workspace */}
-          <div className="markdown-workspace">
+          <div className="markdown-workspace" style={{ display: 'grid', gridTemplateColumns: layoutMode === 'split' ? 'minmax(0, 1.2fr) minmax(0, 2fr) minmax(0, 2fr)' : layoutMode === 'write' ? 'minmax(0, 1.2fr) minmax(0, 4fr)' : '4fr', gap: '1.25rem', height: '70vh', minHeight: '550px' }}>
             
-            {/* Editor Side */}
-            <div className={`glass-card workspace-column ${isFullscreenEditor ? 'fullscreen-mode' : ''} ${activeTab === 'preview' ? 'inactive' : ''}`} style={{ display: 'flex', flexDirection: 'column' }}>
-              <div className="flex justify-between items-center mb-1 flex-wrap gap-1">
-                <h2 style={{ fontSize: '1.1rem', margin: 0 }}>Editor {isFullscreenEditor && <span className="fullscreen-badge">Fullscreen</span>}</h2>
-                
-                {/* Templates Selector */}
-                <div className="flex gap-1 items-center">
-                  <span className="text-xs text-secondary">Template:</span>
-                  <select 
-                    className="form-select text-xs" 
-                    onChange={e => e.target.value && setMarkdown(templates[e.target.value])}
-                    style={{ padding: '0.25rem 1.5rem 0.25rem 0.5rem', width: 'auto', minWidth: '110px', height: '28px', fontSize: '0.75rem' }}
-                    defaultValue=""
-                  >
-                    <option value="" disabled>Choose...</option>
-                    <option value="readme">README.md</option>
-                    <option value="meeting">Meeting Sync</option>
-                    <option value="todo">Task list</option>
-                  </select>
-                  <button 
-                    className={`copy-btn btn-sm ${isFullscreenEditor ? 'active' : ''}`}
-                    onClick={() => {
-                      setIsFullscreenEditor(!isFullscreenEditor);
-                      setIsFullscreenPreview(false);
-                    }}
-                    title={isFullscreenEditor ? "Exit Fullscreen (Esc)" : "Fullscreen Editor"}
-                    style={{ height: '28px' }}
-                  >
-                    <i className={isFullscreenEditor ? "fa-solid fa-compress" : "fa-solid fa-expand"}></i>
-                  </button>
+            {/* Outline Column (Hidden in Preview Only Mode) */}
+            {layoutMode !== 'preview' && (
+              <div className="glass-card workspace-column" style={{ padding: '1rem', overflowY: 'auto' }}>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 600, borderBottom: '1px solid var(--border-color)', paddingBottom: '6px', marginBottom: '0.75rem' }}>
+                  <i className="fa-solid fa-folder-tree"></i> OUTLINE
+                </h3>
+                {headingOutline.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {headingOutline.map((head, i) => (
+                      <div 
+                        key={i} 
+                        onClick={() => scrollToHeading(head.lineIndex)}
+                        style={{ 
+                          fontSize: '0.75rem', 
+                          paddingLeft: `${(head.level - 1) * 8}px`,
+                          color: 'var(--text-secondary)',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.color = 'var(--accent-purple-light)'}
+                        onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+                      >
+                        {head.text}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>No headings found.</span>
+                )}
+              </div>
+            )}
+
+            {/* Editor Box */}
+            {layoutMode !== 'preview' && (
+              <div className="glass-card workspace-column" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+                {/* Formatting Toolbar */}
+                <div style={{
+                  display: 'flex',
+                  gap: '4px',
+                  padding: '6px',
+                  background: 'var(--bg-glass-hover)',
+                  borderBottom: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
+                  flexWrap: 'wrap'
+                }}>
+                  <button className="copy-btn btn-sm" onClick={() => insertText('**', '**')} title="Bold" style={{ padding: '4px 8px' }}><i className="fa-solid fa-bold"></i></button>
+                  <button className="copy-btn btn-sm" onClick={() => insertText('*', '*')} title="Italic" style={{ padding: '4px 8px' }}><i className="fa-solid fa-italic"></i></button>
+                  <button className="copy-btn btn-sm" onClick={() => insertText('# ')} title="H1" style={{ padding: '4px 8px', fontWeight: 700 }}>H1</button>
+                  <button className="copy-btn btn-sm" onClick={() => insertText('## ')} title="H2" style={{ padding: '4px 8px', fontWeight: 700 }}>H2</button>
+                  <button className="copy-btn btn-sm" onClick={() => insertText('### ')} title="H3" style={{ padding: '4px 8px', fontWeight: 700 }}>H3</button>
+                  <button className="copy-btn btn-sm" onClick={() => insertText('> ')} title="Quote" style={{ padding: '4px 8px' }}><i className="fa-solid fa-quote-left"></i></button>
+                  <button className="copy-btn btn-sm" onClick={() => insertText('`', '`')} title="Inline Code" style={{ padding: '4px 8px' }}><i className="fa-solid fa-code"></i></button>
+                  <button className="copy-btn btn-sm" onClick={() => insertText('```javascript\n', '\n```')} title="Code Block" style={{ padding: '4px 8px' }}><i className="fa-solid fa-terminal"></i></button>
+                  <button className="copy-btn btn-sm" onClick={() => insertText('- ')} title="Bullet List" style={{ padding: '4px 8px' }}><i className="fa-solid fa-list"></i></button>
+                  <button className="copy-btn btn-sm" onClick={() => insertText('1. ')} title="Numbered List" style={{ padding: '4px 8px' }}><i className="fa-solid fa-list-ol"></i></button>
+                  <button className="copy-btn btn-sm" onClick={() => insertText('[', '](https://)')} title="Link" style={{ padding: '4px 8px' }}><i className="fa-solid fa-link"></i></button>
+                  <button className="copy-btn btn-sm" onClick={() => insertText('| Header | Header |\n| ------ | ------ |\n| Cell   | Cell   |\n')} title="Table" style={{ padding: '4px 8px' }}><i className="fa-solid fa-table"></i></button>
+                  <button className="copy-btn btn-sm" onClick={() => setMarkdown('')} title="Clear Editor" style={{ padding: '4px 8px', color: 'var(--accent-red)' }}><i className="fa-solid fa-trash-can"></i></button>
+                </div>
+
+                <textarea
+                  ref={textareaRef}
+                  className="form-textarea"
+                  value={markdown}
+                  onChange={e => setMarkdown(e.target.value)}
+                  onScroll={() => handleScroll('editor')}
+                  placeholder="Type Markdown here..."
+                  style={{
+                    fontFamily: 'monospace',
+                    fontSize: '0.85rem',
+                    borderRadius: 0,
+                    margin: 0,
+                    flex: 1,
+                    resize: 'none',
+                    border: 'none',
+                    overflowY: 'auto',
+                    minHeight: 0
+                  }}
+                />
+
+                {/* Editor Statistics */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.5rem',
+                  fontSize: '0.75rem',
+                  color: 'var(--text-secondary)',
+                  borderTop: '1px solid var(--border-color)',
+                  background: 'var(--bg-glass-hover)'
+                }}>
+                  <span>Words: <strong>{stats.words}</strong></span>
+                  <span>Chars: <strong>{stats.chars}</strong></span>
+                  <span>Read: <strong>{stats.readingTime}m</strong></span>
                 </div>
               </div>
+            )}
 
-              {/* Formatting Toolbar */}
-              <div style={{
-                display: 'flex',
-                gap: '4px',
-                padding: '6px',
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-color)',
-                borderBottom: 'none',
-                borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
-                flexWrap: 'wrap'
-              }}>
-                <button className="copy-btn btn-sm" onClick={() => insertText('**', '**')} title="Bold" style={{ padding: '4px 8px' }}><i className="fa-solid fa-bold"></i></button>
-                <button className="copy-btn btn-sm" onClick={() => insertText('*', '*')} title="Italic" style={{ padding: '4px 8px' }}><i className="fa-solid fa-italic"></i></button>
-                <button className="copy-btn btn-sm" onClick={() => insertText('# ')} title="H1" style={{ padding: '4px 8px', fontWeight: 700 }}>H1</button>
-                <button className="copy-btn btn-sm" onClick={() => insertText('## ')} title="H2" style={{ padding: '4px 8px', fontWeight: 700 }}>H2</button>
-                <button className="copy-btn btn-sm" onClick={() => insertText('### ')} title="H3" style={{ padding: '4px 8px', fontWeight: 700 }}>H3</button>
-                <button className="copy-btn btn-sm" onClick={() => insertText('> ')} title="Quote" style={{ padding: '4px 8px' }}><i className="fa-solid fa-quote-left"></i></button>
-                <button className="copy-btn btn-sm" onClick={() => insertText('`', '`')} title="Inline Code" style={{ padding: '4px 8px' }}><i className="fa-solid fa-code"></i></button>
-                <button className="copy-btn btn-sm" onClick={() => insertText('```javascript\n', '\n```')} title="Code Block" style={{ padding: '4px 8px' }}><i className="fa-solid fa-terminal"></i></button>
-                <button className="copy-btn btn-sm" onClick={() => insertText('- ')} title="Bullet List" style={{ padding: '4px 8px' }}><i className="fa-solid fa-list"></i></button>
-                <button className="copy-btn btn-sm" onClick={() => insertText('1. ')} title="Numbered List" style={{ padding: '4px 8px' }}><i className="fa-solid fa-list-ol"></i></button>
-                <button className="copy-btn btn-sm" onClick={() => insertText('[', '](https://)')} title="Link" style={{ padding: '4px 8px' }}><i className="fa-solid fa-link"></i></button>
-                <button className="copy-btn btn-sm" onClick={() => insertText('| Header 1 | Header 2 |\n| -------- | -------- |\n| Cell 1   | Cell 2   |\n')} title="Table" style={{ padding: '4px 8px' }}><i className="fa-solid fa-table"></i></button>
-                <button className="copy-btn btn-sm" onClick={() => setMarkdown('')} title="Clear Editor" style={{ padding: '4px 8px', color: 'var(--accent-red)' }}><i className="fa-solid fa-trash-can"></i></button>
-              </div>
-
-              <textarea
-                id="md-textarea"
-                className="form-textarea"
-                value={markdown}
-                onChange={e => setMarkdown(e.target.value)}
-                placeholder="Type Markdown here..."
-                style={{
-                  fontFamily: 'JetBrains Mono, monospace',
-                  fontSize: '0.85rem',
-                  borderTopLeftRadius: 0,
-                  borderTopRightRadius: 0,
-                  margin: 0,
-                  flex: 1,
-                  resize: 'none',
-                  minHeight: 0
-                }}
-              />
-
-              {/* Editor Statistics */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '0.5rem',
-                fontSize: '0.75rem',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--border-color)',
-                borderTop: 'none',
-                borderRadius: '0 0 var(--radius-md) var(--radius-md)',
-                background: 'var(--bg-glass)'
-              }}>
-                <span>Words: <strong>{stats.words}</strong></span>
-                <span>Characters: <strong>{stats.chars}</strong></span>
-                <span>Reading Time: <strong>{stats.readingTime}m</strong></span>
-              </div>
-            </div>
-            
-            {/* Preview Side */}
-            <div className={`glass-card workspace-column ${isFullscreenPreview ? 'fullscreen-mode' : ''} ${activeTab === 'write' ? 'inactive' : ''}`} style={{ display: 'flex', flexDirection: 'column' }}>
-              <div className="flex justify-between items-center mb-1 flex-wrap gap-1">
-                <h2 style={{ fontSize: '1.1rem', margin: 0 }}>Preview {isFullscreenPreview && <span className="fullscreen-badge">Fullscreen</span>}</h2>
-                
-                {/* Action buttons */}
-                <div className="flex gap-1 flex-wrap">
-                  <button className={`copy-btn btn-sm ${copiedMd ? 'copied' : ''}`} onClick={handleCopyMarkdown} title="Copy Markdown">
-                    <i className={copiedMd ? "fa-solid fa-check" : "fa-solid fa-copy"}></i> MD
-                  </button>
-                  <button className={`copy-btn btn-sm ${copiedHtml ? 'copied' : ''}`} onClick={handleCopyHTML} title="Copy HTML">
-                    <i className={copiedHtml ? "fa-solid fa-check" : "fa-solid fa-code"}></i> HTML
-                  </button>
-                  <button className="copy-btn btn-sm" onClick={handleDownload} title="Download Markdown (.md)">
-                    <i className="fa-solid fa-file-arrow-down"></i> .MD
-                  </button>
-                  <button className="copy-btn btn-sm" onClick={handleDownloadHTML} title="Download HTML Page (.html)">
-                    <i className="fa-solid fa-file-code"></i> .HTML
-                  </button>
-                  <button className="copy-btn btn-sm" onClick={handlePrintPDF} title="Print / Export PDF">
-                    <i className="fa-solid fa-print"></i> PDF
-                  </button>
-                  <button 
-                    className={`copy-btn btn-sm ${isFullscreenPreview ? 'active' : ''}`} 
-                    onClick={() => {
-                      setIsFullscreenPreview(!isFullscreenPreview);
-                      setIsFullscreenEditor(false);
-                    }}
-                    title={isFullscreenPreview ? "Exit Fullscreen (Esc)" : "Fullscreen Preview"}
-                  >
-                    <i className={isFullscreenPreview ? "fa-solid fa-compress" : "fa-solid fa-expand"}></i> {isFullscreenPreview ? 'Minimize' : 'Fullscreen'}
-                  </button>
+            {/* Preview Box */}
+            {layoutMode !== 'write' && (
+              <div className="glass-card workspace-column" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+                {/* Actions Toolbar */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '6px',
+                  background: 'var(--bg-glass-hover)',
+                  borderBottom: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
+                  flexWrap: 'wrap',
+                  gap: '4px'
+                }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, paddingLeft: '6px' }}>Rendered Preview</span>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <button className={`copy-btn btn-sm ${copiedMd ? 'copied' : ''}`} onClick={handleCopyMarkdown} title="Copy Markdown">
+                      <i className={copiedMd ? "fa-solid fa-check" : "fa-solid fa-copy"}></i>
+                    </button>
+                    <button className={`copy-btn btn-sm ${copiedHtml ? 'copied' : ''}`} onClick={handleCopyHTML} title="Copy HTML">
+                      <i className={copiedHtml ? "fa-solid fa-check" : "fa-solid fa-code"}></i>
+                    </button>
+                    <button className="copy-btn btn-sm" onClick={handleDownload} title="Download Markdown (.md)">
+                      <i className="fa-solid fa-file-arrow-down"></i>
+                    </button>
+                    <button className="copy-btn btn-sm" onClick={handleDownloadHTML} title="Download HTML (.html)">
+                      <i className="fa-solid fa-download"></i>
+                    </button>
+                    <button className="copy-btn btn-sm" onClick={handlePrintPDF} title="Print/Export PDF">
+                      <i className="fa-solid fa-print"></i>
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div 
-                className="result-box markdown-preview" 
-                style={{
-                  flex: 1,
-                  background: 'rgba(255, 255, 255, 0.01)',
-                  border: '1px solid var(--border-color)',
-                  overflowY: 'auto',
-                  padding: '1.5rem',
-                  color: 'var(--text-primary)',
-                  wordBreak: 'break-word',
-                  marginTop: 0,
-                  minHeight: 0
-                }}
-                dangerouslySetInnerHTML={{ __html: html }}
-              />
-            </div>
+                <div 
+                  ref={previewRef}
+                  className="result-box markdown-preview" 
+                  onScroll={() => handleScroll('preview')}
+                  style={{
+                    flex: 1,
+                    background: 'transparent',
+                    overflowY: 'auto',
+                    padding: '1.5rem',
+                    color: 'var(--text-primary)',
+                    wordBreak: 'break-word',
+                    marginTop: 0,
+                    minHeight: 0
+                  }}
+                  dangerouslySetInnerHTML={{ __html: html }}
+                />
+              </div>
+            )}
+
           </div>
 
           <div className="glass-card mt-2">
             <h3>Share this tool</h3>
-            <ShareButtons title="Live Markdown Previewer — ToolBox Hub" />
+            <ShareButtons title="Live Markdown Editor — ToolBox Hub" />
           </div>
         </div>
       </div>

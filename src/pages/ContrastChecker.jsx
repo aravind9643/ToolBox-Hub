@@ -89,52 +89,95 @@ function findCompliantColor(fgHex, bgHex, targetRatio = 4.5) {
   return bestHex;
 }
 
+// Color blindness simulation matrix logic
+function simulateColorBlindness(hex, type) {
+  const { r, g, b } = hexToRgb(hex);
+  let rSim = r, gSim = g, bSim = b;
+  
+  if (type === 'deuteranopia') {
+    rSim = r * 0.625 + g * 0.375;
+    gSim = r * 0.70 + g * 0.30;
+    bSim = g * 0.30 + b * 0.70;
+  } else if (type === 'protanopia') {
+    rSim = r * 0.567 + g * 0.433;
+    gSim = r * 0.558 + g * 0.442;
+    bSim = g * 0.242 + b * 0.758;
+  } else if (type === 'tritanopia') {
+    rSim = r * 0.95 + g * 0.05;
+    gSim = g * 0.433 + b * 0.567;
+    bSim = g * 0.475 + b * 0.525;
+  }
+
+  const clamp = (val) => Math.max(0, Math.min(255, Math.round(val)));
+  const f = (val) => clamp(val).toString(16).padStart(2, '0');
+  return `#${f(rSim)}${f(gSim)}${f(bSim)}`;
+}
+
 export default function ContrastChecker() {
-  const [fgColor, setFgColor] = useState('#ffffff');
-  const [bgColor, setBgColor] = useState('#1e293b');
+  const [fgColor, setFgColor] = useState('#60a5fa');
+  const [bgColor, setBgColor] = useState('#0f172a');
+  const [colorBlindnessType, setColorBlindnessType] = useState('normal');
 
   const contrastRatio = useMemo(() => getContrastRatio(fgColor, bgColor), [fgColor, bgColor]);
   const suggestedFg = useMemo(() => findCompliantColor(fgColor, bgColor, 4.5), [fgColor, bgColor]);
+  
   const wcagAA = contrastRatio >= 4.5;
   const wcagAALarge = contrastRatio >= 3;
   const wcagAAA = contrastRatio >= 7;
   const wcagAAALarge = contrastRatio >= 4.5;
 
   const handleSwap = () => {
-    const temp = fgColor;
     setFgColor(bgColor);
-    setBgColor(temp);
+    setBgColor(fgColor);
   };
+
+  // Live Lightness slider updater
+  const handleLightnessChange = (target, val) => {
+    if (target === 'fg') {
+      const hsl = hexToHsl(fgColor);
+      setFgColor(hslToHex(hsl.h, hsl.s, val));
+    } else {
+      const hsl = hexToHsl(bgColor);
+      setBgColor(hslToHex(hsl.h, hsl.s, val));
+    }
+  };
+
+  const fgHsl = useMemo(() => hexToHsl(fgColor), [fgColor]);
+  const bgHsl = useMemo(() => hexToHsl(bgColor), [bgColor]);
+
+  const simulatedFg = useMemo(() => simulateColorBlindness(fgColor, colorBlindnessType), [fgColor, colorBlindnessType]);
+  const simulatedBg = useMemo(() => simulateColorBlindness(bgColor, colorBlindnessType), [bgColor, colorBlindnessType]);
 
   return (
     <div className="tool-page">
-      <SEOHead title="WCAG Color Contrast Checker" description="Check contrast ratios of text and background colors to meet WCAG AA and AAA accessibility standard standards." />
+      <SEOHead title="WCAG Contrast Checker & Color Simulator" description="Verify WCAG contrast compliance ratios, simulate Deuteranopia/Protanopia color blindness modes, and auto-fix color pairs." />
       <div className="tool-page-header">
-        <div className="breadcrumb">
-          <Link to="/">Home</Link> <span>/</span> <span>Contrast Checker</span>
-        </div>
-        <h1>
-          <i className="fa-solid fa-circle-half-stroke" style={{ color: 'var(--accent-purple-light)' }}></i> WCAG Contrast Checker
-        </h1>
-        <p>Check accessibility contrast ratios between foreground and background colors.</p>
+        <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Contrast Checker</span></div>
+        <h1><i className="fa-solid fa-circle-half-stroke" style={{ color: 'var(--accent-purple-light)' }}></i> Color Contrast Accessibility Suite</h1>
+        <p>Analyze foreground/background contrast compliance with WCAG AA/AAA parameters and live simulators.</p>
       </div>
 
       <AdBanner type="header" />
 
       <div className="tool-layout" style={{ gridTemplateColumns: '1fr' }}>
         <div className="tool-main">
+          
           <div className="markdown-workspace" style={{ height: 'auto', minHeight: 'unset' }}>
-            {/* Color Inputs */}
+            
+            {/* Left Column: Select Colors & Adjusters */}
             <div className="glass-card workspace-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <h2 style={{ fontSize: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>Select Colors</h2>
+              <h2 style={{ fontSize: '1.1rem', margin: 0, borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Color Palette Setup</h2>
 
               <div className="form-group">
                 <label className="form-label">Foreground (Text) Color</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <input type="color" value={fgColor} onChange={e => setFgColor(e.target.value)}
-                    style={{ width: 46, height: 42, border: 'none', borderRadius: 8, cursor: 'pointer' }} />
-                  <input className="form-input" type="text" value={fgColor}
-                    onChange={e => { if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) setFgColor(e.target.value); }} />
+                  <input type="color" value={fgColor} onChange={e => setFgColor(e.target.value)} style={{ width: 46, height: 42, border: 'none', borderRadius: 8, cursor: 'pointer' }} />
+                  <input className="form-input" type="text" value={fgColor} onChange={e => { if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) setFgColor(e.target.value); }} />
+                </div>
+                {/* Lightness Slider */}
+                <div style={{ marginTop: '0.5rem' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Adjust Lightness: {fgHsl.l}%</span>
+                  <input type="range" min="0" max="100" value={fgHsl.l} onChange={e => handleLightnessChange('fg', Number(e.target.value))} style={{ width: '100%', height: '4px', accentColor: 'var(--accent-purple-light)' }} />
                 </div>
               </div>
 
@@ -147,102 +190,109 @@ export default function ContrastChecker() {
               <div className="form-group">
                 <label className="form-label">Background Color</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)}
-                    style={{ width: 46, height: 42, border: 'none', borderRadius: 8, cursor: 'pointer' }} />
-                  <input className="form-input" type="text" value={bgColor}
-                    onChange={e => { if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) setBgColor(e.target.value); }} />
+                  <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} style={{ width: 46, height: 42, border: 'none', borderRadius: 8, cursor: 'pointer' }} />
+                  <input className="form-input" type="text" value={bgColor} onChange={e => { if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) setBgColor(e.target.value); }} />
+                </div>
+                {/* Lightness Slider */}
+                <div style={{ marginTop: '0.5rem' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Adjust Lightness: {bgHsl.l}%</span>
+                  <input type="range" min="0" max="100" value={bgHsl.l} onChange={e => handleLightnessChange('bg', Number(e.target.value))} style={{ width: '100%', height: '4px', accentColor: 'var(--accent-purple-light)' }} />
                 </div>
               </div>
 
               {suggestedFg !== fgColor && (
-                <div style={{ padding: '0.75rem 1rem', background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <div style={{ padding: '0.75rem 1rem', background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    💡 Compliant alternative: <strong style={{ color: suggestedFg }}>{suggestedFg}</strong> (Hue-aligned shift to satisfy WCAG AA ratio).
+                    💡 Compliant alternative: <strong style={{ color: suggestedFg }}>{suggestedFg}</strong> (Satisfies WCAG AA contrast ratio).
                   </div>
                   <button className="btn btn-secondary btn-sm" onClick={() => setFgColor(suggestedFg)} style={{ width: 'fit-content', padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}>
-                    Apply Suggestion
+                    Apply Fix Suggestion
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Calculations & Results */}
+            {/* Right Column: Calculations, Simulators, WCAG Ratings */}
             <div className="glass-card workspace-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <h2 style={{ fontSize: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>Contrast Projections</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+                <h2 style={{ fontSize: '1.1rem', margin: 0 }}>Contrast Projections & Ratings</h2>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent-purple-light)' }}>
+                  Ratio: {contrastRatio.toFixed(2)} : 1
+                </div>
+              </div>
 
               {/* Sample Preview Box */}
-              <div style={{ padding: '1.5rem', background: bgColor, borderRadius: 'var(--radius-md)', border: '2px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div>
-                  <p style={{ color: fgColor, fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>
-                    This is how normal text looks.
-                  </p>
-                  <p style={{ color: fgColor, fontSize: '0.85rem', margin: '0.5rem 0 0', opacity: 0.85 }}>
-                    This is how smaller secondary details look.
-                  </p>
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-                  <button style={{
-                    padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700,
-                    background: fgColor, color: bgColor, border: 'none', cursor: 'pointer'
-                  }}>
+              <div style={{ padding: '1.25rem', background: simulatedBg, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <p style={{ color: simulatedFg, fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>
+                  This is how normal text looks.
+                </p>
+                <p style={{ color: simulatedFg, fontSize: '0.85rem', margin: 0, opacity: 0.85 }}>
+                  This is how smaller secondary details look.
+                </p>
+                
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, background: simulatedFg, color: simulatedBg, border: 'none' }}>
                     Solid Button
                   </button>
-                  <button style={{
-                    padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700,
-                    background: 'none', color: fgColor, border: `2px solid ${fgColor}`, cursor: 'pointer'
-                  }}>
+                  <button style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, background: 'none', color: simulatedFg, border: `2px solid ${simulatedFg}` }}>
                     Outline Button
                   </button>
                 </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <label style={{ fontSize: '0.7rem', color: fgColor, opacity: 0.8, fontWeight: 600 }}>Interactive Input Preview</label>
-                  <input 
-                    type="text" 
-                    readOnly 
-                    value="Sample Input Text..." 
-                    style={{
-                      padding: '0.5rem 0.75rem', borderRadius: '6px', fontSize: '0.85rem',
-                      background: 'rgba(255,255,255,0.05)', color: fgColor, border: `1px solid ${fgColor}`,
-                      outline: 'none', width: '100%'
-                    }} 
-                  />
-                </div>
               </div>
 
-              {/* Large Ratio value */}
-              <div style={{ textAlign: 'center', padding: '1rem 0', background: 'var(--bg-glass-hover)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Contrast Ratio</div>
-                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: wcagAAA ? 'var(--accent-green)' : wcagAA ? 'var(--accent-cyan-light)' : 'var(--accent-red)' }}>
-                  {contrastRatio.toFixed(2)}:1
-                </div>
+              {/* Simulator Options Toggle */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Color Blindness Filter:</span>
+                <select className="form-select text-xs" value={colorBlindnessType} onChange={e => setColorBlindnessType(e.target.value)} style={{ width: '130px', padding: '0.25rem 0.5rem', height: '28px', fontSize: '0.75rem' }}>
+                  <option value="normal">Normal Vision</option>
+                  <option value="deuteranopia">Deuteranopia (Green)</option>
+                  <option value="protanopia">Protanopia (Red)</option>
+                  <option value="tritanopia">Tritanopia (Blue)</option>
+                </select>
               </div>
 
-              {/* WCAG Checks grid */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {[
-                  { label: 'WCAG AA (Normal Text)', pass: wcagAA, req: '≥ 4.5:1' },
-                  { label: 'WCAG AA (Large Text)', pass: wcagAALarge, req: '≥ 3:1' },
-                  { label: 'WCAG AAA (Normal Text)', pass: wcagAAA, req: '≥ 7:1' },
-                  { label: 'WCAG AAA (Large Text)', pass: wcagAAALarge, req: '≥ 4.5:1' },
-                ].map(({ label, pass, req }) => (
-                  <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.55rem 0.75rem', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', border: `1px solid ${pass ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.15)'}` }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>
-                      {label} <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>({req})</span>
-                    </span>
-                    <span style={{ fontWeight: 700, color: pass ? 'var(--accent-green)' : 'var(--accent-red)', fontSize: '0.85rem' }}>
-                      {pass ? '✓ PASS' : '✗ FAIL'}
-                    </span>
+              {/* WCAG Compliance Badges Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ padding: '0.75rem', background: 'var(--bg-glass)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>WCAG AA (Normal Text)</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <i className={wcagAA ? "fa-solid fa-circle-check" : "fa-solid fa-circle-xmark"} style={{ color: wcagAA ? 'var(--accent-green)' : 'var(--accent-red)' }} />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{wcagAA ? 'PASSED' : 'FAILED'}</span>
                   </div>
-                ))}
+                </div>
+
+                <div style={{ padding: '0.75rem', background: 'var(--bg-glass)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>WCAG AA (Large Text)</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <i className={wcagAALarge ? "fa-solid fa-circle-check" : "fa-solid fa-circle-xmark"} style={{ color: wcagAALarge ? 'var(--accent-green)' : 'var(--accent-red)' }} />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{wcagAALarge ? 'PASSED' : 'FAILED'}</span>
+                  </div>
+                </div>
+
+                <div style={{ padding: '0.75rem', background: 'var(--bg-glass)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>WCAG AAA (Normal Text)</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <i className={wcagAAA ? "fa-solid fa-circle-check" : "fa-solid fa-circle-xmark"} style={{ color: wcagAAA ? 'var(--accent-green)' : 'var(--accent-red)' }} />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{wcagAAA ? 'PASSED' : 'FAILED'}</span>
+                  </div>
+                </div>
+
+                <div style={{ padding: '0.75rem', background: 'var(--bg-glass)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>WCAG AAA (Large Text)</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <i className={wcagAAALarge ? "fa-solid fa-circle-check" : "fa-solid fa-circle-xmark"} style={{ color: wcagAAALarge ? 'var(--accent-green)' : 'var(--accent-red)' }} />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{wcagAAALarge ? 'PASSED' : 'FAILED'}</span>
+                  </div>
+                </div>
               </div>
+
             </div>
+
           </div>
 
           <div className="glass-card mt-2">
             <h3>Share this tool</h3>
-            <ShareButtons title="WCAG Contrast Checker — ToolBox Hub" />
+            <ShareButtons title="Accessibility Contrast Checker — ToolBox Hub" />
           </div>
         </div>
       </div>
