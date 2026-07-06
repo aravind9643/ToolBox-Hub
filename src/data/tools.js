@@ -54,7 +54,12 @@ export const tools = [
   make('/bpm-metronome','BPM & Metronome','fa-drum','Productivity','tempo rhythm beat','Measure tempo and play a metronome.','#d946ef'),
   make('/stopwatch','Precision Stopwatch','fa-stopwatch','Productivity','lap split timer','Track precise laps and splits.','#ef4444'),
   make('/compass','Compass','fa-compass','Device Sensors','orientation heading direction','Use device orientation as a compass.'),
-  make('/speedometer','Speedometer','fa-gauge','Device Sensors','gps speed travel','Measure travel speed with GPS.','#10b981')
+  make('/speedometer','Speedometer','fa-gauge','Device Sensors','gps speed travel','Measure travel speed with GPS.','#10b981'),
+  make('/json-to-typescript','JSON to TypeScript','fa-file-code','Text & Development','types ts interfaces jsdoc','Generate TypeScript interfaces from JSON.','#3b82f6'),
+  make('/json-diff','JSON Diff Checker','fa-code-compare','Text & Development','compare structural diff objects','Compare two JSON objects structurally.','#ef4444'),
+  make('/jsonpath-evaluator','JSONPath Evaluator','fa-search','Text & Development','query search filter path','Filter and query JSON using JSONPath.','#10b981'),
+  make('/json-schema-generator','JSON Schema Generator','fa-file-signature','Text & Development','schema validation structure','Generate draft schemas from JSON payloads.','#f59e0b'),
+  make('/json-flattener','JSON Flattener','fa-minimize','Text & Development','flatten unflatten key map','Flatten and unflatten nested JSON paths.','#d946ef')
 ];
 
 export const categories = [...new Set(tools.map(tool => tool.category))];

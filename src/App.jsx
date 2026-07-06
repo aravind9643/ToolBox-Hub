@@ -15,7 +15,10 @@ const fileNames = {
   '/uuid-generator': 'UUIDGenerator',
   '/qr-code-generator': 'QRCodeGenerator', '/qr-code-scanner': 'QRCodeScanner',
   '/ascii-art-generator': 'AsciiArtGenerator', '/csv-json-converter': 'CsvJsonConverter',
-  '/bpm-metronome': 'BpmMetronome', '/text-to-speech': 'TextToSpeech'
+  '/bpm-metronome': 'BpmMetronome', '/text-to-speech': 'TextToSpeech',
+  '/json-to-typescript': 'JsonToTypescript', '/json-diff': 'JsonDiff',
+  '/jsonpath-evaluator': 'JsonpathEvaluator', '/json-schema-generator': 'JsonSchemaGenerator',
+  '/json-flattener': 'JsonFlattener'
 };
 
 const routeComponents = Object.fromEntries(tools.map(tool => {

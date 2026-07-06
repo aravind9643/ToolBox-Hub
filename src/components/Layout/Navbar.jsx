@@ -61,6 +61,11 @@ const allTools = [
   { path: '/csv-json-converter',       label: 'CSV ↔ JSON Converter',       tags: 'csv json converter spreadsheet array table columns records spreadsheet parsing' },
   { path: '/sketchpad',                label: 'Sketchpad Whiteboard',       tags: 'sketchpad paint drawing whiteboard draw erase sketch sign image transparent png' },
   { path: '/stopwatch',                label: 'Precision Stopwatch',        tags: 'stopwatch timer split lap centisecond clock precise duration delta' },
+  { path: '/json-to-typescript',       label: 'JSON to TypeScript',         tags: 'json ts typescript interfaces models jsdoc conversion' },
+  { path: '/json-diff',                label: 'JSON Diff Checker',          tags: 'json diff compare structural objects difference additions deletions' },
+  { path: '/jsonpath-evaluator',       label: 'JSONPath Evaluator',         tags: 'json path jsonpath query filter search selector array' },
+  { path: '/json-schema-generator',    label: 'JSON Schema Generator',      tags: 'json schema validation draft structure generator specifications' },
+  { path: '/json-flattener',           label: 'JSON Flattener & Unflattener', tags: 'json flatten unflatten dot notation path key map compression' },
 ];
 
 export default function Navbar({ onMenuToggle }) {
