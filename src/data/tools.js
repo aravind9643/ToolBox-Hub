@@ -59,7 +59,8 @@ export const tools = [
   make('/json-diff','JSON Diff Checker','fa-code-compare','Text & Development','compare structural diff objects','Compare two JSON objects structurally.','#ef4444'),
   make('/jsonpath-evaluator','JSONPath Evaluator','fa-search','Text & Development','query search filter path','Filter and query JSON using JSONPath.','#10b981'),
   make('/json-schema-generator','JSON Schema Generator','fa-file-signature','Text & Development','schema validation structure','Generate draft schemas from JSON payloads.','#f59e0b'),
-  make('/json-flattener','JSON Flattener','fa-minimize','Text & Development','flatten unflatten key map','Flatten and unflatten nested JSON paths.','#d946ef')
+  make('/json-flattener','JSON Flattener','fa-minimize','Text & Development','flatten unflatten key map','Flatten and unflatten nested JSON paths.','#d946ef'),
+  make('/json-generator','JSON Generator','fa-gears','Text & Development','mock schema data generate validation','Generate random mock JSON data sets for testing.','#10b981')
 ];
 
 export const categories = [...new Set(tools.map(tool => tool.category))];

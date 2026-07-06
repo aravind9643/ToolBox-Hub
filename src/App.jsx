@@ -18,7 +18,8 @@ const fileNames = {
   '/bpm-metronome': 'BpmMetronome', '/text-to-speech': 'TextToSpeech',
   '/json-to-typescript': 'JsonToTypescript', '/json-diff': 'JsonDiff',
   '/jsonpath-evaluator': 'JsonpathEvaluator', '/json-schema-generator': 'JsonSchemaGenerator',
-  '/json-flattener': 'JsonFlattener'
+  '/json-flattener': 'JsonFlattener',
+  '/json-generator': 'JsonGenerator'
 };
 
 const routeComponents = Object.fromEntries(tools.map(tool => {
