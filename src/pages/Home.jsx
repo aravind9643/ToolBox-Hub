@@ -35,6 +35,19 @@ export default function Home() {
     return result;
   }, [query, category, sort, favorites, recent]);
 
+  // Group tools by category if "All" is active and we are in "Featured" sort mode
+  const groupedTools = useMemo(() => {
+    if (category !== 'All' || sort !== 'featured') return null;
+    const groups = {};
+    categories.forEach(cat => {
+      const items = visibleTools.filter(t => t.category === cat);
+      if (items.length > 0) {
+        groups[cat] = items;
+      }
+    });
+    return groups;
+  }, [visibleTools, category, sort]);
+
   const toggleFavorite = path => {
     const next = favorites.includes(path) ? favorites.filter(item => item !== path) : [...favorites, path];
     setFavorites(next);
@@ -42,7 +55,7 @@ export default function Home() {
   };
 
   return <>
-    <SEOHead title={null} description="52 free, private browser tools for calculations, conversion, development, design and productivity." />
+    <SEOHead title={null} description="57 free, private browser tools for calculations, conversion, development, design, and productivity." />
     <section className="hero">
       <div className="hero-badge">✨ Free, private and no sign-up</div>
       <h1>Your All-in-One Online Toolbox</h1>
@@ -62,8 +75,39 @@ export default function Home() {
       <div className="category-chips" role="group" aria-label="Filter by category">
         {['All', ...categories].map(item => <button type="button" key={item} className={category === item ? 'active' : ''} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}
       </div>
-      {visibleTools.length ? <div className="tools-grid">{visibleTools.map(tool => <ToolCard key={tool.path} {...tool} favorite={favorites.includes(tool.path)} onFavorite={toggleFavorite} />)}</div> :
-        <div className="empty-state"><i className="fa-solid fa-magnifying-glass" /><h3>No tools found</h3><p>Try another search or clear the active filters.</p><button className="btn btn-primary" onClick={() => { setQuery(''); setCategory('All'); setSort('featured'); }}>Clear filters</button></div>}
+      
+      {/* Grouped view by category vs single grid list */}
+      {visibleTools.length > 0 ? (
+        groupedTools ? (
+          <div>
+            {Object.keys(groupedTools).map(catName => (
+              <div key={catName} style={{ marginBottom: '2.5rem' }}>
+                <h3 style={{ fontSize: '1.25rem', marginTop: '1.5rem', marginBottom: '0.85rem', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.4rem', fontWeight: 700 }}>
+                  {catName}
+                </h3>
+                <div className="tools-grid">
+                  {groupedTools[catName].map(tool => (
+                    <ToolCard key={tool.path} {...tool} favorite={favorites.includes(tool.path)} onFavorite={toggleFavorite} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="tools-grid">
+            {visibleTools.map(tool => (
+              <ToolCard key={tool.path} {...tool} favorite={favorites.includes(tool.path)} onFavorite={toggleFavorite} />
+            ))}
+          </div>
+        )
+      ) : (
+        <div className="empty-state">
+          <i className="fa-solid fa-magnifying-glass" />
+          <h3>No tools found</h3>
+          <p>Try another search or clear the active filters.</p>
+          <button className="btn btn-primary" onClick={() => { setQuery(''); setCategory('All'); setSort('featured'); }}>Clear filters</button>
+        </div>
+      )}
     </section>
     <AdBanner type="footer" />
   </>;

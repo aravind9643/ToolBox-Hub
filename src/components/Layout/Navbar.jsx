@@ -1,72 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { tools } from '../../data/tools';
 
-const allTools = [
-  // Generators
-  { path: '/qr-code-generator',        label: 'QR Code Generator',         tags: 'qr barcode make creation' },
-  { path: '/qr-code-scanner',          label: 'QR Code Scanner',           tags: 'qr scan webcam camera reader decoder' },
-  { path: '/password-generator',       label: 'Password Generator',         tags: 'secure random key password creation' },
-  { path: '/lorem-ipsum',              label: 'Lorem Ipsum Generator',      tags: 'placeholder text dummy dummytext mockup' },
-  { path: '/gradient-generator',       label: 'Gradient Generator',         tags: 'css color design linear radial' },
-  { path: '/uuid-generator',           label: 'UUID Generator',             tags: 'guid unique id crypto token' },
-  { path: '/ascii-art-generator',      label: 'ASCII Art Generator',        tags: 'text banner font art standard text' },
-  // Converters & Utilities
-  { path: '/unit-converter',           label: 'Unit Converter',             tags: 'length weight temperature speed data cooking energy pressure' },
-  { path: '/color-picker',             label: 'Color Picker & Converter',   tags: 'hex rgb hsl rgb format conversion' },
-  { path: '/timestamp-converter',      label: 'Timestamp Converter',        tags: 'unix date epoch time seconds milliseconds' },
-  { path: '/base64-converter',         label: 'Base64 Converter',           tags: 'encode decode binary file text' },
-  { path: '/currency-converter',       label: 'Currency Converter',         tags: 'money exchange rate forex usd eur gbp inr rates' },
-  { path: '/morse-code-translator',    label: 'Morse Code Translator',      tags: 'morse encode decode audio signal dots dashes signal' },
-  // Calculators
-  { path: '/bmi-calculator',           label: 'BMI Calculator',             tags: 'body mass index health weight mass' },
-  { path: '/age-calculator',           label: 'Age Calculator',             tags: 'birthday birth date duration' },
-  { path: '/loan-calculator',          label: 'Loan Calculator',            tags: 'emi mortgage interest payment' },
-  { path: '/compound-interest-calculator', label: 'Compound Interest Calculator', tags: 'investment savings growth chart compound' },
-  { path: '/tip-calculator',           label: 'Tip Calculator',             tags: 'bill split restaurant tip percent calculate' },
-  { path: '/date-calculator',          label: 'Date Calculator',            tags: 'business days duration difference add subtract math' },
-  { path: '/tdee-calculator',          label: 'TDEE & Calorie Calculator',  tags: 'bmr calories macros diet fitness maintenance bulk cut' },
-  // Text & Development
-  { path: '/word-counter',             label: 'Word & Character Counter',   tags: 'characters lines reading time words count density' },
-  { path: '/text-cleaner',             label: 'Text Cleaner',               tags: 'text format clean trim duplicate empty lines spaces case' },
-  { path: '/json-formatter',           label: 'JSON Formatter',             tags: 'format validate beautify json clean pretty print' },
-  { path: '/image-compressor',         label: 'Image Compressor',           tags: 'compress optimize photo reduce size optimize crop' },
-  { path: '/markdown-previewer',       label: 'Markdown Previewer',         tags: 'md preview render syntax document' },
-  { path: '/regex-tester',             label: 'Regex Tester',               tags: 'regular expression match pattern debug test find' },
-  // Design Tools
-  { path: '/box-shadow-generator',     label: 'Box Shadow Generator',       tags: 'css shadow design layers inset offsets blur' },
-  { path: '/aspect-ratio-calculator',  label: 'Aspect Ratio Calculator',    tags: 'resolution scale 16:9 youtube tiktok instagram standard dimensions' },
-  { path: '/contrast-checker',         label: 'Contrast Checker',           tags: 'wcag accessibility ratio color preview pass fail AA AAA' },
-  { path: '/color-palette-generator',  label: 'Palette Generator',          tags: 'color palette scheme harmony complementary triadic analogous shades' },
-  { path: '/password-strength-tester', label: 'Password Strength Tester',   tags: 'entropy crack time security strength lock safe' },
-  // Productivity
-  { path: '/pomodoro-timer',           label: 'Pomodoro Timer',             tags: 'focus productivity work break sessions clock' },
-  { path: '/countdown-timer',          label: 'Countdown Timer',            tags: 'countdown clock timer event birthday deadline live time' },
-  { path: '/decision-maker',           label: 'Decision Maker',             tags: 'roll dice coin flip spin wheel winner choice random select decision' },
-  // Additional Standalone Tools
-  { path: '/hash-generator',           label: 'Hash Generator',             tags: 'md5 sha1 sha256 sha512 hash checksum encrypt security' },
-  { path: '/color-palette-extractor',  label: 'Color Palette Extractor',    tags: 'image color extract load palette canvas swatch pixel rbg' },
-  { path: '/exif-metadata-viewer',     label: 'EXIF Metadata Viewer',       tags: 'exif metadata image details GPS camera parameters privacy edit clear strip' },
-  { path: '/svg-png-converter',        label: 'SVG to PNG Converter',       tags: 'svg vector png raster image convert render high-dpi scale backdrop' },
-  { path: '/unit-price-calculator',    label: 'Unit Price Calculator',      tags: 'value comparison buy deal cheap price volume weight grams pieces' },
-  { path: '/number-base-converter',    label: 'Number Base Converter',      tags: 'base binary octal decimal hex conversion integers division steps' },
-  { path: '/diff-checker',             label: 'Diff Checker',               tags: 'compare text difference additions deletions side by side inline code split' },
-  { path: '/json-yaml-converter',      label: 'JSON to YAML Converter',     tags: 'json yaml config serialize parsing bidirectional data format conversion' },
-  { path: '/compass',                  label: 'Compass',                    tags: 'compass navigation orientation angle heading cardinal N S E W direction sensors' },
-  { path: '/speedometer',              label: 'Speedometer',                tags: 'speedometer speed travel GPS coordinates tracker velocity velocity stats max avg' },
-  { path: '/voice-recorder',           label: 'Voice Recorder',             tags: 'voice recorder sound recording visualizer mic microphone webm audio waveform' },
-  { path: '/bpm-metronome',            label: 'BPM & Metronome',            tags: 'bpm metronome tap beat click rhythm audio tempo count measure timing' },
-  { path: '/meme-generator',           label: 'Meme Generator',             tags: 'meme generator caption custom text template image text impact layout' },
-  { path: '/glassmorphism-generator',  label: 'Glassmorphism Generator',    tags: 'glassmorphism css style code design backdrop blur opacity transperancy shadow' },
-  { path: '/text-to-speech',           label: 'Text to Speech Reader',      tags: 'text to speech speech reader speech synthesis voice audio speaker listen speech read aloud' },
-  { path: '/csv-json-converter',       label: 'CSV ↔ JSON Converter',       tags: 'csv json converter spreadsheet array table columns records spreadsheet parsing' },
-  { path: '/sketchpad',                label: 'Sketchpad Whiteboard',       tags: 'sketchpad paint drawing whiteboard draw erase sketch sign image transparent png' },
-  { path: '/stopwatch',                label: 'Precision Stopwatch',        tags: 'stopwatch timer split lap centisecond clock precise duration delta' },
-  { path: '/json-to-typescript',       label: 'JSON to TypeScript',         tags: 'json ts typescript interfaces models jsdoc conversion' },
-  { path: '/json-diff',                label: 'JSON Diff Checker',          tags: 'json diff compare structural objects difference additions deletions' },
-  { path: '/jsonpath-evaluator',       label: 'JSONPath Evaluator',         tags: 'json path jsonpath query filter search selector array' },
-  { path: '/json-schema-generator',    label: 'JSON Schema Generator',      tags: 'json schema validation draft structure generator specifications' },
-  { path: '/json-flattener',           label: 'JSON Flattener & Unflattener', tags: 'json flatten unflatten dot notation path key map compression' },
-];
+const allTools = tools.map(t => ({
+  path: t.path,
+  label: t.title,
+  tags: t.tags
+}));
 
 export default function Navbar({ onMenuToggle }) {
   const [query, setQuery] = useState('');
