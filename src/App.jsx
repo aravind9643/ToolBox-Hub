@@ -4,7 +4,7 @@ import Layout from './components/Layout/Layout';
 import ScrollToTop from './components/ScrollToTop';
 import { tools } from './data/tools';
 
-const Home = lazy(() => import('./pages/Home'));
+import Home from './pages/Home';
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const modules = import.meta.glob('./pages/*.jsx');
@@ -28,26 +28,20 @@ const routeComponents = Object.fromEntries(tools.map(tool => {
   return [tool.path, lazy(modules[`./pages/${name}.jsx`])];
 }));
 
-function LoadingScreen() {
-  return <div className="route-loading" role="status" aria-live="polite"><span className="loading-spinner" /> Loading tool…</div>;
-}
-
 export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      <Suspense fallback={<LoadingScreen />}>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            {tools.map(tool => {
-              const Component = routeComponents[tool.path];
-              return <Route key={tool.path} path={tool.path} element={<Component />} />;
-            })}
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </Suspense>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          {tools.map(tool => {
+            const Component = routeComponents[tool.path];
+            return <Route key={tool.path} path={tool.path} element={<Component />} />;
+          })}
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
     </Router>
   );
 }

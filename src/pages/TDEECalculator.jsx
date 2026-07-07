@@ -62,11 +62,19 @@ export default function TDEECalculator() {
     const carbGrams = Math.round((targetCalories * 0.40) / 4);
     const fatGrams = Math.round((targetCalories * 0.30) / 9);
 
+    const maxCalories = stats.tdee + 500;
+    const proteinPct = ((proteinGrams * 4) / maxCalories) * 100;
+    const carbPct = ((carbGrams * 4) / maxCalories) * 100;
+    const fatPct = ((fatGrams * 9) / maxCalories) * 100;
+
     return {
       calories: targetCalories,
       protein: proteinGrams,
       carbs: carbGrams,
-      fat: fatGrams
+      fat: fatGrams,
+      proteinPct,
+      carbPct,
+      fatPct
     };
   }, [stats, activeTab]);
 
@@ -291,7 +299,6 @@ export default function TDEECalculator() {
                         <span style={{ fontWeight: 600 }}>Target Calories ({activeTab}):</span>
                         <span style={{ color: 'var(--accent-cyan-light)', fontWeight: 700 }}>{macros.calories} kcal</span>
                       </div>
-
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.75rem' }}>
                         {/* Protein bar */}
                         <div>
@@ -300,7 +307,7 @@ export default function TDEECalculator() {
                             <span><strong>{macros.protein}g</strong> ({macros.protein * 4} kcal)</span>
                           </div>
                           <div style={{ height: '8px', background: 'var(--bg-input)', borderRadius: '9999px', overflow: 'hidden' }}>
-                            <div style={{ width: '30%', height: '100%', background: 'var(--accent-purple-light)' }}></div>
+                            <div style={{ width: `${macros.proteinPct}%`, height: '100%', background: 'var(--accent-purple-light)', transition: 'width 0.3s ease' }}></div>
                           </div>
                         </div>
 
@@ -311,7 +318,7 @@ export default function TDEECalculator() {
                             <span><strong>{macros.carbs}g</strong> ({macros.carbs * 4} kcal)</span>
                           </div>
                           <div style={{ height: '8px', background: 'var(--bg-input)', borderRadius: '9999px', overflow: 'hidden' }}>
-                            <div style={{ width: '40%', height: '100%', background: 'var(--accent-cyan-light)' }}></div>
+                            <div style={{ width: `${macros.carbPct}%`, height: '100%', background: 'var(--accent-cyan-light)', transition: 'width 0.3s ease' }}></div>
                           </div>
                         </div>
 
@@ -322,7 +329,7 @@ export default function TDEECalculator() {
                             <span><strong>{macros.fat}g</strong> ({macros.fat * 9} kcal)</span>
                           </div>
                           <div style={{ height: '8px', background: 'var(--bg-input)', borderRadius: '9999px', overflow: 'hidden' }}>
-                            <div style={{ width: '30%', height: '100%', background: 'var(--accent-pink)' }}></div>
+                            <div style={{ width: `${macros.fatPct}%`, height: '100%', background: 'var(--accent-pink)', transition: 'width 0.3s ease' }}></div>
                           </div>
                         </div>
                       </div>
