@@ -10,13 +10,7 @@ export default function Compass() {
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [supportError, setSupportError] = useState('');
   const [simulatedHeading, setSimulatedHeading] = useState(0);
-  const [simulatedPitch, setSimulatedPitch] = useState(0);
-  const [simulatedRoll, setSimulatedRoll] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  
-  // Spirit Level states
-  const [pitch, setPitch] = useState(0); // Beta (front/back tilt)
-  const [roll, setRoll] = useState(0);   // Gamma (left/right tilt)
 
   // GPS Telemetry states
   const [gpsData, setGpsData] = useState(null);
@@ -53,8 +47,6 @@ export default function Compass() {
 
     const rounded = Math.round(headingDeg);
     setHeading(rounded);
-    setPitch(Math.round(event.beta || 0));
-    setRoll(Math.round(event.gamma || 0));
     setIsMobile(true);
   };
 
@@ -94,7 +86,6 @@ export default function Compass() {
       setSupportError('Orientation sensors not detected on this browser.');
     }
 
-    // Grab initial GPS telemetry
     getGPSLocation();
 
     return () => {
@@ -123,24 +114,17 @@ export default function Compass() {
   const [lockedHeading, setLockedHeading] = useState(null);
 
   const currentHeading = isMobile ? heading : simulatedHeading;
-  const currentPitch = isMobile ? pitch : simulatedPitch;
-  const currentRoll = isMobile ? roll : simulatedRoll;
   const currentDirection = get16PointWindDirection(currentHeading);
 
   const delta = lockedHeading !== null ? ((currentHeading - lockedHeading + 180 + 360) % 360 - 180) : 0;
 
-  // Spirit Level bubble offset math (clamp to +/- 20 degrees for visual boundary)
-  const maxVisualTilt = 20;
-  const bubbleOffsetX = Math.max(-1, Math.min(1, currentRoll / maxVisualTilt)) * 40;
-  const bubbleOffsetY = Math.max(-1, Math.min(1, currentPitch / maxVisualTilt)) * 40;
-
   return (
     <div className="tool-page">
-      <SEOHead title="Online Compass & Bubble Level" description="Interactive device compass with built-in pitch/roll spirit bubble levels and GPS location coordinates." />
+      <SEOHead title="Online Compass & GPS Coordinates Finder" description="Interactive device orientation compass dial with real-time degrees and live GPS coordinates telemetry." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Compass</span></div>
-        <h1><i className="fa-solid fa-compass" style={{ color: 'var(--accent-purple-light)' }}></i> Compass & Level</h1>
-        <p>Real-time orientation dial, 2D spirit slope level, and GPS coordinates telemetry.</p>
+        <h1><i className="fa-solid fa-compass" style={{ color: 'var(--accent-purple-light)' }}></i> Compass</h1>
+        <p>Real-time orientation dial, course tracking lock, and GPS coordinates telemetry.</p>
       </div>
 
       <AdBanner type="header" />
@@ -153,14 +137,14 @@ export default function Compass() {
             {/* Left Card: Heading & Dial */}
             <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
               {supportError && !isMobile && (
-                <div style={{ padding: '0.65rem 0.85rem', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: 'var(--radius-md)', color: 'var(--accent-amber)', fontSize: '0.8rem', marginBottom: '1.5rem', width: '100%' }}>
+                <div style={{ padding: '0.65rem 0.85rem', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: 'var(--radius-md)', color: 'var(--accent-amber)', fontSize: '0.8rem', marginBottom: '1.5rem', width: '100%', textAlign: 'center' }}>
                   <i className="fa-solid fa-circle-info" style={{ marginRight: '6px' }}></i>
-                  Sensor simulation mode. Drag sliders below to rotate dial.
+                  Sensor simulation mode. Drag slider below to rotate dial.
                 </div>
               )}
 
               {requiresPermission && !permissionGranted && (
-                <div style={{ marginBottom: '1.5rem', width: '100%' }}>
+                <div style={{ marginBottom: '1.5rem', width: '100%', textAlign: 'center' }}>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
                     iOS devices require motion permission for compass features.
                   </p>
@@ -249,7 +233,7 @@ export default function Compass() {
                 </div>
               </div>
 
-              {/* Course lock and numeric readout */}
+              {/* Readouts */}
               <div style={{ marginTop: '0.75rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
                   {currentHeading}° <span style={{ color: 'var(--accent-purple-light)', fontSize: '1.8rem' }}>{currentDirection}</span>
@@ -283,143 +267,69 @@ export default function Compass() {
               </div>
             </div>
 
-            {/* Right Card: 2D Spirit Level & Telemetry */}
+            {/* Right Card: GPS Telemetry */}
             <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem' }}>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}><i className="fa-solid fa-arrows-to-circle" style={{ color: 'var(--accent-green)', marginRight: '6px' }}></i> 2D Bubble Level</h3>
+              <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', fontWeight: 600 }}>
+                <i className="fa-solid fa-location-crosshairs" style={{ color: 'var(--accent-cyan-light)', marginRight: '6px' }}></i> GPS Telemetry
+              </h3>
 
-              {/* Bubble Level Container */}
-              <div style={{
-                position: 'relative',
-                width: '180px',
-                height: '180px',
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, var(--bg-secondary) 30%, var(--bg-input) 100%)',
-                border: '3px solid var(--border-color)',
-                boxShadow: 'inset 0 4px 8px rgba(0,0,0,0.15)',
-                margin: '0.5rem 0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden'
-              }}>
-                {/* Center target circle */}
-                <div style={{
-                  position: 'absolute',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  border: '2px dashed var(--accent-cyan-light)',
-                  opacity: 0.6
-                }} />
-
-                {/* Level Grid Crosshairs */}
-                <div style={{ position: 'absolute', width: '100%', height: '1px', background: 'var(--border-color)', opacity: 0.4 }} />
-                <div style={{ position: 'absolute', height: '100%', width: '1px', background: 'var(--border-color)', opacity: 0.4 }} />
-
-                {/* Animated Level Bubble */}
-                <div style={{
-                  position: 'absolute',
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '50%',
-                  background: 'radial-gradient(circle, #f0fdf4 0%, var(--accent-green) 100%)',
-                  border: '2px solid #fff',
-                  boxShadow: '0 0 10px rgba(16, 185, 129, 0.8)',
-                  transform: `translate(${bubbleOffsetX}px, ${bubbleOffsetY}px)`,
-                  transition: isMobile ? 'transform 0.05s ease-out' : 'transform 0.3s ease-out'
-                }} />
-              </div>
-
-              {/* Slope Degrees */}
-              <div style={{ marginTop: '0.75rem', width: '100%', display: 'flex', justifyContent: 'space-around', fontSize: '0.85rem' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ color: 'var(--text-muted)' }}>Roll (X)</div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 700, color: Math.abs(currentRoll) < 2 ? 'var(--accent-green)' : 'var(--text-primary)' }}>{currentRoll}°</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ color: 'var(--text-muted)' }}>Pitch (Y)</div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 700, color: Math.abs(currentPitch) < 2 ? 'var(--accent-green)' : 'var(--text-primary)' }}>{currentPitch}°</div>
-                </div>
-              </div>
-
-              {/* GPS Telemetry Grid */}
-              <div style={{ marginTop: '1.5rem', width: '100%', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>GPS Telemetry</span>
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Coordinates Status</span>
                   <button className="btn btn-secondary btn-sm" onClick={getGPSLocation} disabled={gpsLoading} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}>
                     <i className="fa-solid fa-arrows-rotate" style={{ marginRight: '4px' }}></i> Refresh
                   </button>
                 </div>
                 
                 {gpsData ? (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.75rem' }}>
-                    <div style={{ background: 'var(--bg-input)', padding: '0.4rem', borderRadius: 'var(--radius-sm)' }}>
-                      <div style={{ color: 'var(--text-muted)' }}>Latitude</div>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{gpsData.lat}°</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.8rem' }}>
+                    <div style={{ background: 'var(--bg-input)', padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Latitude</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>{gpsData.lat}°</div>
                     </div>
-                    <div style={{ background: 'var(--bg-input)', padding: '0.4rem', borderRadius: 'var(--radius-sm)' }}>
-                      <div style={{ color: 'var(--text-muted)' }}>Longitude</div>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{gpsData.lng}°</div>
+                    <div style={{ background: 'var(--bg-input)', padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Longitude</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>{gpsData.lng}°</div>
                     </div>
-                    <div style={{ background: 'var(--bg-input)', padding: '0.4rem', borderRadius: 'var(--radius-sm)' }}>
-                      <div style={{ color: 'var(--text-muted)' }}>Altitude</div>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{gpsData.alt}</div>
+                    <div style={{ background: 'var(--bg-input)', padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Altitude</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>{gpsData.alt}</div>
                     </div>
-                    <div style={{ background: 'var(--bg-input)', padding: '0.4rem', borderRadius: 'var(--radius-sm)' }}>
-                      <div style={{ color: 'var(--text-muted)' }}>Accuracy</div>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{gpsData.acc}</div>
+                    <div style={{ background: 'var(--bg-input)', padding: '0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Accuracy Margin</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>{gpsData.acc}</div>
                     </div>
                   </div>
                 ) : (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', padding: '0.5rem' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
                     {gpsLoading ? 'Retrieving coordinates...' : 'Coordinates not loaded.'}
                   </div>
                 )}
               </div>
-
             </div>
+
           </div>
 
-          {/* Fallback Simulator Sliders */}
+          {/* Simulator slider */}
           {!isMobile && (
             <div className="glass-card mt-2" style={{ padding: '1.25rem' }}>
-              <h4 style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}><i className="fa-solid fa-sliders" style={{ marginRight: '6px' }}></i> Orientation Simulator (Desktop Fallback)</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
-                    <label>Simulate Rotation (Heading)</label>
-                    <span>{simulatedHeading}°</span>
-                  </div>
-                  <input type="range" min="0" max="359" value={simulatedHeading} onChange={e => setSimulatedHeading(Number(e.target.value))} />
+              <h4 style={{ fontSize: '0.9rem', marginBottom: '0.75rem', fontWeight: 600 }}><i className="fa-solid fa-sliders" style={{ marginRight: '6px' }}></i> Rotation Simulator</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
+                  <label>Simulate Rotation (Heading)</label>
+                  <span>{simulatedHeading}°</span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
-                      <label>Simulate Roll (X-axis)</label>
-                      <span>{simulatedRoll}°</span>
-                    </div>
-                    <input type="range" min="-90" max="90" value={simulatedRoll} onChange={e => setSimulatedRoll(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
-                      <label>Simulate Pitch (Y-axis)</label>
-                      <span>{simulatedPitch}°</span>
-                    </div>
-                    <input type="range" min="-180" max="180" value={simulatedPitch} onChange={e => setSimulatedPitch(Number(e.target.value))} />
-                  </div>
-                </div>
+                <input type="range" min="0" max="359" value={simulatedHeading} onChange={e => setSimulatedHeading(Number(e.target.value))} style={{ width: '100%' }} />
               </div>
             </div>
           )}
 
           <div className="glass-card mt-2">
             <h3>Share this tool</h3>
-            <ShareButtons title="Online Compass & Level — ToolBox Hub" />
+            <ShareButtons title="Online Compass — ToolBox Hub" />
           </div>
         </div>
       </div>
-
-      <AdBanner type="footer" />
     </div>
   );
 }

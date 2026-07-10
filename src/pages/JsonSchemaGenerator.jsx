@@ -5,17 +5,25 @@ import AdBanner from '../components/AdBanner';
 import ShareButtons from '../components/ShareButtons';
 
 function generateSchema(val, options = {}) {
-  const { addMinMax = true, addPatterns = true, draft = 'draft-07' } = options;
+  const { addMinMax = true, addPatterns = true } = options;
   
   if (val === null) return { type: "null" };
   const t = typeof val;
   
   if (t === "string") {
     const s = { type: "string" };
-    if (addPatterns && /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val)) {
-      s.format = "email";
-    } else if (addPatterns && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
-      s.format = "date";
+    if (addPatterns) {
+      if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val)) {
+        s.format = "email";
+      } else if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+        s.format = "date";
+      } else if (/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(val)) {
+        s.format = "uuid";
+      } else if (/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(val)) {
+        s.format = "uri";
+      } else if (/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(val)) {
+        s.format = "ipv4";
+      }
     }
     return s;
   }
@@ -23,7 +31,8 @@ function generateSchema(val, options = {}) {
   if (t === "number" || t === "integer") {
     const n = { type: Number.isInteger(val) ? "integer" : "number" };
     if (addMinMax) {
-      n.minimum = 0; // standard default constraint suggestion
+      n.minimum = 0;
+      n.maximum = 1000;
     }
     return n;
   }
@@ -99,6 +108,9 @@ export default function JsonSchemaGenerator() {
       productName: "Logitech MX Master 3S",
       price: 99.99,
       contactEmail: "support@logitech.com",
+      website: "https://www.logitech.com",
+      ipAddress: "192.168.1.1",
+      deviceUuid: "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
       tags: ["hardware", "mouse", "bluetooth"],
       dimensions: {
         width: 84.3,
@@ -112,11 +124,11 @@ export default function JsonSchemaGenerator() {
 
   return (
     <div className="tool-page">
-      <SEOHead title="JSON Schema Generator & Custom Builder" description="Auto-generate draft JSON schemas from JSON object payloads. Free structure parsing tool." />
+      <SEOHead title="JSON Schema Builder & Custom Validator Formatter" description="Auto-generate draft JSON schemas from JSON object payloads with auto format detectors." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>JSON Schema</span></div>
         <h1><i className="fa-solid fa-file-signature" style={{ color: 'var(--accent-purple-light)' }}></i> JSON Schema Builder</h1>
-        <p>Infer and customize draft-compliant JSON validation structures based on raw input payloads.</p>
+        <p>Infer draft-compliant JSON schemas with format validations for UUID, IPv4, dates, emails, and URLs.</p>
       </div>
 
       <AdBanner type="header" />
@@ -139,14 +151,14 @@ export default function JsonSchemaGenerator() {
                 </select>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.8rem' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.8rem', flexWrap: 'wrap' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
                   <input type="checkbox" checked={addMinMax} onChange={e => setAddMinMax(e.target.checked)} style={{ cursor: 'pointer', accentColor: 'var(--accent-purple-light)' }} />
-                  Add Numeric Defaults
+                  Add Numeric Suggestions
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
                   <input type="checkbox" checked={addPatterns} onChange={e => setAddPatterns(e.target.checked)} style={{ cursor: 'pointer', accentColor: 'var(--accent-purple-light)' }} />
-                  Detect Formats (Email/Date)
+                  Detect Formats (Email/URL/UUID/IP)
                 </label>
               </div>
             </div>
@@ -176,7 +188,7 @@ export default function JsonSchemaGenerator() {
                   <h3 style={{ fontSize: '0.9rem', fontWeight: 600 }}>Compiled JSON Schema</h3>
                   {schemaOutput && (
                     <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy} style={{ gap: '4px' }}>
-                      <i className={copied ? "fa-solid fa-check" : "fa-solid fa-copy"}></i> {copied ? 'Copied' : 'Copy Schema'}
+                      <i className={copied ? "fa-solid fa-check" : "fa-solid fa-copy"}></i> {copied ? 'Copied Schema' : 'Copy Schema'}
                     </button>
                   )}
                 </div>

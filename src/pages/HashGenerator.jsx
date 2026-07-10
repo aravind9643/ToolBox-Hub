@@ -4,7 +4,7 @@ import SEOHead from '../components/SEOHead';
 import AdBanner from '../components/AdBanner';
 import ShareButtons from '../components/ShareButtons';
 
-// Standard clean JS MD5 implementation
+// Clean JS MD5 implementation
 function md5(string) {
   function RotateLeft(lValue, iShiftBits) {
     return (lValue<<iShiftBits) | (lValue>>>(32-iShiftBits));
@@ -133,27 +133,61 @@ export default function HashGenerator() {
   const [inputText, setInputText] = useState('');
   const [hashes, setHashes] = useState({ md5: '', sha1: '', sha256: '', sha512: '' });
   const [copied, setCopied] = useState('');
+  
+  // Custom modifiers
+  const [salt, setSalt] = useState('');
+  const [saltPosition, setSaltPosition] = useState('append'); // 'prepend' | 'append'
+  const [dragActive, setDragActive] = useState(false);
+  const [fileDetails, setFileDetails] = useState(null);
+
+  const finalInputText = useMemo(() => {
+    if (!salt) return inputText;
+    return saltPosition === 'prepend' ? salt + inputText : inputText + salt;
+  }, [inputText, salt, saltPosition]);
 
   useEffect(() => {
     const generateHashes = async () => {
-      if (!inputText) {
+      if (!finalInputText) {
         setHashes({ md5: '', sha1: '', sha256: '', sha512: '' });
         return;
       }
-      const valMd5 = md5(inputText);
-      const valSha1 = await shaHash(inputText, 'SHA-1');
-      const valSha256 = await shaHash(inputText, 'SHA-256');
-      const valSha512 = await shaHash(inputText, 'SHA-512');
+      const valMd5 = md5(finalInputText);
+      const valSha1 = await shaHash(finalInputText, 'SHA-1');
+      const valSha256 = await shaHash(finalInputText, 'SHA-256');
+      const valSha512 = await shaHash(finalInputText, 'SHA-512');
       setHashes({ md5: valMd5, sha1: valSha1, sha256: valSha256, sha512: valSha512 });
     };
 
     generateHashes();
-  }, [inputText]);
+  }, [finalInputText]);
 
   const copy = (text, label) => {
     navigator.clipboard.writeText(text);
     setCopied(label);
     setTimeout(() => setCopied(''), 1200);
+  };
+
+  const handleFileDrop = async (file) => {
+    if (!file) return;
+    setFileDetails({ name: file.name, size: file.size });
+    
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const buffer = e.target.result;
+      const hashBuffer1 = await crypto.subtle.digest('SHA-1', buffer);
+      const hashBuffer256 = await crypto.subtle.digest('SHA-256', buffer);
+      const hashBuffer512 = await crypto.subtle.digest('SHA-512', buffer);
+      
+      const toHex = (buf) => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      setHashes({
+        md5: 'N/A (Calculated for strings)',
+        sha1: toHex(hashBuffer1),
+        sha256: toHex(hashBuffer256),
+        sha512: toHex(hashBuffer512)
+      });
+    };
+    reader.readAsArrayBuffer(file);
   };
 
   const hashList = [
@@ -165,26 +199,86 @@ export default function HashGenerator() {
 
   return (
     <div className="tool-page">
-      <SEOHead title="Hash Generator (MD5, SHA-256, SHA-512)" description="Generate MD5, SHA-1, SHA-256, and SHA-512 cryptographic hashes locally. 100% private." />
+      <SEOHead title="Hash Generator & Checksum Tool" description="Generate SHA-256, SHA-512, MD5 hashes, or verify secure local file checksums completely client-side." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Hash Generator</span></div>
-        <h1><i className="fa-solid fa-hashtag" style={{ color: 'var(--accent-purple-light)' }}></i> Cryptographic Hash Generator</h1>
-        <p>Generate cryptographic hashes from input text using standard local algorithms.</p>
+        <h1><i className="fa-solid fa-hashtag" style={{ color: 'var(--accent-purple-light)' }}></i> Cryptographic Hash Suite</h1>
+        <p>Pre-salt input text strings, generate secure hashes, or calculate local file checksum values.</p>
       </div>
 
       <AdBanner type="header" />
 
       <div className="tool-layout" style={{ gridTemplateColumns: '1fr' }}>
         <div className="tool-main">
+          
           <div className="glass-card">
-            <div className="form-group">
-              <label className="form-label">Input Text</label>
-              <textarea className="form-textarea" rows="4" value={inputText} onChange={e => setInputText(e.target.value)} placeholder="Type or paste text to hash..." />
+            
+            {/* Custom Salts Config */}
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'center' }}>
+              <div className="form-group" style={{ margin: 0, flex: 1 }}>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="Optional salt string..." 
+                  value={salt} 
+                  onChange={e => setSalt(e.target.value)}
+                  style={{ height: '34px', fontSize: '0.82rem' }} 
+                />
+              </div>
+              <div className="form-group" style={{ margin: 0 }}>
+                <select className="form-select" value={saltPosition} onChange={e => setSaltPosition(e.target.value)} style={{ padding: '0.35rem 0.5rem', height: '34px', fontSize: '0.8rem' }}>
+                  <option value="append">Append Salt</option>
+                  <option value="prepend">Prepend Salt</option>
+                </select>
+              </div>
             </div>
 
+            <div className="markdown-workspace" style={{ height: 'auto', minHeight: 'unset' }}>
+              {/* String Hasher Input */}
+              <div className="workspace-column" style={{ display: 'flex', flexDirection: 'column' }}>
+                <h3 style={{ fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: 600 }}>String Hasher Input</h3>
+                <textarea 
+                  className="form-textarea" 
+                  rows="5" 
+                  value={inputText} 
+                  onChange={e => { setInputText(e.target.value); setFileDetails(null); }} 
+                  placeholder="Type or paste text to hash..." 
+                  style={{ fontSize: '0.82rem' }} 
+                />
+              </div>
+
+              {/* File Drop zone */}
+              <div className="workspace-column" style={{ display: 'flex', flexDirection: 'column' }}>
+                <h3 style={{ fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: 600 }}>File Checksum (Secure)</h3>
+                <div 
+                  className="drop-zone"
+                  onDragOver={e => { e.preventDefault(); setDragActive(true); }}
+                  onDragLeave={() => setDragActive(false)}
+                  onDrop={e => { e.preventDefault(); setDragActive(false); if (e.dataTransfer.files?.length > 0) handleFileDrop(e.dataTransfer.files[0]); }}
+                  onClick={() => document.getElementById('hash-file-picker').click()}
+                  style={{ 
+                    border: dragActive ? '2px dashed var(--accent-cyan-light)' : '2px dashed var(--border-color)', 
+                    background: dragActive ? 'var(--bg-glass-hover)' : 'none',
+                    borderRadius: '8px', padding: '1.25rem', textAlign: 'center', cursor: 'pointer', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center'
+                  }}
+                >
+                  <i className="fa-solid fa-file-shield" style={{ color: 'var(--accent-purple-light)', fontSize: '1.25rem', marginBottom: '0.4rem' }}></i>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>Drag file here to compute hash</div>
+                  <input id="hash-file-picker" type="file" style={{ display: 'none' }} onChange={e => handleFileDrop(e.target.files[0])} />
+                </div>
+              </div>
+            </div>
+
+            {fileDetails && (
+              <div style={{ marginTop: '0.75rem', padding: '0.5rem 0.75rem', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.75rem' }}>
+                📄 Checksum for file: <strong>{fileDetails.name}</strong> ({(fileDetails.size / 1024).toFixed(1)} KB)
+              </div>
+            )}
+
+            {/* Hashes output grid */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1.5rem' }}>
               {hashList.map(({ label, value }) => (
-                <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', padding: '0.75rem 1rem', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', cursor: 'pointer' }}
+                <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', padding: '0.75rem 1.0rem', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', cursor: 'pointer' }}
                   onClick={() => value && copy(value, label)}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{label}</span>
@@ -192,22 +286,16 @@ export default function HashGenerator() {
                       {copied === label ? '✓ Copied' : 'Click to copy'}
                     </span>
                   </div>
-                  <code style={{ fontSize: '0.85rem', color: 'var(--accent-cyan-light)', fontFamily: 'monospace', wordBreak: 'break-all', display: 'block', marginTop: '0.2rem' }}>
+                  <code style={{ fontSize: '0.82rem', color: 'var(--accent-cyan-light)', fontFamily: 'monospace', wordBreak: 'break-all', display: 'block', marginTop: '0.2rem' }}>
                     {value || '—'}
                   </code>
                 </div>
               ))}
             </div>
-          </div>
 
-          <div className="glass-card mt-2">
-            <h3>Share this tool</h3>
-            <ShareButtons title="Cryptographic Hash Generator — ToolBox Hub" />
           </div>
         </div>
       </div>
-
-      <AdBanner type="footer" />
     </div>
   );
 }

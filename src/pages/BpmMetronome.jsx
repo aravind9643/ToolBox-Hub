@@ -2,13 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
 import AdBanner from '../components/AdBanner';
-import ShareButtons from '../components/ShareButtons';
 
 export default function BpmMetronome() {
   // BPM Tapper state
   const [taps, setTaps] = useState([]);
   const [tappedBpm, setTappedBpm] = useState(0);
-  const [tapHistory, setTapHistory] = useState([]); // log of last 5 calculated BPMs
+  const [tapHistory, setTapHistory] = useState([]);
 
   // Metronome state
   const [bpm, setBpm] = useState(120);
@@ -40,7 +39,7 @@ export default function BpmMetronome() {
   // BPM Tapper
   const handleTap = () => {
     const now = Date.now();
-    const newTaps = [...taps, now].slice(-5); // keep last 5 taps
+    const newTaps = [...taps, now].slice(-5);
     setTaps(newTaps);
 
     if (newTaps.length > 1) {
@@ -51,8 +50,6 @@ export default function BpmMetronome() {
       const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
       const bpmCalc = Math.round(60000 / avgInterval);
       setTappedBpm(bpmCalc);
-
-      // Append calculated BPM to history log
       setTapHistory(prev => [bpmCalc, ...prev].slice(0, 5));
     }
   };
@@ -87,7 +84,6 @@ export default function BpmMetronome() {
       gainNode.gain.setValueAtTime(0.6, time);
       gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
     } else if (preset === 'drum') {
-      // Synth drum rimshot / kick style
       osc.type = 'sine';
       osc.frequency.setValueAtTime(isFirstBeat ? 260 : 180, time);
       osc.frequency.exponentialRampToValueAtTime(50, time + 0.035);
@@ -171,7 +167,7 @@ export default function BpmMetronome() {
 
   return (
     <div className="tool-page">
-      <SEOHead title="BPM Tapper & Metronome Suite" description="Tap tempo BPM detector and professional metronome with custom woodblock, beep, and synth drum signatures." />
+      <SEOHead title="BPM Tapper & Pendulum Metronome Suite" description="Tap tempo BPM detector and pendulum metronome with woodblock, beep, and synth drum signatures." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>BPM & Metronome</span></div>
         <h1><i className="fa-solid fa-drum" style={{ color: 'var(--accent-purple-light)' }}></i> BPM & Metronome</h1>
@@ -186,14 +182,14 @@ export default function BpmMetronome() {
             
             {/* BPM Tapper Panel */}
             <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center' }}>
-              <h2 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>BPM Tapper</h2>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Tap the button or press <strong>[T]</strong> in beat to measure tempo</p>
+              <h2 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', fontWeight: 600 }}>BPM Tapper</h2>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>Tap the button or press <strong>[T]</strong> in beat to measure tempo</p>
 
               <button 
                 className="btn btn-primary" 
                 onClick={handleTap}
                 style={{
-                  width: '120px', height: '120px', borderRadius: '50%', fontSize: '1.1rem', fontWeight: 700,
+                  width: '110px', height: '110px', borderRadius: '50%', fontSize: '1.1rem', fontWeight: 700,
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   background: 'linear-gradient(135deg, var(--accent-purple-light) 0%, var(--accent-purple) 100%)',
                   boxShadow: '0 8px 24px rgba(96, 165, 250, 0.3)', cursor: 'pointer', border: 'none', color: '#fff',
@@ -203,7 +199,7 @@ export default function BpmMetronome() {
                 onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
               >
                 <span>TAP</span>
-                <span style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '4px' }}>OR PRESS T</span>
+                <span style={{ fontSize: '0.65rem', opacity: 0.8, marginTop: '4px' }}>OR PRESS T</span>
               </button>
 
               <div style={{ marginTop: '1.25rem', minHeight: '60px' }}>
@@ -240,14 +236,13 @@ export default function BpmMetronome() {
 
             {/* Metronome Panel */}
             <div className="glass-card workspace-column" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-              <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Audio Metronome</h2>
+              <h2 style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: 600 }}>Audio Metronome</h2>
               
               {/* Beats visual indicator dots */}
               <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.25rem' }}>
                 {Array.from({ length: timeSignature }).map((_, b) => (
                   <div 
                     key={b} 
-                    className={`metronome-dot ${isPlaying && beat === b ? (b === 0 ? 'first-beat' : 'active') : ''}`}
                     style={{
                       width: '16px',
                       height: '16px',
@@ -261,7 +256,7 @@ export default function BpmMetronome() {
               </div>
 
               {/* Glowing rhythm flash bar */}
-              <div style={{ width: '100%', height: '8px', background: 'var(--bg-input)', borderRadius: '4px', overflow: 'hidden', marginBottom: '1.5rem', position: 'relative' }}>
+              <div style={{ width: '100%', height: '8px', background: 'var(--bg-input)', borderRadius: '4px', overflow: 'hidden', marginBottom: '1rem', position: 'relative' }}>
                 <div style={{
                   position: 'absolute',
                   left: 0, top: 0, bottom: 0,
@@ -274,8 +269,24 @@ export default function BpmMetronome() {
                 }} />
               </div>
 
+              {/* Visual Swinging Pendulum */}
+              <div style={{ width: '100%', height: '110px', position: 'relative', background: 'rgba(0,0,0,0.1)', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: '10px', overflow: 'hidden' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--text-secondary)', zIndex: 10 }} />
+                <div style={{ 
+                  width: '3px', 
+                  height: '75px', 
+                  background: 'linear-gradient(to bottom, var(--text-secondary), var(--accent-purple-light))', 
+                  transformOrigin: 'top center', 
+                  transform: `rotate(${isPlaying ? (beat % 2 === 0 ? '25deg' : '-25deg') : '0deg'})`, 
+                  transition: isPlaying ? `transform ${60.0 / bpm}s cubic-bezier(0.4, 0, 0.2, 1)` : 'transform 0.5s ease',
+                  position: 'relative'
+                }}>
+                  <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'var(--accent-cyan-light)', position: 'absolute', bottom: '-9px', left: '-7px', boxShadow: '0 0 8px var(--accent-cyan-light)' }} />
+                </div>
+              </div>
+
               {/* Sound Presets */}
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Sound Signature:</span>
                 {['woodblock', 'beep', 'drum'].map(type => (
                   <button 
@@ -290,7 +301,7 @@ export default function BpmMetronome() {
               </div>
 
               {/* Time signature select */}
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Time Signature:</span>
                 <select 
                   className="form-select" 
@@ -318,7 +329,7 @@ export default function BpmMetronome() {
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem' }}>
                 <button className="btn btn-primary" onClick={startMetronome} style={{ gap: '8px' }}>
                   <i className={isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play'}></i>
                   {isPlaying ? 'Pause' : 'Start'}
@@ -330,7 +341,7 @@ export default function BpmMetronome() {
                 )}
               </div>
 
-              <div style={{ marginTop: '1.25rem', padding: '0.5rem 0.75rem', background: 'var(--bg-glass-hover)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              <div style={{ marginTop: '1rem', padding: '0.5rem 0.75rem', background: 'var(--bg-glass-hover)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 Press <strong>[Space]</strong> to Toggle Play/Pause
               </div>
             </div>
@@ -338,8 +349,6 @@ export default function BpmMetronome() {
           </div>
         </div>
       </div>
-
-      <AdBanner type="footer" />
     </div>
   );
 }

@@ -3,14 +3,39 @@ import { Link } from 'react-router-dom';
 import AdBanner from '../components/AdBanner';
 import SEOHead from '../components/SEOHead';
 
-// Recursive tree node renderer
-function JSONNode({ data, name, depth = 0 }) {
-  const [collapsed, setCollapsed] = useState(depth > 1); // Auto-collapse deeper layers for readability
+// Recursive tree node renderer with search highlighting
+function JSONNode({ data, name, searchQuery = '', depth = 0 }) {
+  const [collapsed, setCollapsed] = useState(depth > 1);
   
-  if (data === null) {
+  const isMatch = (str) => {
+    if (!searchQuery) return false;
+    return String(str).toLowerCase().includes(searchQuery.toLowerCase());
+  };
+
+  const highlightText = (text) => {
+    if (!searchQuery) return text;
+    const str = String(text);
+    const index = str.toLowerCase().indexOf(searchQuery.toLowerCase());
+    if (index === -1) return text;
+    
+    const prefix = str.substring(0, index);
+    const match = str.substring(index, index + searchQuery.length);
+    const suffix = str.substring(index + searchQuery.length);
+    
     return (
-      <div style={{ paddingLeft: '1.25rem', fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: 1.5 }}>
-        <span style={{ color: 'var(--text-muted)' }}>{name}:</span> <span style={{ color: '#ef4444' }}>null</span>
+      <>
+        {prefix}
+        <mark style={{ background: 'var(--accent-amber)', color: '#000', borderRadius: '2px', padding: '0 2px' }}>{match}</mark>
+        {suffix}
+      </>
+    );
+  };
+
+  if (data === null) {
+    const matched = isMatch(name) || isMatch('null');
+    return (
+      <div style={{ paddingLeft: '1.25rem', fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: 1.5, background: matched ? 'rgba(245, 158, 11, 0.08)' : 'none' }}>
+        <span style={{ color: 'var(--text-muted)' }}>{name ? highlightText(name) : ''}:</span> <span style={{ color: '#ef4444' }}>null</span>
       </div>
     );
   }
@@ -19,14 +44,15 @@ function JSONNode({ data, name, depth = 0 }) {
     const isArray = Array.isArray(data);
     const keys = Object.keys(data);
     const braces = isArray ? ['[', ']'] : ['{', '}'];
+    const matched = name && isMatch(name);
     
     return (
       <div style={{ paddingLeft: '1.25rem', fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: 1.5 }}>
         <span 
-          style={{ cursor: 'pointer', userSelect: 'none', color: 'var(--accent-purple-light)', fontWeight: 600 }} 
+          style={{ cursor: 'pointer', userSelect: 'none', color: 'var(--accent-purple-light)', fontWeight: 600, background: matched ? 'rgba(245, 158, 11, 0.08)' : 'none' }} 
           onClick={() => setCollapsed(!collapsed)}
         >
-          {collapsed ? '▶' : '▼'} {name ? <span style={{ color: 'var(--text-primary)' }}>{name}: </span> : ''}{braces[0]} 
+          {collapsed ? '▶' : '▼'} {name ? <span style={{ color: 'var(--text-primary)' }}>{highlightText(name)}: </span> : ''}{braces[0]} 
           <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 400, marginLeft: '4px' }}>
             {keys.length} {keys.length === 1 ? 'item' : 'items'}
           </span>
@@ -35,7 +61,7 @@ function JSONNode({ data, name, depth = 0 }) {
         {!collapsed && (
           <div style={{ borderLeft: '1px dashed var(--border-color)', marginLeft: '6px', paddingTop: '2px', paddingBottom: '2px' }}>
             {keys.map(k => (
-              <JSONNode key={k} data={data[k]} name={k} depth={depth + 1} />
+              <JSONNode key={k} data={data[k]} name={k} searchQuery={searchQuery} depth={depth + 1} />
             ))}
           </div>
         )}
@@ -44,15 +70,18 @@ function JSONNode({ data, name, depth = 0 }) {
     );
   }
   
-  let valColor = '#3b82f6'; // number (blue)
-  if (typeof data === 'string') valColor = '#10b981'; // string (green)
-  if (typeof data === 'boolean') valColor = '#f59e0b'; // boolean (orange)
+  let valColor = '#3b82f6';
+  if (typeof data === 'string') valColor = '#10b981';
+  if (typeof data === 'boolean') valColor = '#f59e0b';
   
+  const displayVal = typeof data === 'string' ? `"${data}"` : String(data);
+  const matched = isMatch(name) || isMatch(displayVal);
+
   return (
-    <div style={{ paddingLeft: '1.25rem', fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: 1.5 }}>
-      <span style={{ color: 'var(--text-muted)' }}>{name}:</span>{' '}
+    <div style={{ paddingLeft: '1.25rem', fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: 1.5, background: matched ? 'rgba(245, 158, 11, 0.08)' : 'none' }}>
+      <span style={{ color: 'var(--text-muted)' }}>{name ? highlightText(name) : ''}:</span>{' '}
       <span style={{ color: valColor, wordBreak: 'break-all' }}>
-        {typeof data === 'string' ? `"${data}"` : String(data)}
+        {highlightText(displayVal)}
       </span>
     </div>
   );
@@ -66,6 +95,7 @@ export default function JSONFormatter() {
   const [copied, setCopied] = useState(false);
   const [viewMode, setViewMode] = useState('raw'); // 'raw' | 'tree'
   const [parsedObject, setParsedObject] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const stats = useMemo(() => {
     if (!input) return null;
@@ -165,13 +195,13 @@ export default function JSONFormatter() {
 
   return (
     <div className="tool-page">
-      <SEOHead title="JSON Formatter & Validator" description="Format, validate, and minify JSON strings. Analyze structural metrics and browse deep nodes interactively." />
+      <SEOHead title="JSON Formatter, Validator & Tree Inspector" description="Format, validate, search, and minify JSON strings. Analyze structural metrics and browse deep nodes." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>JSON Formatter</span></div>
         <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <i className="fa-solid fa-code" style={{ color: 'var(--accent-purple-light)' }}></i> JSON Formatter & Validator
+          <i className="fa-solid fa-code" style={{ color: 'var(--accent-purple-light)' }}></i> JSON Studio
         </h1>
-        <p>Format, validate, and minify JSON data, with interactive collapsible node tree explorers.</p>
+        <p>Format, validate, minify JSON data, with tree search highlighting selectors.</p>
       </div>
 
       <AdBanner type="header" />
@@ -216,7 +246,7 @@ export default function JSONFormatter() {
 
             {output && (
               <div style={{ marginTop: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.4rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button className={`btn btn-sm ${viewMode === 'raw' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('raw')}>
                       Plain Text View
@@ -227,6 +257,18 @@ export default function JSONFormatter() {
                       Collapsible Tree View
                     </button>
                   </div>
+                  
+                  {viewMode === 'tree' && parsedObject && (
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      placeholder="Search key or value..." 
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      style={{ width: '180px', height: '30px', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} 
+                    />
+                  )}
+
                   {viewMode === 'raw' && (
                     <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy} style={{ gap: '6px' }}>
                       <i className={copied ? "fa-solid fa-check" : "fa-solid fa-copy"}></i> {copied ? 'Copied' : 'Copy'}
@@ -236,7 +278,7 @@ export default function JSONFormatter() {
 
                 {viewMode === 'tree' && parsedObject ? (
                   <div style={{ padding: '1rem', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', minHeight: '140px', overflowY: 'auto' }}>
-                    <JSONNode data={parsedObject} />
+                    <JSONNode data={parsedObject} searchQuery={searchQuery} />
                   </div>
                 ) : (
                   <div className="code-block" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace' }}>{output}</div>
