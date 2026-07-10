@@ -60,7 +60,17 @@ export const tools = [
   make('/jsonpath-evaluator','JSONPath Evaluator','fa-search','Text & Development','query search filter path','Filter and query JSON using JSONPath.','#10b981'),
   make('/json-schema-generator','JSON Schema Generator','fa-file-signature','Text & Development','schema validation structure','Generate draft schemas from JSON payloads.','#f59e0b'),
   make('/json-flattener','JSON Flattener','fa-minimize','Text & Development','flatten unflatten key map','Flatten and unflatten nested JSON paths.','#d946ef'),
-  make('/json-generator','JSON Generator','fa-gears','Text & Development','mock schema data generate validation','Generate random mock JSON data sets for testing.','#10b981')
+  make('/json-generator','JSON Generator','fa-gears','Text & Development','mock schema data generate validation','Generate random mock JSON data sets for testing.','#10b981'),
+  make('/jwt-debugger','JWT Debugger','fa-key','Text & Development','jwt decode json web token signature','Decode and sign JSON Web Tokens offline.','#3b82f6'),
+  make('/cron-generator','Crontab Generator','fa-clock-rotate-left','Productivity','cron cronjob schedule task','Generate and parse cron expressions.','#d946ef'),
+  make('/sql-formatter','SQL Formatter','fa-database','Text & Development','sql database query format beautify','Format and minify SQL queries.','#10b981'),
+  make('/url-parser','URL Parser','fa-link','Converters & Utilities','url query params parser link','Parse and edit URL parameters.','#ef4444'),
+  make('/css-clamp','CSS Clamp Calculator','fa-expand','Design Tools','css typography clamp fluid size','Calculate CSS clamp values for fluid layouts.','#f59e0b'),
+  make('/keycode-inspector','Keycode Inspector','fa-keyboard','Text & Development','keyboard event key code keycode details','Inspect JavaScript keydown events.','#10b981'),
+  make('/user-agent-parser','User Agent Parser','fa-desktop','Converters & Utilities','user agent browser engine parser details','Parse browser user agent details.','#3b82f6'),
+  make('/html-entity-converter','HTML Entity Converter','fa-code','Text & Development','html entity convert symbols html secure','Encode and decode HTML entities.','#f59e0b'),
+  make('/svg-path-visualizer','SVG Path Visualizer','fa-shapes','Design Tools','svg path optimizer visualizer minify','Visualize and minify SVG path elements.','#10b981'),
+  make('/markdown-table-generator','Markdown Table Generator','fa-table','Generators','markdown table grid creator syntax','Create formatted markdown tables.','#ef4444')
 ];
 
 export const categories = [...new Set(tools.map(tool => tool.category))];

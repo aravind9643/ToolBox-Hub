@@ -19,7 +19,8 @@ const fileNames = {
   '/json-to-typescript': 'JsonToTypescript', '/json-diff': 'JsonDiff',
   '/jsonpath-evaluator': 'JsonpathEvaluator', '/json-schema-generator': 'JsonSchemaGenerator',
   '/json-flattener': 'JsonFlattener',
-  '/json-generator': 'JsonGenerator'
+  '/json-generator': 'JsonGenerator',
+  '/css-clamp': 'CssClampCalculator'
 };
 
 const routeComponents = Object.fromEntries(tools.map(tool => {
