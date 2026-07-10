@@ -6,6 +6,7 @@ import ShareButtons from '../components/ShareButtons';
 
 export default function VoiceRecorder() {
   const [recording, setRecording] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [audioUrl, setAudioUrl] = useState('');
   const [recordedBlob, setRecordedBlob] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
@@ -36,6 +37,7 @@ export default function VoiceRecorder() {
     setErrorMsg('');
     setAudioUrl('');
     setRecordedBlob(null);
+    setPaused(false);
     audioChunksRef.current = [];
 
     const hasMediaDevices = !!(navigator.mediaDevices);
@@ -82,7 +84,6 @@ export default function VoiceRecorder() {
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         setRecordedBlob(audioBlob);
         setAudioUrl(URL.createObjectURL(audioBlob));
-        // Reset playback states
         setPlaybackSpeed(1.0);
         setPlaybackVolume(1.0);
       };
@@ -119,6 +120,24 @@ export default function VoiceRecorder() {
       clearInterval(durationIntervalRef.current);
     }
     setRecording(false);
+    setPaused(false);
+  };
+
+  const togglePause = () => {
+    if (!mediaRecorderRef.current) return;
+    if (paused) {
+      mediaRecorderRef.current.resume();
+      setPaused(false);
+      durationIntervalRef.current = setInterval(() => {
+        setDuration(prev => prev + 1);
+      }, 1000);
+    } else {
+      mediaRecorderRef.current.pause();
+      setPaused(true);
+      if (durationIntervalRef.current) {
+        clearInterval(durationIntervalRef.current);
+      }
+    }
   };
 
   const drawWaveform = () => {
@@ -152,7 +171,6 @@ export default function VoiceRecorder() {
           x += barWidth;
         }
       } else {
-        // Sine wave visualizer mode
         analyser.getByteTimeDomainData(dataArray);
         ctx.fillStyle = 'rgba(30, 41, 59, 0.6)';
         ctx.fillRect(0, 0, w, h);
@@ -224,11 +242,11 @@ export default function VoiceRecorder() {
 
   return (
     <div className="tool-page">
-      <SEOHead title="Microphone Voice Recorder & Player" description="Record high-quality vocal clips. Displays live waveform visualizations and offers custom speed playbacks." />
+      <SEOHead title="Microphone Voice Recorder & Wave Visualizer" description="Record vocal clips. Displays live waveform visualizations, pause-and-resume controls, and custom playback rates." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Voice Recorder</span></div>
-        <h1><i className="fa-solid fa-microphone" style={{ color: 'var(--accent-purple-light)' }}></i> Voice Recorder</h1>
-        <p>Record notes directly, analyze wave visualizers, and adjust playback speed controls.</p>
+        <h1><i className="fa-solid fa-microphone" style={{ color: 'var(--accent-purple-light)' }}></i> Voice Recorder Studio</h1>
+        <p>Capture voice notes, view sound osc frequencies, and test playback speeds.</p>
       </div>
 
       <AdBanner type="header" />
@@ -270,8 +288,8 @@ export default function VoiceRecorder() {
                   borderRadius: '6px', padding: '0.25rem 0.6rem', display: 'flex', alignItems: 'center',
                   gap: '6px', fontSize: '0.75rem', fontWeight: 700, color: '#fca5a5'
                 }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-red)', display: 'inline-block', animation: 'rec-pulse 1s infinite' }} />
-                  REC {formatDuration(duration)}
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: paused ? 'var(--accent-amber)' : 'var(--accent-red)', display: 'inline-block', animation: paused ? 'none' : 'rec-pulse 1s infinite' }} />
+                  {paused ? 'PAUSED' : 'REC'} {formatDuration(duration)}
                 </div>
               )}
               {!recording && !audioUrl && (
@@ -287,9 +305,14 @@ export default function VoiceRecorder() {
                   <i className="fa-solid fa-microphone"></i> Start Recording
                 </button>
               ) : (
-                <button className="btn btn-secondary" onClick={stopRecording} style={{ gap: '8px', color: 'var(--accent-red)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
-                  <i className="fa-solid fa-stop"></i> Stop Recording
-                </button>
+                <>
+                  <button className="btn btn-secondary" onClick={togglePause} style={{ gap: '8px' }}>
+                    <i className={paused ? "fa-solid fa-play" : "fa-solid fa-pause"}></i> {paused ? 'Resume' : 'Pause'}
+                  </button>
+                  <button className="btn btn-secondary" onClick={stopRecording} style={{ gap: '8px', color: 'var(--accent-red)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+                    <i className="fa-solid fa-stop"></i> Stop & Save
+                  </button>
+                </>
               )}
               {audioUrl && (
                 <>
@@ -303,7 +326,7 @@ export default function VoiceRecorder() {
               )}
             </div>
 
-            {/* Custom Audio Player with Speed and Volume modifiers */}
+            {/* Custom Audio Player */}
             {audioUrl && (
               <div style={{ width: '100%', background: 'var(--bg-input)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                 <audio ref={audioPlayerRef} src={audioUrl} controls style={{ width: '100%', maxWidth: '420px' }} />
@@ -342,15 +365,8 @@ export default function VoiceRecorder() {
             )}
 
           </div>
-
-          <div className="glass-card mt-2">
-            <h3>Share this tool</h3>
-            <ShareButtons title="Voice Recorder — ToolBox Hub" />
-          </div>
         </div>
       </div>
-
-      <AdBanner type="footer" />
     </div>
   );
 }

@@ -5,6 +5,45 @@ import SEOHead from '../components/SEOHead';
 import AdBanner from '../components/AdBanner';
 import ShareButtons from '../components/ShareButtons';
 
+function WordHighlightedLine({ text, type, counterpartText }) {
+  if (type === 'neutral' || !counterpartText) {
+    return <span>{text}</span>;
+  }
+
+  // Calculate word diff between this line and its counterpart
+  const wordDiff = useMemo(() => {
+    return type === 'removed'
+      ? Diff.diffWords(text, counterpartText)
+      : Diff.diffWords(counterpartText, text);
+  }, [text, counterpartText, type]);
+
+  return (
+    <>
+      {wordDiff.map((part, idx) => {
+        if (type === 'removed' && part.removed) {
+          return (
+            <span key={idx} style={{ background: 'rgba(239, 68, 68, 0.45)', color: '#fee2e2', padding: '1px 2px', borderRadius: '2px', fontWeight: 600 }}>
+              {part.value}
+            </span>
+          );
+        }
+        if (type === 'added' && part.added) {
+          return (
+            <span key={idx} style={{ background: 'rgba(34, 197, 94, 0.45)', color: '#dcfce7', padding: '1px 2px', borderRadius: '2px', fontWeight: 600 }}>
+              {part.value}
+            </span>
+          );
+        }
+        // Neutral words in modified line
+        if (!part.added && !part.removed) {
+          return <span key={idx}>{part.value}</span>;
+        }
+        return null;
+      })}
+    </>
+  );
+}
+
 export default function DiffChecker() {
   const [originalText, setOriginalText] = useState('The quick brown fox jumps over the lazy dog.');
   const [modifiedText, setModifiedText] = useState('The fast brown fox leaps over the lazy dog!');
@@ -23,7 +62,6 @@ export default function DiffChecker() {
     return result;
   }, [originalText, modifiedText, diffMode]);
 
-  // Align rows side-by-side for GitHub style split comparisons
   const alignedRows = useMemo(() => {
     const rows = [];
     let leftLineNo = 1;
@@ -34,7 +72,6 @@ export default function DiffChecker() {
       const part = diffResult[i];
       const nextPart = diffResult[i + 1];
 
-      // Align deletion and insertion blocks side-by-side
       if (part.removed && nextPart && nextPart.added) {
         const leftLines = part.value.split('\n');
         if (leftLines[leftLines.length - 1] === '') leftLines.pop();
@@ -46,8 +83,8 @@ export default function DiffChecker() {
           const lText = leftLines[j];
           const rText = rightLines[j];
           rows.push({
-            left: lText !== undefined ? { lineNo: leftLineNo++, text: lText, type: 'removed' } : null,
-            right: rText !== undefined ? { lineNo: rightLineNo++, text: rText, type: 'added' } : null
+            left: lText !== undefined ? { lineNo: leftLineNo++, text: lText, type: 'removed', counterpart: rText || '' } : null,
+            right: rText !== undefined ? { lineNo: rightLineNo++, text: rText, type: 'added', counterpart: lText || '' } : null
           });
         }
         i += 2;
@@ -58,18 +95,18 @@ export default function DiffChecker() {
         lines.forEach(line => {
           if (part.removed) {
             rows.push({
-              left: { lineNo: leftLineNo++, text: line, type: 'removed' },
+              left: { lineNo: leftLineNo++, text: line, type: 'removed', counterpart: '' },
               right: null
             });
           } else if (part.added) {
             rows.push({
               left: null,
-              right: { lineNo: rightLineNo++, text: line, type: 'added' }
+              right: { lineNo: rightLineNo++, text: line, type: 'added', counterpart: '' }
             });
           } else {
             rows.push({
-              left: { lineNo: leftLineNo++, text: line, type: 'neutral' },
-              right: { lineNo: rightLineNo++, text: line, type: 'neutral' }
+              left: { lineNo: leftLineNo++, text: line, type: 'neutral', counterpart: '' },
+              right: { lineNo: rightLineNo++, text: line, type: 'neutral', counterpart: '' }
             });
           }
         });
@@ -81,10 +118,10 @@ export default function DiffChecker() {
 
   return (
     <div className="tool-page">
-      <SEOHead title="Text Diff Checker" description="Compare two text files side by side or inline and highlight changes. Free client-side diff comparison utility." />
+      <SEOHead title="General Text Diff Checker" description="Compare two text files side by side or inline and highlight changes. Free client-side diff comparison utility." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>Diff Checker</span></div>
-        <h1><i className="fa-solid fa-code-compare" style={{ color: 'var(--accent-purple-light)' }}></i> Text Diff Checker</h1>
+        <h1><i className="fa-solid fa-code-compare" style={{ color: 'var(--accent-purple-light)' }}></i> Visual Diff Checker</h1>
         <p>Compare two text versions side-by-side or inline to spot line changes and word modifications.</p>
       </div>
 
@@ -96,12 +133,12 @@ export default function DiffChecker() {
           <div className="glass-card">
             <div className="markdown-workspace" style={{ height: 'auto', minHeight: 'unset' }}>
               <div className="workspace-column" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <label className="form-label">Original Text</label>
-                <textarea className="form-textarea" rows="6" value={originalText} onChange={e => setOriginalText(e.target.value)} placeholder="Enter original text..." style={{ fontSize: '0.9rem' }} />
+                <label className="form-label" style={{ fontWeight: 600 }}>Original Version</label>
+                <textarea className="form-textarea" rows="6" value={originalText} onChange={e => setOriginalText(e.target.value)} placeholder="Enter original text..." style={{ fontSize: '0.85rem', fontFamily: 'monospace' }} />
               </div>
               <div className="workspace-column" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <label className="form-label">Modified Text</label>
-                <textarea className="form-textarea" rows="6" value={modifiedText} onChange={e => setModifiedText(e.target.value)} placeholder="Enter modified text..." style={{ fontSize: '0.9rem' }} />
+                <label className="form-label" style={{ fontWeight: 600 }}>Modified Version</label>
+                <textarea className="form-textarea" rows="6" value={modifiedText} onChange={e => setModifiedText(e.target.value)} placeholder="Enter modified text..." style={{ fontSize: '0.85rem', fontFamily: 'monospace' }} />
               </div>
             </div>
 
@@ -128,12 +165,10 @@ export default function DiffChecker() {
 
           {/* Results Comparison Output */}
           <div className="glass-card mt-2">
-            <h3>Comparison Output</h3>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Comparison Output</h3>
             
             {viewMode === 'split' ? (
-              /* SIDE-BY-SIDE SPLIT VIEW */
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden', marginTop: '1rem', background: 'var(--bg-input)', fontFamily: 'monospace', fontSize: '0.82rem' }}>
-                
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden', marginTop: '1rem', background: 'var(--bg-input)', fontFamily: 'monospace', fontSize: '0.8rem' }}>
                 {/* Left side: Original */}
                 <div style={{ borderRight: '1px solid var(--border-color)', overflowX: 'auto' }}>
                   <div style={{ padding: '0.5rem', borderBottom: '1px solid var(--border-color)', fontWeight: 'bold', background: 'rgba(255,255,255,0.02)' }}>Original (Deletions)</div>
@@ -143,7 +178,9 @@ export default function DiffChecker() {
                         {row.left?.lineNo || ''}
                       </div>
                       <div style={{ paddingLeft: '0.5rem', whiteSpace: 'pre', color: row.left?.type === 'removed' ? '#f87171' : 'var(--text-primary)' }}>
-                        {row.left?.text || ''}
+                        {row.left ? (
+                          <WordHighlightedLine text={row.left.text} type={row.left.type} counterpartText={row.left.counterpart} />
+                        ) : ''}
                       </div>
                     </div>
                   ))}
@@ -158,16 +195,17 @@ export default function DiffChecker() {
                         {row.right?.lineNo || ''}
                       </div>
                       <div style={{ paddingLeft: '0.5rem', whiteSpace: 'pre', color: row.right?.type === 'added' ? '#4ade80' : 'var(--text-primary)' }}>
-                        {row.right?.text || ''}
+                        {row.right ? (
+                          <WordHighlightedLine text={row.right.text} type={row.right.type} counterpartText={row.right.counterpart} />
+                        ) : ''}
                       </div>
                     </div>
                   ))}
                 </div>
-
               </div>
             ) : (
               /* INLINE VIEW */
-              <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '0.9rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace' }}>
+              <div style={{ marginTop: '1rem', padding: '1.25rem', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '0.85rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace' }}>
                 {diffResult.map((part, i) => {
                   const style = part.added
                     ? { background: 'rgba(34, 197, 94, 0.25)', color: '#4ade80', padding: '1px 3px', borderRadius: '4px' }
@@ -179,15 +217,8 @@ export default function DiffChecker() {
               </div>
             )}
           </div>
-
-          <div className="glass-card mt-2">
-            <h3>Share this tool</h3>
-            <ShareButtons title="Text Diff Checker — ToolBox Hub" />
-          </div>
         </div>
       </div>
-
-      <AdBanner type="footer" />
     </div>
   );
 }

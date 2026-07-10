@@ -88,6 +88,7 @@ export default function AsciiArtGenerator() {
   const [style, setStyle] = useState('block');
   const [blockChar, setBlockChar] = useState('█');
   const [copied, setCopied] = useState(false);
+  const [textColorTheme, setTextColorTheme] = useState('default'); // 'default', 'green', 'cyber', 'gold'
 
   // Image modes states
   const [imageSrc, setImageSrc] = useState('');
@@ -103,7 +104,6 @@ export default function AsciiArtGenerator() {
     const ctx = canvas.getContext('2d');
 
     const width = asciiWidth;
-    // Account for font height-to-width ratio (characters are normally ~1.8 times taller than wide)
     const height = Math.round(width * (img.height / img.width) * 0.52);
 
     canvas.width = width;
@@ -123,13 +123,11 @@ export default function AsciiArtGenerator() {
         const b = imgData[offset + 2];
         const a = imgData[offset + 3];
 
-        // If pixel is transparent, add space
         if (a < 128) {
           ascii += ' ';
           continue;
         }
 
-        // Grayscale conversion
         const brightness = 0.2126 * r + 0.7152 * g + 0.0722 * b;
         const charIdx = Math.floor((brightness / 255) * (ramp.length - 1));
         ascii += ramp[charIdx];
@@ -153,7 +151,6 @@ export default function AsciiArtGenerator() {
     reader.readAsDataURL(file);
   };
 
-  // Re-run image translation when settings change
   const triggerImageRebuild = () => {
     if (!imageSrc) return;
     const img = new Image();
@@ -174,13 +171,44 @@ export default function AsciiArtGenerator() {
     setTimeout(() => setCopied(false), 1200);
   };
 
+  // Get text color styles based on selected theme
+  const getPreColorStyle = () => {
+    switch (textColorTheme) {
+      case 'green':
+        return {
+          color: '#22c55e',
+          textShadow: '0 0 4px rgba(34, 197, 94, 0.4)',
+          background: '#090d16'
+        };
+      case 'cyber':
+        return {
+          backgroundImage: 'linear-gradient(90deg, #ec4899, #a855f7)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          background: '#090d16'
+        };
+      case 'gold':
+        return {
+          backgroundImage: 'linear-gradient(90deg, #f59e0b, #eab308)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          background: '#090d16'
+        };
+      default:
+        return {
+          color: 'var(--text-primary)',
+          background: 'var(--bg-input)'
+        };
+    }
+  };
+
   return (
     <div className="tool-page">
-      <SEOHead title="ASCII Art Generator" description="Convert text to banner fonts or transform photos into ASCII text art grids locally in browser." />
+      <SEOHead title="ASCII Art Font Canvas & Image Converter" description="Convert text to large banner headers or convert photos into retro text-mode art with colors." />
       
       <div className="tool-page-header">
-        <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>ASCII Art Generator</span></div>
-        <h1><i className="fa-solid fa-font" style={{ color: 'var(--accent-purple-light)' }}></i> ASCII Art Generator</h1>
+        <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>ASCII Art</span></div>
+        <h1><i className="fa-solid fa-font" style={{ color: 'var(--accent-purple-light)' }}></i> ASCII Art Suite</h1>
         <p>Convert text to large banner headers or convert photos into retro text-mode art.</p>
       </div>
 
@@ -189,7 +217,6 @@ export default function AsciiArtGenerator() {
       <div className="tool-layout" style={{ gridTemplateColumns: '1fr' }}>
         <div className="tool-main">
           
-          {/* Mode Selector */}
           <div className="tabs" style={{ marginBottom: '1.25rem' }}>
             <button className={`tab-btn ${artMode === 'text' ? 'active' : ''}`} onClick={() => setArtMode('text')}>
               <i className="fa-solid fa-keyboard" style={{ marginRight: '6px' }}></i> Text Banner
@@ -200,109 +227,104 @@ export default function AsciiArtGenerator() {
           </div>
 
           <div className="glass-card">
-            
-            {/* TEXT MODE */}
-            {artMode === 'text' && (
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-                <div className="form-group" style={{ flex: 2, minWidth: '200px' }}>
-                  <label className="form-label">Text (max 15 chars)</label>
-                  <input className="form-input" type="text" value={inputText} onChange={e => setInputText(e.target.value.slice(0, 15))}
-                    placeholder="HELLO WORLD" style={{ fontSize: '1.1rem', fontWeight: 600 }} />
+            {artMode === 'text' ? (
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'flex-end' }}>
+                <div className="form-group" style={{ margin: 0, flex: 1, minWidth: '180px' }}>
+                  <label className="form-label">Banner Text</label>
+                  <input className="form-input" type="text" value={inputText} onChange={e => setInputText(e.target.value)} placeholder="Type text..." />
                 </div>
-                <div className="form-group" style={{ flex: 1, minWidth: '120px' }}>
-                  <label className="form-label">Style</label>
+                
+                <div className="form-group" style={{ margin: 0, minWidth: '120px' }}>
+                  <label className="form-label">Font Character</label>
+                  <select className="form-select" value={blockChar} onChange={e => setBlockChar(e.target.value)}>
+                    {BLOCK_CHARS.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+
+                <div className="form-group" style={{ margin: 0, minWidth: '120px' }}>
+                  <label className="form-label">Font Style</label>
                   <select className="form-select" value={style} onChange={e => setStyle(e.target.value)}>
                     {STYLES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                   </select>
                 </div>
-                {style === 'block' && (
-                  <div className="form-group" style={{ flex: 1, minWidth: '120px' }}>
-                    <label className="form-label">Block Character</label>
-                    <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                      {BLOCK_CHARS.map(c => (
-                        <button key={c} onClick={() => setBlockChar(c)}
-                          style={{ width: '34px', height: '34px', border: `2px solid ${blockChar === c ? 'var(--accent-purple-light)' : 'var(--border-color)'}`, borderRadius: 'var(--radius-sm)', background: blockChar === c ? 'rgba(96,165,250,0.1)' : 'var(--bg-input)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {c}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
 
-            {/* IMAGE MODE */}
-            {artMode === 'image' && (
-              <div style={{ marginBottom: '1.25rem' }}>
-                {/* Drag zone */}
-                <div 
+                <div className="form-group" style={{ margin: 0, minWidth: '120px' }}>
+                  <label className="form-label">Color Theme</label>
+                  <select className="form-select" value={textColorTheme} onChange={e => setTextColorTheme(e.target.value)}>
+                    <option value="default">Default Theme</option>
+                    <option value="green">Green Terminal</option>
+                    <option value="cyber">Cyber Neon</option>
+                    <option value="gold">Gold Rush</option>
+                  </select>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'center' }}>
+                <div
+                  className="drop-zone"
                   onClick={() => fileInputRef.current.click()}
                   onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                  onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+                  onDragLeave={() => setIsDragging(false)}
                   onDrop={(e) => { e.preventDefault(); setIsDragging(false); if (e.dataTransfer.files?.length > 0) handleImageUpload(e.dataTransfer.files[0]); }}
                   style={{
+                    flex: 1,
+                    minWidth: '240px',
                     border: isDragging ? '2px dashed var(--accent-cyan-light)' : '2px dashed var(--border-color)',
-                    background: isDragging ? 'var(--bg-glass-hover)' : 'none',
-                    transition: 'all 0.2s',
-                    padding: '1.5rem',
-                    borderRadius: '12px',
+                    borderRadius: '8px',
+                    padding: '1.25rem',
                     textAlign: 'center',
-                    cursor: 'pointer',
-                    marginBottom: '1rem'
+                    cursor: 'pointer'
                   }}
                 >
-                  <div style={{ fontSize: '2rem', color: 'var(--accent-purple-light)', marginBottom: '0.5rem' }}>
-                    <i className="fa-solid fa-file-arrow-up"></i>
-                  </div>
-                  <h3>Select or drag photo to render</h3>
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={e => handleImageUpload(e.target.files[0])} style={{ display: 'none' }} />
+                  <i className="fa-solid fa-cloud-arrow-up" style={{ color: 'var(--accent-purple-light)', marginBottom: '0.4rem', fontSize: '1.25rem' }}></i>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>Drag photo here or browse</div>
+                  <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleImageUpload(e.target.files[0])} />
                 </div>
 
-                {imageSrc && (
-                  <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.75rem', background: 'var(--bg-glass-hover)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', marginBottom: '1rem' }}>
-                    <div className="form-group" style={{ margin: 0, flex: 1, minWidth: '150px' }}>
-                      <label className="form-label" style={{ fontSize: '0.75rem' }}>Output Columns Width ({asciiWidth} chars)</label>
-                      <input type="range" min="40" max="150" step="5" value={asciiWidth} onChange={e => { setAsciiWidth(Number(e.target.value)); setTimeout(triggerImageRebuild, 50); }} style={{ width: '100%', height: '4px' }} />
-                    </div>
-                    <div className="form-group" style={{ margin: 0, width: '140px' }}>
-                      <label className="form-label" style={{ fontSize: '0.75rem' }}>Character Density</label>
-                      <select className="form-select" value={rampType} onChange={e => { setRampType(e.target.value); setTimeout(triggerImageRebuild, 50); }}>
-                        <option value="short">Normal Contrast</option>
-                        <option value="long">Detailed Ramp</option>
-                        <option value="blocks">Retro Block Fill</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
+                <div className="form-group" style={{ margin: 0, width: '130px' }}>
+                  <label className="form-label" style={{ fontSize: '0.72rem', marginBottom: '0.2rem' }}>Width ({asciiWidth} chars)</label>
+                  <input type="range" min="30" max="150" value={asciiWidth} onChange={e => { setAsciiWidth(Number(e.target.value)); triggerImageRebuild(); }} style={{ width: '100%' }} />
+                </div>
+
+                <div className="form-group" style={{ margin: 0, minWidth: '120px' }}>
+                  <label className="form-label" style={{ fontSize: '0.72rem', marginBottom: '0.2rem' }}>Characters Set</label>
+                  <select className="form-select" value={rampType} onChange={e => { setRampType(e.target.value); triggerImageRebuild(); }} style={{ fontSize: '0.8rem' }}>
+                    <option value="short">Short (Default)</option>
+                    <option value="long">Long (Extended)</option>
+                    <option value="blocks">Blocks (Solid)</option>
+                  </select>
+                </div>
               </div>
             )}
 
-            {/* ASCII Output Display */}
-            <div style={{ position: 'relative' }}>
-              <pre style={{ padding: '1.25rem', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontFamily: '"Courier New", Courier, monospace', fontSize: artMode === 'image' ? 'clamp(0.2rem, 0.7vw, 0.5rem)' : 'clamp(0.45rem, 1.5vw, 0.75rem)', lineHeight: 1.0, color: 'var(--accent-cyan-light)', overflowX: 'auto', whiteSpace: 'pre', userSelect: 'all', minHeight: '100px' }}>
-                {output || (artMode === 'image' ? 'Upload an image above to translate into ASCII art...' : 'Type text above to generate...')}
-              </pre>
-            </div>
+            {output && (
+              <div style={{ marginTop: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Generated ASCII Output</span>
+                  <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={copy}>
+                    <i className={copied ? "fa-solid fa-check" : "fa-solid fa-copy"}></i> {copied ? 'Copied!' : 'Copy Code'}
+                  </button>
+                </div>
+                
+                <pre style={{
+                  padding: '1rem',
+                  fontFamily: 'monospace',
+                  fontSize: '0.62rem',
+                  lineHeight: '1.2',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-color)',
+                  overflowX: 'auto',
+                  whiteSpace: 'pre',
+                  ...getPreColorStyle()
+                }}>
+                  {output}
+                </pre>
+              </div>
+            )}
 
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-              <button className="btn btn-primary" onClick={copy} disabled={!output} style={{ gap: '8px' }}>
-                <i className={copied ? 'fa-solid fa-check' : 'fa-solid fa-copy'}></i>
-                {copied ? 'Copied Art!' : 'Copy ASCII Art'}
-              </button>
-              <button className="btn btn-secondary" onClick={() => { setInputText(''); setImageAscii(''); setImageSrc(''); }} style={{ gap: '8px' }}>
-                <i className="fa-solid fa-trash-can"></i> Clear
-              </button>
-            </div>
-
-            <div style={{ marginTop: '1.25rem', padding: '0.75rem', background: 'var(--bg-glass-hover)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-              <i className="fa-solid fa-circle-info" style={{ color: 'var(--accent-purple-light)', marginRight: '6px' }}></i>
-              ASCII art renders best with monospace fonts. Paste into terminals, README files, or markdown document templates for retro visuals.
-            </div>
           </div>
         </div>
       </div>
-
-      <AdBanner type="footer" />
     </div>
   );
 }

@@ -61,7 +61,7 @@ function generateHarmony(hex, type) {
 
 export default function ColorPaletteGenerator() {
   const [hex, setHex] = useState('#3b82f6');
-  const [harmonyType, setHarmonyType] = useState('complementary');
+  const [harmonyType, setHarmonyType] = useState('triadic');
   const [copied, setCopied] = useState('');
 
   const copy = useCallback((text, label) => {
@@ -71,27 +71,28 @@ export default function ColorPaletteGenerator() {
   }, []);
 
   const harmonyColors = useMemo(() => generateHarmony(hex, harmonyType), [hex, harmonyType]);
-
   const harmonyTypes = ['complementary', 'triadic', 'analogous', 'split-complementary', 'tetradic', 'shades'];
 
   return (
     <div className="tool-page">
-      <SEOHead title="Color Palette Generator" description="Generate stunning color palettes based on color theory harmonies (Complementary, Triadic, Analogous)." />
+      <SEOHead title="Color Palette Harmony Generator & Theme Playground" description="Generate designer color schemes based on analogous, split complementary or triadic theory harmonies." />
       <div className="tool-page-header">
         <div className="breadcrumb">
           <Link to="/">Home</Link> <span>/</span> <span>Color Palette Generator</span>
         </div>
         <h1>
-          <i className="fa-solid fa-palette" style={{ color: 'var(--accent-purple-light)' }}></i> Color Palette Generator
+          <i className="fa-solid fa-palette" style={{ color: 'var(--accent-purple-light)' }}></i> Color Palette & Theme Suite
         </h1>
-        <p>Create harmonious color schemes using color theory rule sets.</p>
+        <p>Create harmonious developer palettes and preview them instantly inside a mock application layout.</p>
       </div>
 
       <AdBanner type="header" />
 
       <div className="tool-layout" style={{ gridTemplateColumns: '1fr' }}>
         <div className="tool-main">
+          
           <div className="glass-card">
+            
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
               <div>
                 <label className="form-label">Base Color</label>
@@ -99,9 +100,10 @@ export default function ColorPaletteGenerator() {
                   <input type="color" value={hex} onChange={e => setHex(e.target.value)}
                     style={{ width: 48, height: 42, border: 'none', borderRadius: 8, cursor: 'pointer' }} />
                   <input className="form-input" type="text" value={hex} onChange={e => { if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) setHex(e.target.value); }}
-                    style={{ width: '120px', fontWeight: 600 }} />
+                    style={{ width: '110px', fontWeight: 600 }} />
                 </div>
               </div>
+              
               <div style={{ flex: 1, minWidth: '200px' }}>
                 <label className="form-label">Harmony Type</label>
                 <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
@@ -120,22 +122,74 @@ export default function ColorPaletteGenerator() {
               </div>
             </div>
 
+            {/* Colors Listing grid */}
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
               {harmonyColors.map((c, i) => (
-                <div key={i} style={{ flex: '1', minWidth: '100px', cursor: 'pointer' }} onClick={() => copy(c, `harm-${i}`)}>
-                  <div style={{ height: '120px', borderRadius: '12px', background: c, border: '2px solid var(--border-color)', transition: 'transform 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
+                <div key={i} style={{ flex: '1', minWidth: '90px', cursor: 'pointer' }} onClick={() => copy(c, `harm-${i}`)}>
+                  <div style={{ height: '110px', borderRadius: '12px', background: c, border: '2px solid var(--border-color)', transition: 'transform 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.03)'}
                     onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                   />
-                  <div style={{ textAlign: 'center', marginTop: '0.4rem', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>{c.toUpperCase()}</div>
-                  <div style={{ textAlign: 'center', fontSize: '0.7rem', color: copied === `harm-${i}` ? 'var(--accent-green)' : 'var(--text-muted)' }}>
-                    {copied === `harm-${i}` ? '✓ Copied!' : 'Click to copy'}
+                  <div style={{ textAlign: 'center', marginTop: '0.4rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>{c.toUpperCase()}</div>
+                  <div style={{ textAlign: 'center', fontSize: '0.65rem', color: copied === `harm-${i}` ? 'var(--accent-green)' : 'var(--text-muted)' }}>
+                    {copied === `harm-${i}` ? '✓ Copied' : 'Click to copy'}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div style={{ marginTop: '1.5rem' }}>
+            {/* Mock Dashboard Layout Preview */}
+            <div style={{
+              margin: '1.5rem 0',
+              padding: '1.25rem',
+              borderRadius: '12px',
+              border: '1px solid var(--border-color)',
+              background: '#090d16',
+              color: '#ffffff',
+              textAlign: 'left'
+            }}>
+              <h3 style={{ fontSize: '0.9rem', marginBottom: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                <i className="fa-solid fa-desktop"></i> Live Theme Playground UI
+              </h3>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem', background: '#0e1726', borderRadius: '8px', border: '1px solid #1f2937', padding: '1rem' }}>
+                {/* Left Panel Sidebar */}
+                <div style={{ borderRight: '1px solid #374151', paddingRight: '0.75rem' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: harmonyColors[0], marginBottom: '0.75rem' }}>🔥 Dashboard App</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ fontSize: '0.7rem', padding: '4px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', color: harmonyColors[1] || harmonyColors[0] }}>✓ Overview</div>
+                    <div style={{ fontSize: '0.7rem', padding: '4px', color: '#9ca3af' }}>Analytics</div>
+                    <div style={{ fontSize: '0.7rem', padding: '4px', color: '#9ca3af' }}>Configuration</div>
+                  </div>
+                </div>
+                
+                {/* Main Body */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Active Projects Status</span>
+                    <span style={{ background: harmonyColors[2] || harmonyColors[0], color: '#000', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '9999px', fontWeight: 700 }}>
+                      Live
+                    </span>
+                  </div>
+                  
+                  <div style={{ height: '4px', width: '100%', background: '#374151', borderRadius: '9999px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: '70%', background: harmonyColors[0], borderRadius: '9999px' }} />
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
+                    <button style={{ flex: 1, background: harmonyColors[0], border: 'none', borderRadius: '4px', color: '#000', padding: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>
+                      Primary Action
+                    </button>
+                    <button style={{ flex: 1, background: 'transparent', border: `1px solid ${harmonyColors[1] || harmonyColors[0]}`, borderRadius: '4px', color: harmonyColors[1] || harmonyColors[0], padding: '6px', fontSize: '0.75rem', cursor: 'pointer' }}>
+                      Outline
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Code Export Blocks */}
+            <div style={{ marginTop: '1.25rem' }}>
               <div className="tabs" style={{ background: 'var(--bg-input)', padding: '2px', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '0.75rem' }}>
                 <button className={`tab-btn ${copied === 'css' || copied === '' ? 'active' : ''}`} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }} onClick={() => copy(harmonyColors.map((c, i) => `--color-${i + 1}: ${c};`).join('\n'), 'css')}>Copy CSS Variables</button>
                 <button className={`tab-btn ${copied === 'tw' ? 'active' : ''}`} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }} onClick={() => copy(`colors: {\n  ${harmonyColors.map((c, i) => `color${i + 1}: '${c}',`).join('\n  ')}\n}`, 'tw')}>Copy Tailwind Config</button>
@@ -150,16 +204,10 @@ export default function ColorPaletteGenerator() {
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="glass-card mt-2">
-            <h3>Share this tool</h3>
-            <ShareButtons title="Color Palette Generator — ToolBox Hub" />
+            
           </div>
         </div>
       </div>
-
-      <AdBanner type="footer" />
     </div>
   );
 }

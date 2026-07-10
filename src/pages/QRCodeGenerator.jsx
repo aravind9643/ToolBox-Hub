@@ -6,7 +6,7 @@ import SEOHead from '../components/SEOHead';
 import ShareButtons from '../components/ShareButtons';
 
 export default function QRCodeGenerator() {
-  // Templates: 'text' | 'wifi' | 'email'
+  // Templates: 'text' | 'wifi' | 'email' | 'upi'
   const [template, setTemplate] = useState('text');
   
   // Input fields
@@ -17,6 +17,12 @@ export default function QRCodeGenerator() {
   const [emailTo, setEmailTo] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
+
+  // UPI fields
+  const [upiAddress, setUpiAddress] = useState('');
+  const [upiName, setUpiName] = useState('');
+  const [upiAmount, setUpiAmount] = useState('');
+  const [upiNote, setUpiNote] = useState('');
 
   // Styles
   const [fgColor, setFgColor] = useState('#3b82f6');
@@ -60,6 +66,14 @@ export default function QRCodeGenerator() {
       if (emailBody) parts.push(`body=${encodeURIComponent(emailBody)}`);
       const query = parts.length > 0 ? `?${parts.join('&')}` : '';
       qrText = `mailto:${emailTo}${query}`;
+    } else if (template === 'upi') {
+      const parts = [];
+      if (upiAddress) parts.push(`pa=${encodeURIComponent(upiAddress)}`);
+      if (upiName) parts.push(`pn=${encodeURIComponent(upiName)}`);
+      if (upiAmount) parts.push(`am=${encodeURIComponent(upiAmount)}`);
+      if (upiNote) parts.push(`tn=${encodeURIComponent(upiNote)}`);
+      parts.push(`cu=INR`);
+      qrText = `upi://pay?${parts.join('&')}`;
     }
 
     if (!qrText || !canvasRef.current) return;
@@ -176,7 +190,7 @@ export default function QRCodeGenerator() {
       .catch((err) => {
         console.error('Error drawing QR Code:', err);
       });
-  }, [text, ssid, password, encryption, emailTo, emailSubject, emailBody, template, fgColor, bgColor, useGradient, gradStart, gradEnd, size, logoType, customLogoImg]);
+  }, [text, ssid, password, encryption, emailTo, emailSubject, emailBody, upiAddress, upiName, upiAmount, upiNote, template, fgColor, bgColor, useGradient, gradStart, gradEnd, size, logoType, customLogoImg]);
 
   const handleDownload = () => {
     if (!canvasRef.current) return;
@@ -208,6 +222,7 @@ export default function QRCodeGenerator() {
               <button className={`tab-btn ${template === 'text' ? 'active' : ''}`} onClick={() => setTemplate('text')}>URL / Text</button>
               <button className={`tab-btn ${template === 'wifi' ? 'active' : ''}`} onClick={() => setTemplate('wifi')}>Wi-Fi Network</button>
               <button className={`tab-btn ${template === 'email' ? 'active' : ''}`} onClick={() => setTemplate('email')}>Email Mailto</button>
+              <button className={`tab-btn ${template === 'upi' ? 'active' : ''}`} onClick={() => setTemplate('upi')}>UPI Payment</button>
             </div>
 
             {/* Template Fields */}
@@ -254,6 +269,31 @@ export default function QRCodeGenerator() {
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Message Body</label>
                   <textarea className="form-textarea" rows="3" value={emailBody} onChange={e => setEmailBody(e.target.value)} placeholder="Write message details..." />
+                </div>
+              </div>
+            )}
+
+            {template === 'upi' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
+                <div className="grid-2">
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">UPI ID / VPA (Virtual Payment Address)</label>
+                    <input className="form-input" type="text" value={upiAddress} onChange={e => setUpiAddress(e.target.value)} placeholder="e.g. someone@upi" required />
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Payee Name</label>
+                    <input className="form-input" type="text" value={upiName} onChange={e => setUpiName(e.target.value)} placeholder="e.g. John Doe" required />
+                  </div>
+                </div>
+                <div className="grid-2">
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Amount (INR, Optional)</label>
+                    <input className="form-input" type="number" min="0" value={upiAmount} onChange={e => setUpiAmount(e.target.value)} placeholder="e.g. 500" />
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Transaction Note (Optional)</label>
+                    <input className="form-input" type="text" value={upiNote} onChange={e => setUpiNote(e.target.value)} placeholder="e.g. Dinner share" />
+                  </div>
                 </div>
               </div>
             )}

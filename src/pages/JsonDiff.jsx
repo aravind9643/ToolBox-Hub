@@ -1,139 +1,13 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { diffLines } from 'diff';
 import SEOHead from '../components/SEOHead';
 import AdBanner from '../components/AdBanner';
 import ShareButtons from '../components/ShareButtons';
 
-function computeJsonDiff(o1, o2) {
-  if (typeof o1 !== typeof o2 || Array.isArray(o1) !== Array.isArray(o2)) {
-    return { type: 'modified', oldVal: o1, newVal: o2 };
-  }
-  if (o1 === null || typeof o1 !== 'object') {
-    if (o1 === o2) return { type: 'unchanged', val: o1 };
-    return { type: 'modified', oldVal: o1, newVal: o2 };
-  }
-  
-  if (Array.isArray(o1)) {
-    const maxLen = Math.max(o1.length, o2.length);
-    const diffs = [];
-    let unchanged = true;
-    for (let i = 0; i < maxLen; i++) {
-      if (i >= o1.length) {
-        diffs.push({ type: 'added', val: o2[i] });
-        unchanged = false;
-      } else if (i >= o2.length) {
-        diffs.push({ type: 'deleted', val: o1[i] });
-        unchanged = false;
-      } else {
-        const sub = computeJsonDiff(o1[i], o2[i]);
-        diffs.push(sub);
-        if (sub.type !== 'unchanged') unchanged = false;
-      }
-    }
-    if (unchanged) return { type: 'unchanged', val: o1 };
-    return { type: 'array-diff', children: diffs };
-  }
-  
-  const allKeys = [...new Set([...Object.keys(o1), ...Object.keys(o2)])];
-  const diffs = {};
-  let unchanged = true;
-  allKeys.forEach(k => {
-    if (!(k in o1)) {
-      diffs[k] = { type: 'added', val: o2[k] };
-      unchanged = false;
-    } else if (!(k in o2)) {
-      diffs[k] = { type: 'deleted', val: o1[k] };
-      unchanged = false;
-    } else {
-      const sub = computeJsonDiff(o1[k], o2[k]);
-      diffs[k] = sub;
-      if (sub.type !== 'unchanged') unchanged = false;
-    }
-  });
-  if (unchanged) return { type: 'unchanged', val: o1 };
-  return { type: 'object-diff', children: diffs };
-}
-
-// Recursive visual diff node renderer
-function DiffNode({ diff, name, depth = 0, hideUnchanged = false }) {
-  if (hideUnchanged && diff.type === 'unchanged') return null;
-
-  const pad = depth * 16;
-  const lineStyle = { paddingLeft: `${pad}px`, fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: 1.5 };
-
-  if (diff.type === 'unchanged') {
-    return (
-      <div style={{ ...lineStyle, color: 'var(--text-muted)' }}>
-        <span>{name ? `${name}: ` : ''}</span>
-        <span>{typeof diff.val === 'object' ? JSON.stringify(diff.val) : String(diff.val)}</span>
-      </div>
-    );
-  }
-
-  if (diff.type === 'added') {
-    return (
-      <div style={{ ...lineStyle, color: '#22c55e', background: 'rgba(34, 197, 94, 0.1)', borderLeft: '3px solid #22c55e' }}>
-        <span>+ {name ? `${name}: ` : ''}</span>
-        <span>{JSON.stringify(diff.val)}</span>
-      </div>
-    );
-  }
-
-  if (diff.type === 'deleted') {
-    return (
-      <div style={{ ...lineStyle, color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', borderLeft: '3px solid #ef4444', textDecoration: 'line-through' }}>
-        <span>- {name ? `${name}: ` : ''}</span>
-        <span>{JSON.stringify(diff.val)}</span>
-      </div>
-    );
-  }
-
-  if (diff.type === 'modified') {
-    return (
-      <div style={{ ...lineStyle, color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', borderLeft: '3px solid #f59e0b' }}>
-        <span>✎ {name ? `${name}: ` : ''}</span>
-        <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>{JSON.stringify(diff.oldVal)}</span>
-        <span style={{ margin: '0 8px' }}>➔</span>
-        <span>{JSON.stringify(diff.newVal)}</span>
-      </div>
-    );
-  }
-
-  if (diff.type === 'array-diff') {
-    return (
-      <div style={{ paddingLeft: `${pad}px`, fontFamily: 'monospace', fontSize: '0.85rem' }}>
-        <span style={{ fontWeight: 600 }}>{name ? `${name}: ` : ''}[</span>
-        <div style={{ borderLeft: '1px dashed var(--border-color)', margin: '2px 0' }}>
-          {diff.children.map((child, idx) => (
-            <DiffNode key={idx} diff={child} name={String(idx)} depth={1} hideUnchanged={hideUnchanged} />
-          ))}
-        </div>
-        <span style={{ fontWeight: 600 }}>]</span>
-      </div>
-    );
-  }
-
-  if (diff.type === 'object-diff') {
-    return (
-      <div style={{ paddingLeft: `${pad}px`, fontFamily: 'monospace', fontSize: '0.85rem' }}>
-        <span style={{ fontWeight: 600 }}>{name ? `${name}: ` : ''}&#123;</span>
-        <div style={{ borderLeft: '1px dashed var(--border-color)', margin: '2px 0' }}>
-          {Object.keys(diff.children).map(k => (
-            <DiffNode key={k} diff={diff.children[k]} name={k} depth={1} hideUnchanged={hideUnchanged} />
-          ))}
-        </div>
-        <span style={{ fontWeight: 600 }}>&#125;</span>
-      </div>
-    );
-  }
-
-  return null;
-}
-
 export default function JsonDiff() {
   const [json1, setJson1] = useState('');
   const [json2, setJson2] = useState('');
-  const [hideUnchanged, setHideUnchanged] = useState(false);
   const [error, setError] = useState('');
 
   const sample1 = JSON.stringify({
@@ -158,13 +32,51 @@ export default function JsonDiff() {
     setError('');
   };
 
+  // Align lines for side-by-side split visual diff
   const diffResult = useMemo(() => {
     if (!json1.trim() || !json2.trim()) return null;
     try {
       const o1 = JSON.parse(json1);
       const o2 = JSON.parse(json2);
       setError('');
-      return computeJsonDiff(o1, o2);
+      
+      const str1 = JSON.stringify(o1, null, 2);
+      const str2 = JSON.stringify(o2, null, 2);
+      
+      const diffs = diffLines(str1, str2);
+      
+      const leftLines = [];
+      const rightLines = [];
+      
+      let leftNum = 1;
+      let rightNum = 1;
+      
+      diffs.forEach(part => {
+        const lines = part.value.split('\n');
+        // Remove trailing empty line caused by trailing newline split
+        if (lines.length > 1 && lines[lines.length - 1] === '') {
+          lines.pop();
+        }
+        
+        if (part.added) {
+          lines.forEach(line => {
+            rightLines.push({ type: 'added', text: line, num: rightNum++ });
+            leftLines.push({ type: 'empty', text: '', num: '' });
+          });
+        } else if (part.removed) {
+          lines.forEach(line => {
+            leftLines.push({ type: 'removed', text: line, num: leftNum++ });
+            rightLines.push({ type: 'empty', text: '', num: '' });
+          });
+        } else {
+          lines.forEach(line => {
+            leftLines.push({ type: 'unchanged', text: line, num: leftNum++ });
+            rightLines.push({ type: 'unchanged', text: line, num: rightNum++ });
+          });
+        }
+      });
+      
+      return { leftLines, rightLines };
     } catch (e) {
       setError(`JSON Parsing Error: ${e.message}`);
       return null;
@@ -173,11 +85,11 @@ export default function JsonDiff() {
 
   return (
     <div className="tool-page">
-      <SEOHead title="JSON Diff Structural Compare" description="Compare two JSON objects structurally, ignoring key sorting. Visual highlights of added, modified, or deleted attributes." />
+      <SEOHead title="JSON Visual Split Diff Checker" description="Compare two JSON objects side-by-side with line matching. Visual highlights of structural additions, changes, and deletions." />
       <div className="tool-page-header">
         <div className="breadcrumb"><Link to="/">Home</Link> <span>/</span> <span>JSON Diff</span></div>
-        <h1><i className="fa-solid fa-code-compare" style={{ color: 'var(--accent-purple-light)' }}></i> JSON Diff Checker</h1>
-        <p>Visually compare two JSON payloads and inspect structural additions, changes, or deletions.</p>
+        <h1><i className="fa-solid fa-code-compare" style={{ color: 'var(--accent-purple-light)' }}></i> Visual JSON Diff Checker</h1>
+        <p>Visually compare two JSON payloads side-by-side with synchronized structural comparisons.</p>
       </div>
 
       <AdBanner type="header" />
@@ -187,39 +99,37 @@ export default function JsonDiff() {
           
           <div className="glass-card">
             
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
               <button className="btn btn-secondary btn-sm" onClick={loadSample} style={{ gap: '6px' }}>
                 <i className="fa-solid fa-file-lines"></i> Load Demo JSONs
               </button>
-              <button 
-                className={`btn btn-sm ${hideUnchanged ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => setHideUnchanged(!hideUnchanged)}
-              >
-                {hideUnchanged ? 'Show Unchanged' : 'Hide Unchanged'}
+              <button className="btn btn-secondary btn-sm" onClick={() => { setJson1(''); setJson2(''); setError(''); }} style={{ gap: '6px', color: 'var(--accent-red)' }}>
+                <i className="fa-solid fa-trash-can"></i> Clear
               </button>
             </div>
 
+            {/* Input panes */}
             <div className="grid-2" style={{ gap: '1rem' }}>
               <div className="form-group">
-                <label className="form-label">JSON Object 1 (Original)</label>
+                <label className="form-label" style={{ fontWeight: 600 }}>Original JSON</label>
                 <textarea 
                   className="form-textarea"
-                  rows="8"
+                  rows="10"
                   value={json1}
                   onChange={e => setJson1(e.target.value)}
-                  placeholder="Paste original JSON..."
-                  style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+                  placeholder="Paste original JSON here..."
+                  style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">JSON Object 2 (Modified)</label>
+                <label className="form-label" style={{ fontWeight: 600 }}>Modified JSON</label>
                 <textarea 
                   className="form-textarea"
-                  rows="8"
+                  rows="10"
                   value={json2}
                   onChange={e => setJson2(e.target.value)}
-                  placeholder="Paste modified JSON..."
-                  style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}
+                  placeholder="Paste modified JSON here..."
+                  style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}
                 />
               </div>
             </div>
@@ -230,13 +140,86 @@ export default function JsonDiff() {
               </div>
             )}
 
-            {/* Diff Result Board */}
+            {/* Visual Side-by-Side Diff Board */}
             {diffResult && (
-              <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-                <h3 style={{ fontSize: '0.95rem', marginBottom: '0.75rem' }}>Comparison Result</h3>
-                <div style={{ padding: '1rem', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', overflowX: 'auto', minHeight: '100px' }}>
-                  <DiffNode diff={diffResult} hideUnchanged={hideUnchanged} />
+              <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }}>
+                <h3 style={{ fontSize: '0.95rem', marginBottom: '0.75rem', fontWeight: 600 }}>
+                  <i className="fa-solid fa-split-screen"></i> Side-by-Side Comparison
+                </h3>
+                
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)',
+                  overflow: 'hidden'
+                }}>
+                  {/* Left Column (Original/Removed) */}
+                  <div style={{ borderRight: '1px solid var(--border-color)', overflowX: 'auto' }}>
+                    <div style={{ padding: '0.5rem', background: 'var(--bg-glass-hover)', borderBottom: '1px solid var(--border-color)', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                      Original Payload
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      {diffResult.leftLines.map((line, idx) => {
+                        let rowBg = 'transparent';
+                        let textColor = 'var(--text-primary)';
+                        if (line.type === 'removed') {
+                          rowBg = 'rgba(239, 68, 68, 0.15)';
+                          textColor = 'var(--accent-red)';
+                        } else if (line.type === 'empty') {
+                          rowBg = 'rgba(0, 0, 0, 0.15)';
+                        } else if (line.type === 'unchanged') {
+                          textColor = 'var(--text-secondary)';
+                        }
+                        
+                        return (
+                          <div key={idx} style={{ display: 'flex', background: rowBg, fontFamily: 'monospace', fontSize: '0.8rem', minHeight: '1.5rem', alignItems: 'center' }}>
+                            <span style={{ width: '36px', textAlign: 'right', paddingRight: '8px', color: 'var(--text-muted)', borderRight: '1px solid var(--border-color)', select: 'none', userSelect: 'none', fontSize: '0.7rem' }}>
+                              {line.num}
+                            </span>
+                            <span style={{ paddingLeft: '8px', whiteSpace: 'pre', color: textColor }}>
+                              {line.type === 'removed' ? '- ' : line.type === 'unchanged' ? '  ' : '  '}{line.text}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Right Column (Modified/Added) */}
+                  <div style={{ overflowX: 'auto' }}>
+                    <div style={{ padding: '0.5rem', background: 'var(--bg-glass-hover)', borderBottom: '1px solid var(--border-color)', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                      Modified Payload
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      {diffResult.rightLines.map((line, idx) => {
+                        let rowBg = 'transparent';
+                        let textColor = 'var(--text-primary)';
+                        if (line.type === 'added') {
+                          rowBg = 'rgba(34, 197, 94, 0.15)';
+                          textColor = 'var(--accent-green)';
+                        } else if (line.type === 'empty') {
+                          rowBg = 'rgba(0, 0, 0, 0.15)';
+                        } else if (line.type === 'unchanged') {
+                          textColor = 'var(--text-secondary)';
+                        }
+                        
+                        return (
+                          <div key={idx} style={{ display: 'flex', background: rowBg, fontFamily: 'monospace', fontSize: '0.8rem', minHeight: '1.5rem', alignItems: 'center' }}>
+                            <span style={{ width: '36px', textAlign: 'right', paddingRight: '8px', color: 'var(--text-muted)', borderRight: '1px solid var(--border-color)', select: 'none', userSelect: 'none', fontSize: '0.7rem' }}>
+                              {line.num}
+                            </span>
+                            <span style={{ paddingLeft: '8px', whiteSpace: 'pre', color: textColor }}>
+                              {line.type === 'added' ? '+ ' : line.type === 'unchanged' ? '  ' : '  '}{line.text}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
+
               </div>
             )}
 
@@ -244,7 +227,7 @@ export default function JsonDiff() {
 
           <div className="glass-card mt-2">
             <h3>Share this tool</h3>
-            <ShareButtons title="JSON Diff Checker — ToolBox Hub" />
+            <ShareButtons title="JSON Side-by-Side Diff Checker — ToolBox Hub" />
           </div>
         </div>
       </div>
