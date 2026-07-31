@@ -70,7 +70,8 @@ export const tools = [
   make('/user-agent-parser','User Agent Parser','fa-desktop','Converters & Utilities','user agent browser engine parser details','Parse browser user agent details.','#3b82f6'),
   make('/html-entity-converter','HTML Entity Converter','fa-code','Text & Development','html entity convert symbols html secure','Encode and decode HTML entities.','#f59e0b'),
   make('/svg-path-visualizer','SVG Path Visualizer','fa-shapes','Design Tools','svg path optimizer visualizer minify','Visualize and minify SVG path elements.','#10b981'),
-  make('/markdown-table-generator','Markdown Table Generator','fa-table','Generators','markdown table grid creator syntax','Create formatted markdown tables.','#ef4444')
+  make('/markdown-table-generator','Markdown Table Generator','fa-table','Generators','markdown table grid creator syntax','Create formatted markdown tables.','#ef4444'),
+  make('/age-verification','Age Verification','fa-id-card','Converters & Utilities','barcode scan age verify id license dob','Verify age via barcode scanning or manual date entry.','#10b981')
 ];
 
 export const categories = [...new Set(tools.map(tool => tool.category))];
