@@ -32,10 +32,6 @@ export default function QRCodeScanner() {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
       streamRef.current = stream;
       setScanning(true);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
     } catch (err) {
       setScanError('Camera access denied. Please allow camera permissions and try again.');
     }
@@ -76,6 +72,10 @@ export default function QRCodeScanner() {
 
   useEffect(() => {
     if (!scanning) return;
+    if (videoRef.current && streamRef.current && !videoRef.current.srcObject) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
     const scan = async () => {
       if (!videoRef.current || !scanCanvasRef.current) return;
       const video = videoRef.current;

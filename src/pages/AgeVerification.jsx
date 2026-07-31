@@ -161,10 +161,6 @@ export default function AgeVerification() {
       });
       streamRef.current = stream;
       setScanning(true);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
     } catch (err) {
       setError('Camera access denied. Please allow camera permissions and try again.');
     }
@@ -173,11 +169,19 @@ export default function AgeVerification() {
   /* ── frame-by-frame barcode scanning loop ── */
   useEffect(() => {
     if (!scanning) return;
-    const scan = async () => {
-      if (!videoRef.current || !canvasRef.current) return;
+
+    if (videoRef.current && streamRef.current && !videoRef.current.srcObject) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
+
+    let isProcessing = false;
+    const interval = setInterval(async () => {
+      if (isProcessing || !videoRef.current || !canvasRef.current) return;
       const video = videoRef.current;
       const canvas = canvasRef.current;
       if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        isProcessing = true;
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
@@ -204,23 +208,19 @@ export default function AgeVerification() {
             locate: true,
             src: dataUrl
           }, (result) => {
+            isProcessing = false;
             if (result && result.codeResult && result.codeResult.code) {
               processBarcode(result.codeResult.code);
               stopScanner();
-              return;
             }
-            // No barcode found, continue scanning
-            animFrameRef.current = requestAnimationFrame(scan);
           });
-          return; // wait for decodeSingle callback
         } catch {
-          // Quagga import error, keep trying
+          isProcessing = false;
         }
       }
-      animFrameRef.current = requestAnimationFrame(scan);
-    };
-    animFrameRef.current = requestAnimationFrame(scan);
-    return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
+    }, 250);
+
+    return () => clearInterval(interval);
   }, [scanning, stopScanner, processBarcode]);
 
   /* ── file upload decoding ── */
