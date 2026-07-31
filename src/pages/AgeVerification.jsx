@@ -94,15 +94,18 @@ export default function AgeVerification() {
   const [manualDob, setManualDob] = useState('');
   const [showResult, setShowResult] = useState(false); // for animation
 
-  const scannerRef = useRef(null);
-  const quaggaRef = useRef(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const animFrameRef = useRef(null);
+  const streamRef = useRef(null);
 
   /* ── cleanup ── */
-  const stopScanner = useCallback(async () => {
+  const stopScanner = useCallback(() => {
     setScanning(false);
-    if (quaggaRef.current) {
-      try { quaggaRef.current.stop(); } catch {}
-      quaggaRef.current = null;
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
     }
   }, []);
 
@@ -145,78 +148,80 @@ export default function AgeVerification() {
     setTimeout(() => setShowResult(true), 50);
   }, [minAge]);
 
-  /* ── start camera scanner ── */
+  /* ── start camera scanner (getUserMedia + decodeSingle per frame) ── */
   const startScanner = useCallback(async () => {
     setResult(null);
     setError('');
     setRawData('');
     setShowResult(false);
-    setScanning(true);
-
-    // Wait for the next frame so the scanner container is visible in the DOM
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
     try {
-      const Quagga = (await import('@ericblade/quagga2')).default;
-
-      await new Promise((resolve, reject) => {
-        Quagga.init({
-          inputStream: {
-            name: 'Live',
-            type: 'LiveStream',
-            target: scannerRef.current,
-            constraints: {
-              facingMode: 'environment',
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            }
-          },
-          locator: {
-            patchSize: 'medium',
-            halfSample: true
-          },
-          numOfWorkers: navigator.hardwareConcurrency || 4,
-          decoder: {
-            readers: [
-              'code_128_reader',
-              'ean_reader',
-              'ean_8_reader',
-              'code_39_reader',
-              'code_39_vin_reader',
-              'codabar_reader',
-              'upc_reader',
-              'upc_e_reader',
-              'i2of5_reader',
-              '2of5_reader',
-              'code_93_reader'
-            ]
-          },
-          locate: true,
-          frequency: 10
-        }, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
       });
-
-      quaggaRef.current = Quagga;
-      Quagga.start();
-
-      Quagga.onDetected((result) => {
-        if (result?.codeResult?.code) {
-          const code = result.codeResult.code;
-          Quagga.stop();
-          quaggaRef.current = null;
-          setScanning(false);
-          processBarcode(code);
-        }
-      });
+      streamRef.current = stream;
+      setScanning(true);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
     } catch (err) {
-      console.error('Scanner init error:', err);
-      setScanning(false);
-      setError('Camera access denied or unavailable. Please allow camera permissions and try again.');
+      setError('Camera access denied. Please allow camera permissions and try again.');
     }
-  }, [processBarcode]);
+  }, []);
+
+  /* ── frame-by-frame barcode scanning loop ── */
+  useEffect(() => {
+    if (!scanning) return;
+    const scan = async () => {
+      if (!videoRef.current || !canvasRef.current) return;
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        try {
+          const Quagga = (await import('@ericblade/quagga2')).default;
+          const dataUrl = canvas.toDataURL('image/png');
+          Quagga.decodeSingle({
+            decoder: {
+              readers: [
+                'code_128_reader',
+                'ean_reader',
+                'ean_8_reader',
+                'code_39_reader',
+                'code_39_vin_reader',
+                'codabar_reader',
+                'upc_reader',
+                'upc_e_reader',
+                'i2of5_reader',
+                '2of5_reader',
+                'code_93_reader'
+              ]
+            },
+            locate: true,
+            src: dataUrl
+          }, (result) => {
+            if (result && result.codeResult && result.codeResult.code) {
+              processBarcode(result.codeResult.code);
+              stopScanner();
+              return;
+            }
+            // No barcode found, continue scanning
+            animFrameRef.current = requestAnimationFrame(scan);
+          });
+          return; // wait for decodeSingle callback
+        } catch {
+          // Quagga import error, keep trying
+        }
+      }
+      animFrameRef.current = requestAnimationFrame(scan);
+    };
+    animFrameRef.current = requestAnimationFrame(scan);
+    return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
+  }, [scanning, stopScanner, processBarcode]);
 
   /* ── file upload decoding ── */
   const handleFileUpload = async (file) => {
@@ -326,21 +331,10 @@ export default function AgeVerification() {
         .av-result-enter {
           animation: av-scale-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
-        .av-scanner-container .viewport {
-          position: relative !important;
-          width: 100% !important;
-          overflow: hidden;
+        .av-scanner-container video {
+          width: 100%;
+          display: block;
           border-radius: 12px;
-        }
-        .av-scanner-container .viewport video {
-          position: relative !important;
-          width: 100% !important;
-          height: auto !important;
-          display: block !important;
-          border-radius: 12px;
-        }
-        .av-scanner-container .viewport canvas.drawingBuffer {
-          display: none !important;
         }
         .av-age-slider {
           -webkit-appearance: none;
@@ -521,61 +515,60 @@ export default function AgeVerification() {
                     <button className="btn btn-primary btn-lg" onClick={startScanner} style={{ gap: '8px', margin: '0 auto' }}>
                       <i className="fa-solid fa-camera"></i> Start Camera Scanner
                     </button>
+                    {error && <p style={{ color: 'var(--accent-red)', marginTop: '1.25rem', fontSize: '0.9rem' }}>{error}</p>}
                   </div>
                 )}
 
-                {/* Scanner container — always in DOM so ref is available for Quagga.init */}
-                <div style={{ padding: '0.5rem 0', display: scanning ? 'block' : 'none' }}>
-                  <div
-                    ref={scannerRef}
-                    className="av-scanner-container"
-                    style={{
-                      position: 'relative',
-                      maxWidth: '480px',
-                      margin: '0 auto',
-                      borderRadius: '16px',
-                      overflow: 'hidden',
-                      border: '3px solid var(--accent-green)',
-                      boxShadow: '0 0 30px rgba(16, 185, 129, 0.15)'
-                    }}
-                  >
-                    {/* Scan laser */}
-                    {scanning && <div style={{
-                      position: 'absolute',
-                      left: '5%',
-                      right: '5%',
-                      height: '3px',
-                      background: 'linear-gradient(90deg, transparent, #10b981, #06b6d4, #10b981, transparent)',
-                      boxShadow: '0 0 15px #10b981',
-                      zIndex: 10,
-                      pointerEvents: 'none',
-                      animation: 'av-scan-laser 2.5s ease-in-out infinite',
-                      borderRadius: '2px'
-                    }} />}
-                    {/* Corner markers */}
-                    {scanning && [
-                      { top: '8%', left: '8%', borderTop: '3px solid rgba(255,255,255,0.7)', borderLeft: '3px solid rgba(255,255,255,0.7)' },
-                      { top: '8%', right: '8%', borderTop: '3px solid rgba(255,255,255,0.7)', borderRight: '3px solid rgba(255,255,255,0.7)' },
-                      { bottom: '8%', left: '8%', borderBottom: '3px solid rgba(255,255,255,0.7)', borderLeft: '3px solid rgba(255,255,255,0.7)' },
-                      { bottom: '8%', right: '8%', borderBottom: '3px solid rgba(255,255,255,0.7)', borderRight: '3px solid rgba(255,255,255,0.7)' }
-                    ].map((style, i) => (
-                      <div key={i} style={{ position: 'absolute', width: '24px', height: '24px', borderRadius: '4px', pointerEvents: 'none', zIndex: 10, ...style }} />
-                    ))}
+                {scanning && (
+                  <div style={{ padding: '0.5rem 0' }}>
+                    <div
+                      className="av-scanner-container"
+                      style={{
+                        position: 'relative',
+                        maxWidth: '480px',
+                        margin: '0 auto',
+                        borderRadius: '16px',
+                        overflow: 'hidden',
+                        border: '3px solid var(--accent-green)',
+                        boxShadow: '0 0 30px rgba(16, 185, 129, 0.15)'
+                      }}
+                    >
+                      <video ref={videoRef} style={{ width: '100%', display: 'block' }} playsInline muted />
+                      {/* Scan laser */}
+                      <div style={{
+                        position: 'absolute',
+                        left: '5%',
+                        right: '5%',
+                        height: '3px',
+                        background: 'linear-gradient(90deg, transparent, #10b981, #06b6d4, #10b981, transparent)',
+                        boxShadow: '0 0 15px #10b981',
+                        zIndex: 10,
+                        pointerEvents: 'none',
+                        animation: 'av-scan-laser 2.5s ease-in-out infinite',
+                        borderRadius: '2px'
+                      }} />
+                      {/* Corner markers */}
+                      {[
+                        { top: '8%', left: '8%', borderTop: '3px solid rgba(255,255,255,0.7)', borderLeft: '3px solid rgba(255,255,255,0.7)' },
+                        { top: '8%', right: '8%', borderTop: '3px solid rgba(255,255,255,0.7)', borderRight: '3px solid rgba(255,255,255,0.7)' },
+                        { bottom: '8%', left: '8%', borderBottom: '3px solid rgba(255,255,255,0.7)', borderLeft: '3px solid rgba(255,255,255,0.7)' },
+                        { bottom: '8%', right: '8%', borderBottom: '3px solid rgba(255,255,255,0.7)', borderRight: '3px solid rgba(255,255,255,0.7)' }
+                      ].map((style, i) => (
+                        <div key={i} style={{ position: 'absolute', width: '24px', height: '24px', borderRadius: '4px', pointerEvents: 'none', zIndex: 10, ...style }} />
+                      ))}
+                    </div>
+                    <canvas ref={canvasRef} style={{ display: 'none' }} />
+                    <p style={{ textAlign: 'center', color: 'var(--accent-green)', margin: '1.25rem 0 0.75rem', fontSize: '0.95rem', fontWeight: 500 }}>
+                      <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>
+                      Searching for barcode…
+                    </p>
+                    <div style={{ textAlign: 'center' }}>
+                      <button className="btn btn-secondary" onClick={stopScanner} style={{ gap: '8px', margin: '0 auto' }}>
+                        <i className="fa-solid fa-stop"></i> Stop Scanner
+                      </button>
+                    </div>
                   </div>
-                  {scanning && (
-                    <>
-                      <p style={{ textAlign: 'center', color: 'var(--accent-green)', margin: '1.25rem 0 0.75rem', fontSize: '0.95rem', fontWeight: 500 }}>
-                        <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>
-                        Searching for barcode…
-                      </p>
-                      <div style={{ textAlign: 'center' }}>
-                        <button className="btn btn-secondary" onClick={stopScanner} style={{ gap: '8px', margin: '0 auto' }}>
-                          <i className="fa-solid fa-stop"></i> Stop Scanner
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
+                )}
               </>
             )}
 
