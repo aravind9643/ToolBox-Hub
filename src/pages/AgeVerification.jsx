@@ -151,6 +151,10 @@ export default function AgeVerification() {
     setError('');
     setRawData('');
     setShowResult(false);
+    setScanning(true);
+
+    // Wait for the next frame so the scanner container is visible in the DOM
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
     try {
       const Quagga = (await import('@ericblade/quagga2')).default;
@@ -197,7 +201,6 @@ export default function AgeVerification() {
 
       quaggaRef.current = Quagga;
       Quagga.start();
-      setScanning(true);
 
       Quagga.onDetected((result) => {
         if (result?.codeResult?.code) {
@@ -210,6 +213,7 @@ export default function AgeVerification() {
       });
     } catch (err) {
       console.error('Scanner init error:', err);
+      setScanning(false);
       setError('Camera access denied or unavailable. Please allow camera permissions and try again.');
     }
   }, [processBarcode]);
@@ -515,55 +519,58 @@ export default function AgeVerification() {
                   </div>
                 )}
 
-                {scanning && (
-                  <div style={{ padding: '0.5rem 0' }}>
-                    <div
-                      ref={scannerRef}
-                      className="av-scanner-container"
-                      style={{
-                        position: 'relative',
-                        maxWidth: '480px',
-                        margin: '0 auto',
-                        borderRadius: '16px',
-                        overflow: 'hidden',
-                        border: '3px solid var(--accent-green)',
-                        boxShadow: '0 0 30px rgba(16, 185, 129, 0.15)'
-                      }}
-                    >
-                      {/* Scan laser */}
-                      <div style={{
-                        position: 'absolute',
-                        left: '5%',
-                        right: '5%',
-                        height: '3px',
-                        background: 'linear-gradient(90deg, transparent, #10b981, #06b6d4, #10b981, transparent)',
-                        boxShadow: '0 0 15px #10b981',
-                        zIndex: 10,
-                        pointerEvents: 'none',
-                        animation: 'av-scan-laser 2.5s ease-in-out infinite',
-                        borderRadius: '2px'
-                      }} />
-                      {/* Corner markers */}
-                      {[
-                        { top: '8%', left: '8%', borderTop: '3px solid rgba(255,255,255,0.7)', borderLeft: '3px solid rgba(255,255,255,0.7)' },
-                        { top: '8%', right: '8%', borderTop: '3px solid rgba(255,255,255,0.7)', borderRight: '3px solid rgba(255,255,255,0.7)' },
-                        { bottom: '8%', left: '8%', borderBottom: '3px solid rgba(255,255,255,0.7)', borderLeft: '3px solid rgba(255,255,255,0.7)' },
-                        { bottom: '8%', right: '8%', borderBottom: '3px solid rgba(255,255,255,0.7)', borderRight: '3px solid rgba(255,255,255,0.7)' }
-                      ].map((style, i) => (
-                        <div key={i} style={{ position: 'absolute', width: '24px', height: '24px', borderRadius: '4px', pointerEvents: 'none', zIndex: 10, ...style }} />
-                      ))}
-                    </div>
-                    <p style={{ textAlign: 'center', color: 'var(--accent-green)', margin: '1.25rem 0 0.75rem', fontSize: '0.95rem', fontWeight: 500 }}>
-                      <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>
-                      Searching for barcode…
-                    </p>
-                    <div style={{ textAlign: 'center' }}>
-                      <button className="btn btn-secondary" onClick={stopScanner} style={{ gap: '8px', margin: '0 auto' }}>
-                        <i className="fa-solid fa-stop"></i> Stop Scanner
-                      </button>
-                    </div>
+                {/* Scanner container — always in DOM so ref is available for Quagga.init */}
+                <div style={{ padding: '0.5rem 0', display: scanning ? 'block' : 'none' }}>
+                  <div
+                    ref={scannerRef}
+                    className="av-scanner-container"
+                    style={{
+                      position: 'relative',
+                      maxWidth: '480px',
+                      margin: '0 auto',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      border: '3px solid var(--accent-green)',
+                      boxShadow: '0 0 30px rgba(16, 185, 129, 0.15)'
+                    }}
+                  >
+                    {/* Scan laser */}
+                    {scanning && <div style={{
+                      position: 'absolute',
+                      left: '5%',
+                      right: '5%',
+                      height: '3px',
+                      background: 'linear-gradient(90deg, transparent, #10b981, #06b6d4, #10b981, transparent)',
+                      boxShadow: '0 0 15px #10b981',
+                      zIndex: 10,
+                      pointerEvents: 'none',
+                      animation: 'av-scan-laser 2.5s ease-in-out infinite',
+                      borderRadius: '2px'
+                    }} />}
+                    {/* Corner markers */}
+                    {scanning && [
+                      { top: '8%', left: '8%', borderTop: '3px solid rgba(255,255,255,0.7)', borderLeft: '3px solid rgba(255,255,255,0.7)' },
+                      { top: '8%', right: '8%', borderTop: '3px solid rgba(255,255,255,0.7)', borderRight: '3px solid rgba(255,255,255,0.7)' },
+                      { bottom: '8%', left: '8%', borderBottom: '3px solid rgba(255,255,255,0.7)', borderLeft: '3px solid rgba(255,255,255,0.7)' },
+                      { bottom: '8%', right: '8%', borderBottom: '3px solid rgba(255,255,255,0.7)', borderRight: '3px solid rgba(255,255,255,0.7)' }
+                    ].map((style, i) => (
+                      <div key={i} style={{ position: 'absolute', width: '24px', height: '24px', borderRadius: '4px', pointerEvents: 'none', zIndex: 10, ...style }} />
+                    ))}
                   </div>
-                )}
+                  {scanning && (
+                    <>
+                      <p style={{ textAlign: 'center', color: 'var(--accent-green)', margin: '1.25rem 0 0.75rem', fontSize: '0.95rem', fontWeight: 500 }}>
+                        <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>
+                        Searching for barcode…
+                      </p>
+                      <div style={{ textAlign: 'center' }}>
+                        <button className="btn btn-secondary" onClick={stopScanner} style={{ gap: '8px', margin: '0 auto' }}>
+                          <i className="fa-solid fa-stop"></i> Stop Scanner
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </>
             )}
 
