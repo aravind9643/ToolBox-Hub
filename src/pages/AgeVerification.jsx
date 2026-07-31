@@ -326,16 +326,21 @@ export default function AgeVerification() {
         .av-result-enter {
           animation: av-scale-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
-        .av-scanner-container video {
-          width: 100%;
-          display: block;
+        .av-scanner-container .viewport {
+          position: relative !important;
+          width: 100% !important;
+          overflow: hidden;
           border-radius: 12px;
         }
-        .av-scanner-container canvas {
-          display: none;
+        .av-scanner-container .viewport video {
+          position: relative !important;
+          width: 100% !important;
+          height: auto !important;
+          display: block !important;
+          border-radius: 12px;
         }
-        .av-scanner-container .drawingBuffer {
-          display: none;
+        .av-scanner-container .viewport canvas.drawingBuffer {
+          display: none !important;
         }
         .av-age-slider {
           -webkit-appearance: none;
